@@ -75,7 +75,7 @@ export const FilterCarousel = ({
                 variant={!value ? "default" :"secondary"}
                 className="rounded-lg px-3 py-1 cursor-pointer whitespace-nowrap text-sm"
               >
-                All
+              Tất cả
               </Badge>
             </CarouselItem>
           )}
