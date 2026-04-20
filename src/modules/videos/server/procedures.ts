@@ -254,7 +254,11 @@ export const videosRouter = createTRPCRouter({
               : undefined,
           ),
         )
-        .orderBy(desc(videos.updatedAt), desc(videos.id))
+        .orderBy(
+          ...(cursor
+            ? [desc(videos.updatedAt), desc(videos.id)]
+            : [sql`RANDOM()`]),
+        )
         // Add 1 to the limit to check if there is more data
         .limit(limit + 1);
 
