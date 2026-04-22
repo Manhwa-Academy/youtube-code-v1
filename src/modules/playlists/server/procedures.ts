@@ -3,7 +3,12 @@ import { TRPCError } from "@trpc/server";
 import { and, desc, eq, getTableColumns, lt, or, sql } from "drizzle-orm";
 import { categories } from "@/db/schema";
 import { db } from "@/db";
-import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { inArray } from "drizzle-orm"; // 🔥 nhớ import
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/trpc/init";
 import {
   playlists,
   playlistVideos,
@@ -200,32 +205,90 @@ export const playlistsRouter = createTRPCRouter({
 
       return deletedPlaylistVideo;
     }),
-  getMixPlaylists: protectedProcedure.query(async () => {
-    const categoriesData = await db.select().from(categories);
+  createMixPlaylist: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+        videoIds: z.array(z.string().uuid()).min(1),
+        description: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { name, videoIds, description } = input;
+      const { id: userId } = ctx.user;
 
-    if (!categoriesData.length) return [];
+      // Kiểm tra tất cả video là của chủ user
+      const userVideos = await db
+        .select()
+        .from(videos)
+        .where(and(eq(videos.userId, userId), inArray(videos.id, videoIds)));
+
+      if (userVideos.length !== videoIds.length) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Chỉ chủ sở hữu video mới có quyền tạo playlist kết hợp",
+        });
+      }
+
+      // Tạo playlist mix
+      const [playlist] = await db
+        .insert(playlists)
+        .values({
+          userId,
+          name,
+          description,
+          isMixPlaylist: true,
+        })
+        .returning();
+
+      if (!playlist) throw new TRPCError({ code: "BAD_REQUEST" });
+
+      // Thêm video vào playlist
+      await db
+        .insert(playlistVideos)
+        .values(
+          videoIds.map((id) => ({ playlistId: playlist.id, videoId: id })),
+        );
+
+      return playlist;
+    }),
+  getPublicMixPlaylists: publicProcedure.query(async () => {
+    // Lấy tất cả playlist kết hợp công khai
+    const playlistsData = await db
+      .select()
+      .from(playlists)
+      .where(eq(playlists.isMixPlaylist, true))
+      .orderBy(desc(playlists.updatedAt));
 
     const result = [];
 
-    for (const category of categoriesData) {
-      const categoryVideos = await db
-        .select()
+    for (const playlist of playlistsData) {
+      const playlistVideosData = await db
+        .select({
+          id: videos.id,
+          title: videos.title,
+          description: videos.description,
+          thumbnail: videos.thumbnailUrl,
+          createdAt: videos.createdAt,
+          updatedAt: videos.updatedAt,
+        })
         .from(videos)
-        .where(eq(videos.categoryId, category.id))
-        .orderBy(desc(videos.createdAt))
-        .limit(20);
+        .innerJoin(playlistVideos, eq(playlistVideos.videoId, videos.id))
+        .where(eq(playlistVideos.playlistId, playlist.id))
+        .orderBy(desc(videos.updatedAt));
 
-      // ❌ bỏ playlist có <2 video
-      if (categoryVideos.length < 2) continue;
+      if (playlistVideosData.length === 0) continue;
 
       result.push({
-        id: category.id,
-        name: `Danh sách kết hợp – ${category.name}`,
-        thumbnail: categoryVideos[0]?.thumbnailUrl ?? null,
-        videos: categoryVideos,
-        videoCount: categoryVideos.length,
+        id: playlist.id,
+        name: playlist.name,
+        description: playlist.description,
+        videos: playlistVideosData,
+        videoCount: playlistVideosData.length,
+        thumbnail: playlistVideosData[0]?.thumbnail || "/placeholder.jpg",
       });
     }
+
     return result;
   }),
   addVideo: protectedProcedure
