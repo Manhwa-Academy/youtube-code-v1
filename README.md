@@ -48,7 +48,9 @@ Một bản YouTube hiện đại được phát triển bằng **Next.js, Drizz
 ## Hướng Dẫn Cài Đặt
 
 ### Sử dụng Bun (khuyến nghị)
----
+
+```
+
 # Cài đặt dependencies
 bun install
 
@@ -63,6 +65,7 @@ npm install --legacy-peer-deps
 # Copy file môi trường
 cp .env.example .env
 
+```
 ---
 
 ## Biến Môi Trường
