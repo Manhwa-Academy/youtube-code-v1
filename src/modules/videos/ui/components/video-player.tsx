@@ -55,7 +55,14 @@ export const VideoPlayer = ({
     };
   }, []);
 
-  // ⏱ COUNTDOWN (CHỈ GIẢM SỐ)
+  // 🔥 RESET KHI VIDEO ĐỔI
+  useEffect(() => {
+    setShowNext(false);
+    setCountdown(6);
+    setHasRedirected(false);
+  }, [playbackId]);
+
+  // ⏱ COUNTDOWN
   useEffect(() => {
     if (!showNext) return;
 
@@ -66,7 +73,7 @@ export const VideoPlayer = ({
     return () => clearInterval(interval);
   }, [showNext]);
 
-  // 🚀 REDIRECT (TÁCH RIÊNG - QUAN TRỌNG)
+  // 🚀 REDIRECT
   useEffect(() => {
     if (countdown <= 0 && nextVideo?.id && !hasRedirected) {
       setHasRedirected(true);
@@ -76,7 +83,6 @@ export const VideoPlayer = ({
 
   return (
     <div className="relative w-full h-full">
-      {/* 🎬 PLAYER */}
       <MuxPlayer
         ref={playerRef}
         playbackId={playbackId || ""}
@@ -89,7 +95,6 @@ export const VideoPlayer = ({
         onPlay={onPlay}
       />
 
-      {/* 🔥 OVERLAY */}
       {showNext && nextVideo && (
         <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white">
           <p className="mb-4 text-sm opacity-80">
@@ -97,10 +102,13 @@ export const VideoPlayer = ({
           </p>
 
           <div className="w-64 text-center">
-            <img
-              src={nextVideo.thumbnail}
-              className="rounded-lg mb-2"
-            />
+            <div className="relative aspect-video rounded-lg overflow-hidden mb-2">
+              <img
+                src={nextVideo.thumbnail}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
+
             <p className="text-sm font-medium line-clamp-2">
               {nextVideo.title}
             </p>
