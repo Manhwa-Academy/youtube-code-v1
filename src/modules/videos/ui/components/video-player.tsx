@@ -92,7 +92,7 @@ export const VideoPlayer = ({
       // 🎯 NORMAL MODE
       if (nextVideo.playlistId) {
         router.push(
-          `/videos/${nextVideo.id}?list=${nextVideo.playlistId}&index=${nextVideo.index}`
+          `/videos/${nextVideo.id}?list=${nextVideo.playlistId}&index=${nextVideo.index}`,
         );
       } else {
         router.push(`/videos/${nextVideo.id}`);
@@ -106,6 +106,7 @@ export const VideoPlayer = ({
       <MuxPlayer
         ref={playerRef}
         playbackId={playbackId || ""}
+        streamType="on-demand" // ⭐ QUAN TRỌNG
         poster={thumbnailUrl || THUMBNAIL_FALLBACK}
         autoPlay={autoPlay}
         className="w-full h-full object-contain"
@@ -151,7 +152,7 @@ export const VideoPlayer = ({
                   onEnded();
                 } else if (nextVideo.playlistId) {
                   router.push(
-                    `/videos/${nextVideo.id}?list=${nextVideo.playlistId}&index=${nextVideo.index}`
+                    `/videos/${nextVideo.id}?list=${nextVideo.playlistId}&index=${nextVideo.index}`,
                   );
                 } else {
                   router.push(`/videos/${nextVideo.id}`);
