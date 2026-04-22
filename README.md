@@ -114,15 +114,20 @@ UPLOADTHING_TOKEN=<UPLOADTHING_TOKEN>
 
 ### Thiết Lập Database
 
+```
+
 # Dùng Bun
 bun run src/scripts/seed-categories.ts
 
 # Hoặc TSX
 tsx src/scripts/seed-categories.ts
 
+```
 ---
 
 ### Chạy Project
+
+```
 
 # Dùng Bun
 
@@ -131,6 +136,8 @@ bun run dev:all
 # Dùng npm
 
 npm run dev:all
+
+```
 
 ### Tài Nguyên Tham Khảo
 
