@@ -116,34 +116,35 @@ export const VideoPlayer = ({
 
       {/* OVERLAY */}
       {showNext && nextVideo && (
-        <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white">
-          <p className="mb-4 text-sm opacity-80">
+        <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white px-4">
+          <p className="mb-2 text-xs sm:text-sm opacity-80 text-center w-full">
             Video tiếp theo sau {countdown}
           </p>
 
-          <div className="w-64 text-center">
-            <div className="relative aspect-video rounded-lg overflow-hidden mb-2">
+          <div className="w-full max-w-md flex items-center gap-3 mb-4">
+            {/* Thumbnail */}
+            <div className="relative flex-shrink-0 w-24 aspect-video rounded-lg overflow-hidden -translate-y-2">
               <img
                 src={nextVideo.thumbnail}
                 className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
 
-            <p className="text-sm font-medium line-clamp-2">
+            {/* Title */}
+            <p className="text-xs sm:text-sm font-medium line-clamp-2 flex-1">
               {nextVideo.title}
             </p>
           </div>
 
-          <div className="flex gap-4 mt-4">
-            {/* HỦY */}
+          {/* Buttons */}
+          <div className="flex gap-2 w-full max-w-md">
             <button
               onClick={() => setShowNext(false)}
-              className="px-4 py-2 bg-gray-700 rounded-full"
+              className="flex-1 px-4 py-2 bg-gray-700 rounded-full text-sm"
             >
               HỦY
             </button>
 
-            {/* PLAY NGAY */}
             <button
               onClick={() => {
                 setHasRedirected(true);
@@ -158,7 +159,7 @@ export const VideoPlayer = ({
                   router.push(`/videos/${nextVideo.id}`);
                 }
               }}
-              className="px-4 py-2 bg-white text-black rounded-full font-semibold"
+              className="flex-1 px-4 py-2 bg-white text-black rounded-full font-semibold text-sm"
             >
               PHÁT NGAY
             </button>
