@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState, useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -8,8 +8,14 @@ import { cn } from "@/lib/utils";
 import { trpc } from "@/trpc/client";
 import { THUMBNAIL_FALLBACK } from "../../constants";
 import { VideoBanner } from "../components/video-banner";
-import { VideoPlayer, VideoPlayerSkeleton } from "../components/video-player";
-import { VideoTopRow, VideoTopRowSkeleton } from "../components/video-top-row";
+import {
+  VideoPlayer,
+  VideoPlayerSkeleton,
+} from "../components/video-player";
+import {
+  VideoTopRow,
+  VideoTopRowSkeleton,
+} from "../components/video-top-row";
 
 interface VideoSectionProps {
   videoId: string;
@@ -40,13 +46,39 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
 
   const [video] = trpc.videos.getOne.useSuspenseQuery({ id: videoId });
 
-  // 🔥 thêm suggestions (video tiếp theo)
+  // 🔥 HISTORY CHỐNG LOOP
+  const [history, setHistory] = useState<string[]>([]);
+
+  useEffect(() => {
+    setHistory((prev) => {
+      if (prev.includes(videoId)) return prev;
+      return [...prev, videoId];
+    });
+  }, [videoId]);
+
+  // 🔥 SUGGESTIONS (CHUẨN YOUTUBE)
   const { data: suggestions } = trpc.suggestions.getMany.useQuery({
     videoId,
-    limit: 1,
+    limit: 5,
+    excludeIds: history, // 🔥 CHỐNG LẶP
   });
 
-  const nextVideo = suggestions?.items?.[0];
+  // 🔥 RANDOM VIDEO TIẾP THEO
+  const nextVideo = useMemo(() => {
+    if (!suggestions?.items?.length) return undefined;
+
+    const randomIndex = Math.floor(
+      Math.random() * suggestions.items.length
+    );
+
+    const v = suggestions.items[randomIndex];
+
+    return {
+      id: v.id,
+      title: v.title,
+      thumbnail: v.thumbnailUrl || THUMBNAIL_FALLBACK,
+    };
+  }, [suggestions]);
 
   const createView = trpc.videoViews.create.useMutation({
     onSuccess: () => {
@@ -72,16 +104,7 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
           onPlay={handlePlay}
           playbackId={video.muxPlaybackId}
           thumbnailUrl={video.thumbnailUrl}
-          // 🔥 truyền video tiếp theo
-          nextVideo={
-            nextVideo
-              ? {
-                  id: nextVideo.id,
-                  title: nextVideo.title,
-                  thumbnail: nextVideo.thumbnailUrl || THUMBNAIL_FALLBACK,
-                }
-              : undefined
-          }
+          nextVideo={nextVideo}
         />
       </div>
 
