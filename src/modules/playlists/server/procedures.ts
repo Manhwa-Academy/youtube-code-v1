@@ -200,34 +200,34 @@ export const playlistsRouter = createTRPCRouter({
 
       return deletedPlaylistVideo;
     }),
- getMixPlaylists: protectedProcedure.query(async () => {
-  const categoriesData = await db.select().from(categories);
+  getMixPlaylists: protectedProcedure.query(async () => {
+    const categoriesData = await db.select().from(categories);
 
-  if (!categoriesData.length) return [];
+    if (!categoriesData.length) return [];
 
-  const result = [];
+    const result = [];
 
-  for (const category of categoriesData) {
-    const categoryVideos = await db
-      .select()
-      .from(videos)
-      .where(eq(videos.categoryId, category.id))
-      .orderBy(desc(videos.createdAt))
-      .limit(20);
+    for (const category of categoriesData) {
+      const categoryVideos = await db
+        .select()
+        .from(videos)
+        .where(eq(videos.categoryId, category.id))
+        .orderBy(desc(videos.createdAt))
+        .limit(20);
 
-    if (!categoryVideos.length) continue;
+      // ❌ bỏ playlist có <2 video
+      if (categoryVideos.length < 2) continue;
 
-    result.push({
-      id: category.id,
-      name: `Danh sách kết hợp – ${category.name}`,
-      thumbnail: categoryVideos[0]?.thumbnailUrl ?? null,
-      videos: categoryVideos,
-      videoCount: categoryVideos.length, // 🔥 QUAN TRỌNG
-    });
-  }
-
-  return result;
-}),
+      result.push({
+        id: category.id,
+        name: `Danh sách kết hợp – ${category.name}`,
+        thumbnail: categoryVideos[0]?.thumbnailUrl ?? null,
+        videos: categoryVideos,
+        videoCount: categoryVideos.length,
+      });
+    }
+    return result;
+  }),
   addVideo: protectedProcedure
     .input(
       z.object({
