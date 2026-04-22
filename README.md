@@ -1,4 +1,4 @@
-# YouTube Clone của Chủ nhân-sama
+# YouTube Clone 
 
 Một bản clone YouTube hiện đại được phát triển bằng **Next.js, Drizzle ORM**, kết hợp các thư viện UI hiện đại, với khả năng xử lý video nâng cao, phiên âm thời gian thực và giao diện **responsive**.
 
