@@ -48,7 +48,13 @@ export const PlaylistsView = () => {
           return (
             <div
               key={playlist.id}
-              onClick={() => router.push(`/videos?list=${playlist.id}`)}
+              onClick={() => {
+                if (firstVideo?.id) {
+                  router.push(
+                    `/videos/${firstVideo.id}?list=${playlist.id}&index=0`
+                  );
+                }
+              }}
               className="cursor-pointer group"
             >
               <div className="relative aspect-video rounded-xl overflow-hidden bg-black">
