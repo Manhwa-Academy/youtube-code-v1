@@ -23,6 +23,7 @@ interface VideoPlayerProps {
   onEnded?: () => void;
 
   autoNextEnabled?: boolean; // ✅ NEW
+  loopEnabled?: boolean;
 }
 
 export const VideoPlayerSkeleton = () => {
@@ -37,6 +38,7 @@ export const VideoPlayer = ({
   nextVideo,
   onEnded,
   autoNextEnabled = true, // ✅ default bật
+  loopEnabled = false,
 }: VideoPlayerProps) => {
   const router = useRouter();
   const playerRef = useRef<any>(null);
@@ -51,20 +53,26 @@ export const VideoPlayer = ({
     if (!player) return;
 
     const handleEnded = () => {
-      // ❌ nếu tắt auto next → không làm gì
+      const p = playerRef.current;
+
+      if (loopEnabled && p) {
+        p.currentTime = 0;
+        p.play();
+        return;
+      }
+
       if (!autoNextEnabled) return;
 
       setCountdown(6);
       setShowNext(true);
       setHasRedirected(false);
     };
-
     player.addEventListener("ended", handleEnded);
 
     return () => {
       player.removeEventListener("ended", handleEnded);
     };
-  }, [autoNextEnabled]);
+  }, [autoNextEnabled, loopEnabled]);
 
   // 🔥 RESET khi đổi video
   useEffect(() => {
@@ -123,54 +131,56 @@ export const VideoPlayer = ({
       />
 
       {/* OVERLAY */}
-      {autoNextEnabled && showNext && nextVideo && ( // ✅ thêm điều kiện
-        <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white px-4">
-          <p className="mb-2 text-xs sm:text-sm opacity-80 text-center w-full">
-            Video tiếp theo sau {countdown}
-          </p>
+      {autoNextEnabled &&
+        showNext &&
+        nextVideo && ( // ✅ thêm điều kiện
+          <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white px-4">
+            <p className="mb-2 text-xs sm:text-sm opacity-80 text-center w-full">
+              Video tiếp theo sau {countdown}
+            </p>
 
-          <div className="w-full max-w-md flex items-center gap-3 mb-4">
-            <div className="relative flex-shrink-0 w-24 aspect-video rounded-lg overflow-hidden -translate-y-2">
-              <img
-                src={nextVideo.thumbnail}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
+            <div className="w-full max-w-md flex items-center gap-3 mb-4">
+              <div className="relative flex-shrink-0 w-24 aspect-video rounded-lg overflow-hidden -translate-y-2">
+                <img
+                  src={nextVideo.thumbnail}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </div>
+
+              <p className="text-xs sm:text-sm font-medium line-clamp-2 flex-1">
+                {nextVideo.title}
+              </p>
             </div>
 
-            <p className="text-xs sm:text-sm font-medium line-clamp-2 flex-1">
-              {nextVideo.title}
-            </p>
+            <div className="flex gap-2 w-full max-w-md">
+              <button
+                onClick={() => setShowNext(false)}
+                className="flex-1 px-4 py-2 bg-gray-700 rounded-full text-sm"
+              >
+                HỦY
+              </button>
+
+              <button
+                onClick={() => {
+                  setHasRedirected(true);
+
+                  if (onEnded) {
+                    onEnded();
+                  } else if (nextVideo.playlistId) {
+                    router.push(
+                      `/videos/${nextVideo.id}?list=${nextVideo.playlistId}&index=${nextVideo.index}`,
+                    );
+                  } else {
+                    router.push(`/videos/${nextVideo.id}`);
+                  }
+                }}
+                className="flex-1 px-4 py-2 bg-white text-black rounded-full font-semibold text-sm"
+              >
+                PHÁT NGAY
+              </button>
+            </div>
           </div>
-
-          <div className="flex gap-2 w-full max-w-md">
-            <button
-              onClick={() => setShowNext(false)}
-              className="flex-1 px-4 py-2 bg-gray-700 rounded-full text-sm"
-            >
-              HỦY
-            </button>
-
-            <button
-              onClick={() => {
-                setHasRedirected(true);
-
-                if (onEnded) {
-                  onEnded();
-                } else if (nextVideo.playlistId) {
-                  router.push(
-                    `/videos/${nextVideo.id}?list=${nextVideo.playlistId}&index=${nextVideo.index}`,
-                  );
-                } else {
-                  router.push(`/videos/${nextVideo.id}`);
-                }
-              }}
-              className="flex-1 px-4 py-2 bg-white text-black rounded-full font-semibold text-sm"
-            >
-              PHÁT NGAY
-            </button>
-          </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };
