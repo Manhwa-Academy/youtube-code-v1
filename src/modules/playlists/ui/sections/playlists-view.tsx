@@ -27,13 +27,13 @@ export const PlaylistsView = () => {
   }
 
   const visiblePlaylists = data.items.filter(
-    (p) => p.visibility === "public" || p.user.id === userId
+    (p) => p.visibility === "public" || p.user.id === userId,
   );
 
   const totalPages = Math.ceil(visiblePlaylists.length / PAGE_SIZE);
   const currentPlaylists = visiblePlaylists.slice(
     PAGE_SIZE * (page - 1),
-    PAGE_SIZE * page
+    PAGE_SIZE * page,
   );
 
   return (
@@ -45,15 +45,17 @@ export const PlaylistsView = () => {
           const videoCount = playlist.videoCount ?? 0;
           const thumbnail = playlist.thumbnailUrl || THUMBNAIL_FALLBACK;
 
+          const firstVideoId = playlist.firstVideoId;
+
           return (
             <div
               key={playlist.id}
               onClick={() => {
-                if (firstVideo?.id) {
-                  router.push(
-                    `/videos/${firstVideo.id}?list=${playlist.id}&index=0`
-                  );
-                }
+                if (!firstVideoId) return;
+
+                router.push(
+                  `/videos/${firstVideoId}?list=${playlist.id}&index=0`,
+                );
               }}
               className="cursor-pointer group"
             >
