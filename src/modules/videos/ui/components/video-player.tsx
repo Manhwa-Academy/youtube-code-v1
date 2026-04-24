@@ -20,7 +20,9 @@ interface VideoPlayerProps {
     index?: number;
   };
 
-  onEnded?: () => void; // playlist mode
+  onEnded?: () => void;
+
+  autoNextEnabled?: boolean; // ✅ NEW
 }
 
 export const VideoPlayerSkeleton = () => {
@@ -34,6 +36,7 @@ export const VideoPlayer = ({
   onPlay,
   nextVideo,
   onEnded,
+  autoNextEnabled = true, // ✅ default bật
 }: VideoPlayerProps) => {
   const router = useRouter();
   const playerRef = useRef<any>(null);
@@ -42,12 +45,15 @@ export const VideoPlayer = ({
   const [countdown, setCountdown] = useState(6);
   const [hasRedirected, setHasRedirected] = useState(false);
 
-  // 🎬 VIDEO END → chỉ hiện overlay
+  // 🎬 VIDEO END
   useEffect(() => {
     const player = playerRef.current;
     if (!player) return;
 
     const handleEnded = () => {
+      // ❌ nếu tắt auto next → không làm gì
+      if (!autoNextEnabled) return;
+
       setCountdown(6);
       setShowNext(true);
       setHasRedirected(false);
@@ -58,7 +64,7 @@ export const VideoPlayer = ({
     return () => {
       player.removeEventListener("ended", handleEnded);
     };
-  }, []);
+  }, [autoNextEnabled]);
 
   // 🔥 RESET khi đổi video
   useEffect(() => {
@@ -78,18 +84,21 @@ export const VideoPlayer = ({
     return () => clearInterval(interval);
   }, [showNext]);
 
-  // 🚀 AUTO NEXT (QUAN TRỌNG)
+  // 🚀 AUTO NEXT
   useEffect(() => {
-    if (countdown <= 0 && nextVideo && !hasRedirected) {
+    if (
+      countdown <= 0 &&
+      nextVideo &&
+      !hasRedirected &&
+      autoNextEnabled // ✅ chặn tại đây
+    ) {
       setHasRedirected(true);
 
-      // 🎯 PLAYLIST MODE
       if (onEnded) {
         onEnded();
         return;
       }
 
-      // 🎯 NORMAL MODE
       if (nextVideo.playlistId) {
         router.push(
           `/videos/${nextVideo.id}?list=${nextVideo.playlistId}&index=${nextVideo.index}`,
@@ -98,15 +107,14 @@ export const VideoPlayer = ({
         router.push(`/videos/${nextVideo.id}`);
       }
     }
-  }, [countdown, nextVideo, hasRedirected, onEnded, router]);
+  }, [countdown, nextVideo, hasRedirected, onEnded, router, autoNextEnabled]);
 
   return (
     <div className="relative w-full h-full">
-      {/* PLAYER */}
       <MuxPlayer
         ref={playerRef}
         playbackId={playbackId || ""}
-        streamType="on-demand" // ⭐ QUAN TRỌNG
+        streamType="on-demand"
         poster={thumbnailUrl || THUMBNAIL_FALLBACK}
         autoPlay={autoPlay}
         className="w-full h-full object-contain"
@@ -115,14 +123,13 @@ export const VideoPlayer = ({
       />
 
       {/* OVERLAY */}
-      {showNext && nextVideo && (
+      {autoNextEnabled && showNext && nextVideo && ( // ✅ thêm điều kiện
         <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white px-4">
           <p className="mb-2 text-xs sm:text-sm opacity-80 text-center w-full">
             Video tiếp theo sau {countdown}
           </p>
 
           <div className="w-full max-w-md flex items-center gap-3 mb-4">
-            {/* Thumbnail */}
             <div className="relative flex-shrink-0 w-24 aspect-video rounded-lg overflow-hidden -translate-y-2">
               <img
                 src={nextVideo.thumbnail}
@@ -130,13 +137,11 @@ export const VideoPlayer = ({
               />
             </div>
 
-            {/* Title */}
             <p className="text-xs sm:text-sm font-medium line-clamp-2 flex-1">
               {nextVideo.title}
             </p>
           </div>
 
-          {/* Buttons */}
           <div className="flex gap-2 w-full max-w-md">
             <button
               onClick={() => setShowNext(false)}
