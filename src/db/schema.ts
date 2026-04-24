@@ -336,3 +336,4 @@ export const videoViewRelations = relations(videoViews, ({ one }) => ({
   user: one(users, { fields: [videoViews.userId], references: [users.id] }),
   video: one(videos, { fields: [videoViews.videoId], references: [videos.id] }),
 }));
+ 
