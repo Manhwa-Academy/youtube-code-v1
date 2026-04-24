@@ -57,4 +57,3 @@ export const VideoThumbnail = ({
     </div>
   );
 };
- 
