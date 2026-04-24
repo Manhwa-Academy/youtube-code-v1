@@ -52,7 +52,11 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
     return saved === null ? true : saved === "true";
   });
   const [video] = trpc.videos.getOne.useSuspenseQuery({ id: currentVideoId });
-
+  const [loopEnabled, setLoopEnabled] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const saved = localStorage.getItem("loop");
+    return saved === "true";
+  });
   // 🔹 Sử dụng public playlist
   const { data: playlists } = trpc.playlists.getPublicMixPlaylists.useQuery();
   const playlist = playlists?.find((p) => p.id === playlistId);
@@ -101,16 +105,18 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
     if (!isSignedIn) return;
     createView.mutate({ videoId });
   };
+
   useEffect(() => {
     localStorage.setItem("autoNext", autoNextEnabled.toString());
   }, [autoNextEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem("loop", loopEnabled.toString());
+  }, [loopEnabled]);
+  
   return (
     <div className="flex flex-col gap-4">
-      {/* STATE */}
-      {/* 👇 thêm dòng này ở đầu component nếu chưa có */}
-      {/* const [autoNextEnabled, setAutoNextEnabled] = useState(true); */}
-
-      {/* Video Player */}
+      {/* 🎬 Video Player */}
       <div className="aspect-video bg-black rounded-xl overflow-hidden relative shadow-lg">
         <VideoPlayer
           key={currentVideoId}
@@ -119,53 +125,38 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
           playbackId={video.muxPlaybackId}
           thumbnailUrl={video.thumbnailUrl}
           nextVideo={nextVideo}
-          autoNextEnabled={autoNextEnabled} // ✅ truyền xuống
+          autoNextEnabled={autoNextEnabled}
+          loopEnabled={loopEnabled}
         />
       </div>
 
-      {/* 🔥 CONTROL BAR */}
-      <div className="flex items-center justify-between mt-2">
-        {/* Toggle auto next */}
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-800">Video tiếp theo</span>
+      {/* 🧾 Info + controls */}
+      <VideoTopRow
+        video={video}
+        autoNextEnabled={autoNextEnabled}
+        setAutoNextEnabled={setAutoNextEnabled}
+        loopEnabled={loopEnabled}
+        setLoopEnabled={setLoopEnabled}
+      />
 
-          <button
-            onClick={() => setAutoNextEnabled((prev: boolean) => !prev)}
-            className={`w-10 h-5 flex items-center rounded-full p-1 transition ${
-              autoNextEnabled ? "bg-blue-500" : "bg-gray-500"
-            }`}
-          >
-            <div
-              className={`w-4 h-4 bg-white rounded-full transition ${
-                autoNextEnabled ? "translate-x-5" : ""
-              }`}
-            />
-          </button>
+      {/* 📌 NÚT PLAYLIST */}
+      {playlist && (
+        <button
+          className="text-sm text-blue-500 hover:text-blue-600 font-medium mt-1 self-start"
+          onClick={() => setShowPlaylist((prev) => !prev)}
+        >
+          {showPlaylist ? "Ẩn danh sách kết hợp" : "Xem danh sách kết hợp"}
+        </button>
+      )}
 
-          <span className="text-xs text-gray-600">
-            {autoNextEnabled ? "Đang bật" : "Đã tắt"}
-          </span>
-        </div>
-
-        {/* Playlist toggle */}
-        {playlist && (
-          <button
-            className="text-sm text-blue-500 hover:text-blue-600 font-medium"
-            onClick={() => setShowPlaylist((prev) => !prev)}
-          >
-            {showPlaylist ? "Ẩn danh sách kết hợp" : "Xem danh sách kết hợp"}
-          </button>
-        )}
-      </div>
-
-      {/* Playlist */}
+      {/* 📚 PLAYLIST */}
       {showPlaylist && playlist && (
         <div className="w-full mt-2 max-h-72 overflow-y-auto bg-gray-900/90 backdrop-blur-md rounded-lg shadow-xl p-3 border border-gray-700">
           <div className="text-white font-semibold text-sm mb-2">
             {playlist.name}
           </div>
 
-          {playlist.videos.map((v: (typeof playlist.videos)[0], i: number) => (
+          {playlist.videos.map((v, i) => (
             <div
               key={v.id}
               className={cn(
@@ -202,8 +193,6 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
           ))}
         </div>
       )}
-
-      <VideoTopRow video={video} />
     </div>
   );
 };
