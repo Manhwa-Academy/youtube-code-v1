@@ -448,33 +448,33 @@ export const videosRouter = createTRPCRouter({
 
       return workflowRunId;
     }),
-    updateProgress: protectedProcedure
-  .input(
-    z.object({
-      videoId: z.string(),
-      progress: z.number(),
-    })
-  )
-  .mutation(async ({ ctx, input }) => {
-    const { id: userId } = ctx.user;
+  updateProgress: protectedProcedure
+    .input(
+      z.object({
+        videoId: z.string(),
+        progress: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
 
-    await db
-      .insert(videoViews)
-      .values({
-        userId,
-        videoId: input.videoId,
-        progress: input.progress,
-      })
-      .onConflictDoUpdate({
-        target: [videoViews.userId, videoViews.videoId],
-        set: {
+      await db
+        .insert(videoViews)
+        .values({
+          userId,
+          videoId: input.videoId,
           progress: input.progress,
-          updatedAt: new Date(),
-        },
-      });
+        })
+        .onConflictDoUpdate({
+          target: [videoViews.userId, videoViews.videoId],
+          set: {
+            progress: input.progress,
+            updatedAt: new Date(),
+          },
+        });
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
   revalidate: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
@@ -493,19 +493,17 @@ export const videosRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
-      const upload = await mux.video.uploads.retrieve(
+      const muxClient = mux(); // Lấy client kế tiếp
+      const upload = await muxClient.video.uploads.retrieve(
         existingVideo.muxUploadId,
       );
 
-      if (!upload || !upload.asset_id) {
+      if (!upload || !upload.asset_id)
         throw new TRPCError({ code: "BAD_REQUEST" });
-      }
 
-      const asset = await mux.video.assets.retrieve(upload.asset_id);
+      const asset = await muxClient.video.assets.retrieve(upload.asset_id);
 
-      if (!asset) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
+      if (!asset) throw new TRPCError({ code: "BAD_REQUEST" });
 
       const playbackId = asset.playback_ids?.[0].id;
       const duration = asset.duration ? Math.round(asset.duration * 1000) : 0;
@@ -616,39 +614,42 @@ export const videosRouter = createTRPCRouter({
 
       return updatedVideo;
     }),
- create: protectedProcedure.mutation(async ({ ctx }) => {
-  const { id: userId } = ctx.user;
+  create: protectedProcedure.mutation(async ({ ctx }) => {
+    const { id: userId } = ctx.user;
 
-  // Tạo upload + asset SD ngay lập tức
-  const upload = await mux.video.uploads.create({
-    new_asset_settings: {
-      passthrough: userId,
-      playback_policy: ["public"],
-      mp4_support: "standard",        // ⚡ SD 480p
-      input: [
-        {
-          generated_subtitles: [{ language_code: "en", name: "English" }],
-        },
-      ],
-    },
-    cors_origin: "*", // Production URL nếu cần
-  });
+    // 🔄 Lấy client Mux tiếp theo trong danh sách (Multi Mux Rotation)
+    const muxClient = mux();
 
-  // Lưu record video
-  const [video] = await db
-    .insert(videos)
-    .values({
-      userId,
-      title: "Untitled",
-      muxStatus: "waiting",
-      muxUploadId: upload.id,
-    })
-    .returning();
+    // 1️⃣ Tạo upload trên Mux
+    const upload = await muxClient.video.uploads.create({
+      new_asset_settings: {
+        passthrough: userId,
+        playback_policy: ["public"],
+        mp4_support: "standard", // ⚡ Track SD 480p
+        input: [
+          {
+            generated_subtitles: [{ language_code: "en", name: "English" }],
+          },
+        ],
+      },
+      cors_origin: "*", // ⚡ Production URL nếu cần
+    });
 
-  return {
-    video,
-    url: upload.url,
-  };
-}),
+    // 2️⃣ Lưu record video vào DB
+    const [video] = await db
+      .insert(videos)
+      .values({
+        userId,
+        title: "Untitled",
+        muxStatus: "waiting",
+        muxUploadId: upload.id,
+      })
+      .returning();
+
+    // 3️⃣ Trả về video và URL upload cho client
+    return {
+      video,
+      url: upload.url,
+    };
+  }),
 });
- 
