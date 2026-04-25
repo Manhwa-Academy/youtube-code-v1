@@ -1,7 +1,7 @@
 import Mux from "@mux/mux-node";
 
 // Danh sách client
-const muxClients = [
+export const muxClients = [
   new Mux({
     tokenId: process.env.MUX1_TOKEN_ID!,
     tokenSecret: process.env.MUX1_TOKEN_SECRET!,
