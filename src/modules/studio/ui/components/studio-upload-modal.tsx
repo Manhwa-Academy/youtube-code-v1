@@ -19,7 +19,7 @@ export const StudioUploadModal = () => {
       utils.studio.getMany.invalidate();
     },
     onError: () => {
-      toast.error("Đã xảy ra lỗi khi tạo video, vui lòng thử lại");
+      toast.error("Đã xảy ra lỗi vì đủ 10 video trên Mux nên không thể tạo video mới. Vui lòng xóa bớt video cũ hoặc liên hệ support để được hỗ trợ.");
     },
   });
 
