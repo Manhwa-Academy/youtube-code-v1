@@ -10,9 +10,8 @@ import {
   VideoAssetTrackReadyWebhookEvent,
   VideoAssetDeletedWebhookEvent,
 } from "@mux/mux-node/resources/webhooks";
-
+import { muxClients } from "@/lib/mux"; // danh sách các client Mux
 import { db } from "@/db";
-import { mux } from "@/lib/mux";
 import { videos } from "@/db/schema";
 import { InferModel } from "drizzle-orm";
 
@@ -41,8 +40,9 @@ export const POST = async (request: Request) => {
     return new Response("Invalid JSON", { status: 400 });
   }
 
-  // verify signature
-  mux.webhooks.verifySignature(
+  // ⚡ Dùng client đầu tiên để verify signature
+  const muxWebhookClient = muxClients[0];
+  muxWebhookClient.webhooks.verifySignature(
     JSON.stringify(payload),
     { "mux-signature": muxSignature },
     SIGNING_SECRET
