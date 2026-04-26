@@ -15,6 +15,14 @@ import { db } from "@/db";
 import { mux } from "@/lib/mux";
 import { videos } from "@/db/schema";
 import { InferModel } from "drizzle-orm";
+import { v2 as cloudinary } from "cloudinary";
+
+// Cấu hình Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Type helper cho update video
 type VideoUpdate = Partial<InferModel<typeof videos, "insert">>;
@@ -45,14 +53,13 @@ export const POST = async (request: Request) => {
   mux.webhooks.verifySignature(
     JSON.stringify(payload),
     { "mux-signature": muxSignature },
-    SIGNING_SECRET
+    SIGNING_SECRET,
   );
 
-  // Helper: update video với type an toàn
   const updateVideo = async (
     muxStatus: string,
     updateFields: VideoUpdate = {},
-    uploadId?: string
+    uploadId?: string,
   ) => {
     if (!uploadId) return;
     await db
@@ -65,7 +72,6 @@ export const POST = async (request: Request) => {
     case "video.asset.created": {
       const data = payload.data as VideoAssetCreatedWebhookEvent["data"];
       await updateVideo(data.status, { muxAssetId: data.id }, data.upload_id);
-      console.log("Video created:", data.upload_id);
       break;
     }
 
@@ -79,30 +85,29 @@ export const POST = async (request: Request) => {
 
       let thumbnailUrl: string | undefined;
       let thumbnailKey: string | undefined;
-      let previewUrl: string | undefined;
-      let previewKey: string | undefined;
+      let gifUrl: string | undefined;
 
       try {
         const utapi = new UTApi();
         const randomPercent = Math.floor(Math.random() * 90) + 5;
-        const width = 1280;
-        const height = 720;
 
-        const [thumb, prev] = await utapi.uploadFilesFromUrl([
-          `https://image.mux.com/${playbackId}/thumbnail.png?width=${width}&height=${height}&time=${randomPercent}`,
-          `https://image.mux.com/${playbackId}/animated.gif`,
+        // 1️⃣ Upload thumbnail PNG lên UploadThing
+        const [thumb] = await utapi.uploadFilesFromUrl([
+          `https://image.mux.com/${playbackId}/thumbnail.png?width=1280&height=720&time=${randomPercent}`,
         ]);
-
         if (thumb.data) {
           thumbnailUrl = thumb.data.url;
           thumbnailKey = thumb.data.key;
         }
-        if (prev.data) {
-          previewUrl = prev.data.url;
-          previewKey = prev.data.key;
-        }
+
+        // 2️⃣ Upload GIF động lên Cloudinary
+        const gifResult = await cloudinary.uploader.upload(
+          `https://image.mux.com/${playbackId}/animated.gif`,
+          { resource_type: "video", folder: "mux_gifs" },
+        );
+        gifUrl = gifResult.secure_url;
       } catch (err) {
-        console.warn("Thumbnail/preview upload failed:", err);
+        console.warn("Upload failed:", err);
       }
 
       await updateVideo(
@@ -112,14 +117,12 @@ export const POST = async (request: Request) => {
           muxAssetId: data.id,
           thumbnailUrl,
           thumbnailKey,
-          previewUrl,
-          previewKey,
+          gifUrl,
           duration,
         },
-        data.upload_id
+        data.upload_id,
       );
 
-      console.log("Video ready:", data.upload_id);
       break;
     }
 
@@ -134,7 +137,6 @@ export const POST = async (request: Request) => {
       if (data.upload_id) {
         await db.delete(videos).where(eq(videos.muxUploadId, data.upload_id));
       }
-      console.log("Video deleted:", data.upload_id);
       break;
     }
 
@@ -149,7 +151,6 @@ export const POST = async (request: Request) => {
           muxTrackStatus: data.status,
         })
         .where(eq(videos.muxAssetId, data.asset_id));
-      console.log("Track ready:", data.asset_id);
       break;
     }
   }
