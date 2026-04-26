@@ -7,10 +7,14 @@ import { trpc } from "@/trpc/client";
 import { DEFAULT_LIMIT } from "@/constants";
 import { InfiniteScroll } from "@/components/infinite-scroll";
 
-import { VideoGridCard, VideoGridCardSkeleton } from "@/modules/videos/ui/components/video-grid-card";
+import {
+  VideoGridCard,
+  VideoGridCardSkeleton,
+} from "@/modules/videos/ui/components/video-grid-card";
 
 interface VideosSectionProps {
   userId: string;
+  sortBy?: "latest" | "popular" | "oldest"; // thêm prop sortBy
 }
 
 export const VideosSection = (props: VideosSectionProps) => {
@@ -26,22 +30,28 @@ export const VideosSection = (props: VideosSectionProps) => {
 export const VideosSectionSkeleton = () => {
   return (
     <div className="gap-4 gap-y-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
-        {Array.from({ length: 18 }).map((_, index) => (
-            <VideoGridCardSkeleton key={index} />
-          ))
-        }
-      </div>
-  )
-}
+      {Array.from({ length: 18 }).map((_, index) => (
+        <VideoGridCardSkeleton key={index} />
+      ))}
+    </div>
+  );
+};
 
-const VideosSectionSuspense = ({ userId }: VideosSectionProps) => {
+const VideosSectionSuspense = ({ userId, sortBy }: VideosSectionProps) => {
   const [videos, query] = trpc.videos.getMany.useSuspenseInfiniteQuery(
-    { userId, limit: DEFAULT_LIMIT },
+    { userId, limit: DEFAULT_LIMIT }, // xóa sortBy nếu server không support
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-    }
+    },
   );
-
+ const sortedVideos = videos.pages
+    .flatMap((page) => page.items)
+    .sort((a, b) => {
+      if (sortBy === "latest") return b.createdAt.getTime() - a.createdAt.getTime();
+      if (sortBy === "oldest") return a.createdAt.getTime() - b.createdAt.getTime();
+      if (sortBy === "popular") return b.viewCount - a.viewCount;
+      return 0;
+    });
   return (
     <div>
       <div className="gap-4 gap-y-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
@@ -49,8 +59,7 @@ const VideosSectionSuspense = ({ userId }: VideosSectionProps) => {
           .flatMap((page) => page.items)
           .map((video) => (
             <VideoGridCard key={video.id} data={video} />
-          ))
-        }
+          ))}
       </div>
       <InfiniteScroll
         hasNextPage={query.hasNextPage}
@@ -58,5 +67,5 @@ const VideosSectionSuspense = ({ userId }: VideosSectionProps) => {
         fetchNextPage={query.fetchNextPage}
       />
     </div>
-  )
-}
+  );
+};
