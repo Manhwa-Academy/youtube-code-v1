@@ -1,4 +1,4 @@
-"use client";
+"use client"; // ✅ chỉ 1 lần
 
 import { useState } from "react";
 
@@ -6,15 +6,16 @@ interface UserTabsProps {
   userId: string;
   activeVideoTab: "latest" | "popular" | "oldest";
   setActiveVideoTabAction: (tab: "latest" | "popular" | "oldest") => void;
+  activeTab: "home" | "videos" | "shorts" | "posts";
+  setActiveTabAction: (tab: "home" | "videos" | "shorts" | "posts") => void;
 }
 
 export const UserTabs = ({
-  userId,
   activeVideoTab,
   setActiveVideoTabAction,
+  activeTab,
+  setActiveTabAction,
 }: UserTabsProps) => {
-  const [activeTab, setActiveTab] = useState("home");
-
   const tabs = [
     { key: "home", label: "Trang chủ" },
     { key: "videos", label: "Video" },
@@ -30,20 +31,16 @@ export const UserTabs = ({
 
   return (
     <div>
-      {/* Main Tabs */}
       <div className="flex gap-6 border-b border-gray-300 mb-2">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             className={`pb-2 text-sm font-medium ${
-              activeTab === tab.key
-                ? "border-b-2 border-black text-black"
-                : "text-gray-500"
+              activeTab === tab.key ? "border-b-2 border-black text-black" : "text-gray-500"
             }`}
             onClick={() => {
-              setActiveTab(tab.key);
-              if (tab.key === "videos")
-                setActiveVideoTabAction("latest" as "latest"); // reset sub-tab
+              setActiveTabAction(tab.key as "home" | "videos" | "shorts" | "posts");
+              if (tab.key === "videos") setActiveVideoTabAction("latest");
             }}
           >
             {tab.label}
@@ -51,17 +48,12 @@ export const UserTabs = ({
         ))}
       </div>
 
-      {/* Video Sub-Tabs */}
       {activeTab === "videos" && (
         <div className="flex gap-3 mb-4">
           {videoSubTabs.map((sub) => (
             <button
               key={sub.key}
-              onClick={() =>
-                setActiveVideoTabAction(
-                  sub.key as "latest" | "popular" | "oldest",
-                )
-              }
+              onClick={() => setActiveVideoTabAction(sub.key as "latest" | "popular" | "oldest")}
               className={`px-3 py-1 text-sm rounded-full border ${
                 activeVideoTab === sub.key
                   ? "bg-black text-white border-black"
