@@ -403,7 +403,11 @@ export const videosRouter = createTRPCRouter({
       if (!existingVideo) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
-
+      // 🔥 Tăng viewsCount mỗi lần xem
+      await db
+        .update(videos)
+        .set({ viewsCount: sql`${videos.viewsCount} + 1` })
+        .where(eq(videos.id, input.id));
       return existingVideo;
     }),
   generateDescription: protectedProcedure
@@ -616,7 +620,7 @@ export const videosRouter = createTRPCRouter({
 
       return updatedVideo;
     }),
- create: protectedProcedure.mutation(async ({ ctx }) => {
+  create: protectedProcedure.mutation(async ({ ctx }) => {
     const { id: userId } = ctx.user;
 
     const upload = await mux.video.uploads.create({
