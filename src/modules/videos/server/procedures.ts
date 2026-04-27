@@ -360,7 +360,7 @@ export const videosRouter = createTRPCRouter({
           .where(inArray(subscriptions.viewerId, userId ? [userId] : [])),
       );
 
-      const [existingVideo] = await db
+      let [existingVideo] = await db
         .with(viewerReactions, viewerSubscriptions)
         .select({
           ...getTableColumns(videos),
@@ -403,11 +403,19 @@ export const videosRouter = createTRPCRouter({
       if (!existingVideo) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
+
       // 🔥 Tăng viewsCount mỗi lần xem
       await db
         .update(videos)
         .set({ viewsCount: sql`${videos.viewsCount} + 1` })
         .where(eq(videos.id, input.id));
+
+      // 🔥 Cập nhật luôn viewCount để UI thấy lượt xem mới
+      existingVideo = {
+        ...existingVideo,
+        viewCount: (existingVideo.viewCount ?? 0) + 1,
+      };
+
       return existingVideo;
     }),
   generateDescription: protectedProcedure
