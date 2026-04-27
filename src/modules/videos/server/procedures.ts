@@ -242,15 +242,12 @@ export const videosRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { cursor, limit, categoryId, userId } = input;
 
-      // 👇 lấy viewerId từ clerk
       let viewerId: string | undefined;
-
       if (ctx.clerkUserId) {
         const [user] = await db
           .select()
           .from(users)
           .where(eq(users.clerkId, ctx.clerkUserId));
-
         viewerId = user?.id;
       }
 
@@ -258,11 +255,9 @@ export const videosRouter = createTRPCRouter({
         .select({
           ...getTableColumns(videos),
           user: users,
-
-          progress: videoViews.progress, // 🔥
-
-          viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
-
+          progress: videoViews.progress,
+          // ✅ Sử dụng viewsCount từ videos để đồng bộ
+          viewCount: videos.viewsCount,
           likeCount: db.$count(
             videoReactions,
             and(
@@ -270,7 +265,6 @@ export const videosRouter = createTRPCRouter({
               eq(videoReactions.type, "like"),
             ),
           ),
-
           dislikeCount: db.$count(
             videoReactions,
             and(
@@ -315,7 +309,6 @@ export const videosRouter = createTRPCRouter({
 
       const hasMore = data.length > limit;
       const items = hasMore ? data.slice(0, -1) : data;
-
       const lastItem = items[items.length - 1];
 
       const nextCursor = hasMore
@@ -327,20 +320,19 @@ export const videosRouter = createTRPCRouter({
 
       return { items, nextCursor };
     }),
+
   getOne: baseProcedure
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ input, ctx }) => {
       const { clerkUserId } = ctx;
+      let userId: string | undefined;
 
-      let userId;
-
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(inArray(users.clerkId, clerkUserId ? [clerkUserId] : []));
-
-      if (user) {
-        userId = user.id;
+      if (clerkUserId) {
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.clerkId, clerkUserId));
+        userId = user?.id;
       }
 
       const viewerReactions = db.$with("viewer_reactions").as(
@@ -374,7 +366,8 @@ export const videosRouter = createTRPCRouter({
               Boolean,
             ),
           },
-          viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
+          // ✅ Dùng viewsCount từ videos luôn
+          viewCount: videos.viewsCount,
           likeCount: db.$count(
             videoReactions,
             and(
@@ -400,17 +393,15 @@ export const videosRouter = createTRPCRouter({
         )
         .where(eq(videos.id, input.id));
 
-      if (!existingVideo) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+      if (!existingVideo) throw new TRPCError({ code: "NOT_FOUND" });
 
-      // 🔥 Tăng viewsCount mỗi lần xem
+      // ✅ Tăng viewsCount mỗi lần xem
       await db
         .update(videos)
         .set({ viewsCount: sql`${videos.viewsCount} + 1` })
         .where(eq(videos.id, input.id));
 
-      // 🔥 Cập nhật luôn viewCount để UI thấy lượt xem mới
+      // 🔥 Đồng bộ luôn viewCount trả về
       existingVideo = {
         ...existingVideo,
         viewCount: (existingVideo.viewCount ?? 0) + 1,
