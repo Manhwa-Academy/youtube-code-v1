@@ -321,94 +321,111 @@ export const videosRouter = createTRPCRouter({
       return { items, nextCursor };
     }),
 
-  getOne: baseProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .query(async ({ input, ctx }) => {
-      const { clerkUserId } = ctx;
-      let userId: string | undefined;
+ getOne: baseProcedure
+  .input(z.object({ id: z.string().uuid() }))
+  .query(async ({ input, ctx }) => {
+    const { clerkUserId } = ctx;
+    let userId: string | undefined;
 
-      if (clerkUserId) {
-        const [user] = await db
-          .select()
-          .from(users)
-          .where(eq(users.clerkId, clerkUserId));
-        userId = user?.id;
-      }
+    if (clerkUserId) {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.clerkId, clerkUserId));
+      userId = user?.id;
+    }
 
-      const viewerReactions = db.$with("viewer_reactions").as(
-        db
-          .select({
-            videoId: videoReactions.videoId,
-            type: videoReactions.type,
-          })
-          .from(videoReactions)
-          .where(inArray(videoReactions.userId, userId ? [userId] : [])),
-      );
-
-      const viewerSubscriptions = db.$with("viewer_subscriptions").as(
-        db
-          .select()
-          .from(subscriptions)
-          .where(inArray(subscriptions.viewerId, userId ? [userId] : [])),
-      );
-
-      let [existingVideo] = await db
-        .with(viewerReactions, viewerSubscriptions)
+    const viewerReactions = db.$with("viewer_reactions").as(
+      db
         .select({
-          ...getTableColumns(videos),
-          user: {
-            ...getTableColumns(users),
-            subscriberCount: db.$count(
-              subscriptions,
-              eq(subscriptions.creatorId, users.id),
-            ),
-            viewerSubscribed: isNotNull(viewerSubscriptions.viewerId).mapWith(
-              Boolean,
-            ),
-          },
-          // ✅ Dùng viewsCount từ videos luôn
-          viewCount: videos.viewsCount,
-          likeCount: db.$count(
-            videoReactions,
-            and(
-              eq(videoReactions.videoId, videos.id),
-              eq(videoReactions.type, "like"),
-            ),
-          ),
-          dislikeCount: db.$count(
-            videoReactions,
-            and(
-              eq(videoReactions.videoId, videos.id),
-              eq(videoReactions.type, "dislike"),
-            ),
-          ),
-          viewerReaction: viewerReactions.type,
+          videoId: videoReactions.videoId,
+          type: videoReactions.type,
         })
-        .from(videos)
-        .innerJoin(users, eq(videos.userId, users.id))
-        .leftJoin(viewerReactions, eq(viewerReactions.videoId, videos.id))
-        .leftJoin(
-          viewerSubscriptions,
-          eq(viewerSubscriptions.creatorId, users.id),
-        )
-        .where(eq(videos.id, input.id));
+        .from(videoReactions)
+        .where(inArray(videoReactions.userId, userId ? [userId] : [])),
+    );
 
-      if (!existingVideo) throw new TRPCError({ code: "NOT_FOUND" });
+    const viewerSubscriptions = db.$with("viewer_subscriptions").as(
+      db
+        .select()
+        .from(subscriptions)
+        .where(inArray(subscriptions.viewerId, userId ? [userId] : [])),
+    );
 
-      // ✅ Tăng viewsCount mỗi lần xem
+    let [existingVideo] = await db
+      .with(viewerReactions, viewerSubscriptions)
+      .select({
+        ...getTableColumns(videos),
+        user: {
+          ...getTableColumns(users),
+          subscriberCount: db.$count(
+            subscriptions,
+            eq(subscriptions.creatorId, users.id),
+          ),
+          viewerSubscribed: isNotNull(viewerSubscriptions.viewerId).mapWith(
+            Boolean,
+          ),
+        },
+        viewCount: videos.viewsCount,
+        likeCount: db.$count(
+          videoReactions,
+          and(
+            eq(videoReactions.videoId, videos.id),
+            eq(videoReactions.type, "like"),
+          ),
+        ),
+        dislikeCount: db.$count(
+          videoReactions,
+          and(
+            eq(videoReactions.videoId, videos.id),
+            eq(videoReactions.type, "dislike"),
+          ),
+        ),
+        viewerReaction: viewerReactions.type,
+      })
+      .from(videos)
+      .innerJoin(users, eq(videos.userId, users.id))
+      .leftJoin(viewerReactions, eq(viewerReactions.videoId, videos.id))
+      .leftJoin(
+        viewerSubscriptions,
+        eq(viewerSubscriptions.creatorId, users.id),
+      )
+      .where(eq(videos.id, input.id));
+
+    if (!existingVideo) throw new TRPCError({ code: "NOT_FOUND" });
+
+    // 🔥 Tăng viewCount mỗi lần xem, kể cả lặp lại
+    await db
+      .update(videos)
+      .set({ viewsCount: sql`${videos.viewsCount} + 1` })
+      .where(eq(videos.id, input.id));
+
+    // ✅ Đồng bộ luôn viewCount trả về
+    existingVideo = {
+      ...existingVideo,
+      viewCount: (existingVideo.viewCount ?? 0) + 1,
+    };
+
+    // 🔹 Cập nhật progress cho user
+    if (userId) {
       await db
-        .update(videos)
-        .set({ viewsCount: sql`${videos.viewsCount} + 1` })
-        .where(eq(videos.id, input.id));
+        .insert(videoViews)
+        .values({
+          userId,
+          videoId: input.id,
+          progress: 0, // có thể thay progress thực tế nếu có
+        })
+        .onConflictDoUpdate({
+          target: [videoViews.userId, videoViews.videoId],
+          set: {
+            progress: 0,
+            updatedAt: new Date(),
+          },
+        });
+    }
 
-      // 🔥 Đồng bộ luôn viewCount trả về
-      existingVideo = {
-        ...existingVideo,
-        viewCount: (existingVideo.viewCount ?? 0) + 1,
-      };
-
-      return existingVideo;
-    }),
+    return existingVideo;
+  }),
   generateDescription: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
