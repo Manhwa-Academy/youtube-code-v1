@@ -94,20 +94,29 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       const player = playerRef.current;
       if (!player) return;
 
-      const handleLoadedMetadata = () => {
+      const handleCanPlay = () => {
         if (hasSeeked.current) return;
 
-        if (savedProgress > 0 && savedProgress < player.duration - 3) {
-          player.currentTime = savedProgress;
+        const duration = Math.floor(player.duration || 0);
+
+        if (savedProgress > 0 && duration > 0) {
+          const watchedPercent = (savedProgress / duration) * 100;
+
+          if (watchedPercent < 95) {
+            player.currentTime = savedProgress;
+          } else {
+            player.currentTime = 0;
+          }
         }
 
         hasSeeked.current = true;
       };
 
-      player.addEventListener("loadedmetadata", handleLoadedMetadata);
+      player.addEventListener("canplay", handleCanPlay);
 
-      return () =>
-        player.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      return () => {
+        player.removeEventListener("canplay", handleCanPlay);
+      };
     }, [savedProgress, videoId]);
 
     // ✅ Video ended
@@ -116,9 +125,11 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       if (!player) return;
 
       const handleEnded = async () => {
+        const player = playerRef.current;
+
         await updateProgressMutation.mutateAsync({
           videoId,
-          progress: 0,
+          progress: Math.floor(player?.duration || 0),
         });
 
         if (loopEnabled) {
@@ -147,7 +158,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       hasSeeked.current = false;
     }, [videoId]);
 
-    // ✅ Save progress mỗi 5s
+    // ✅ Save progress mỗi 2s
     useEffect(() => {
       const interval = setInterval(() => {
         const player = playerRef.current;
@@ -158,7 +169,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           videoId,
           progress: Math.floor(player.currentTime),
         });
-      }, 5000);
+      }, 2000);
 
       return () => clearInterval(interval);
     }, [videoId]);
