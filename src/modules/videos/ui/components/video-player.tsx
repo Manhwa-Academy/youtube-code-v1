@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import MuxPlayer from "@mux/mux-player-react";
 import { THUMBNAIL_FALLBACK } from "../../constants";
 import { trpc } from "@/trpc/client";
-import { toast } from "sonner"; // toast notification
+import { toast } from "sonner";
 
 interface VideoPlayerProps {
-  videoId: string; // ✅ DB UUID
-  playbackId?: string | null; // Mux playbackId
+  videoId: string;
+  playbackId?: string | null;
   thumbnailUrl?: string | null;
+  savedProgress?: number;
   autoPlay?: boolean;
   onPlay?: () => void;
   nextVideo?: {
@@ -23,7 +24,6 @@ interface VideoPlayerProps {
   onEnded?: () => void;
   autoNextEnabled?: boolean;
   loopEnabled?: boolean;
-  onTimeUpdate?: (current: number, duration: number) => void;
 }
 
 export const VideoPlayerSkeleton = () => (
@@ -36,13 +36,13 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       videoId,
       playbackId,
       thumbnailUrl,
+      savedProgress = 0,
       autoPlay,
       onPlay,
       nextVideo,
       onEnded,
       autoNextEnabled = true,
       loopEnabled = false,
-      onTimeUpdate,
     },
     ref,
   ) => {
@@ -50,7 +50,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     const internalRef = useRef<any>(null);
     const playerRef = (ref as React.RefObject<any>) || internalRef;
     const utils = trpc.useContext();
-    // TRPC mutation hooks
+
     const incrementViewMutation = trpc.videos.incrementView.useMutation({
       onMutate: async () => {
         utils.videos.getOne.setData({ id: videoId }, (old: any) => {
@@ -62,23 +62,26 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         toast.error("Không thể tăng view");
       },
     });
+
     const updateProgressMutation = trpc.videos.updateProgress.useMutation();
 
     const [showNext, setShowNext] = useState(false);
     const [countdown, setCountdown] = useState(6);
     const [hasRedirected, setHasRedirected] = useState(false);
+    const hasCountedView = useRef(false);
+    const hasSeeked = useRef(false);
 
-    // ✅ Increment viewCount khi play lần đầu
+    // ✅ Tăng view khi play lần đầu
     useEffect(() => {
       const player = playerRef.current;
       if (!player) return;
-      let counted = false;
 
       const handlePlay = async () => {
-        if (!counted) {
-          counted = true;
+        if (!hasCountedView.current) {
+          hasCountedView.current = true;
           await incrementViewMutation.mutateAsync({ videoId });
         }
+
         onPlay?.();
       };
 
@@ -86,17 +89,44 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       return () => player.removeEventListener("play", handlePlay);
     }, [videoId, onPlay, incrementViewMutation]);
 
-    // 🎬 Video ended
+    // ✅ Resume tới progress cũ
     useEffect(() => {
       const player = playerRef.current;
       if (!player) return;
 
-      const handleEnded = () => {
+      const handleLoadedMetadata = () => {
+        if (hasSeeked.current) return;
+
+        if (savedProgress > 0 && savedProgress < player.duration - 3) {
+          player.currentTime = savedProgress;
+        }
+
+        hasSeeked.current = true;
+      };
+
+      player.addEventListener("loadedmetadata", handleLoadedMetadata);
+
+      return () =>
+        player.removeEventListener("loadedmetadata", handleLoadedMetadata);
+    }, [savedProgress, videoId]);
+
+    // ✅ Video ended
+    useEffect(() => {
+      const player = playerRef.current;
+      if (!player) return;
+
+      const handleEnded = async () => {
+        await updateProgressMutation.mutateAsync({
+          videoId,
+          progress: 0,
+        });
+
         if (loopEnabled) {
           player.currentTime = 0;
           player.play();
           return;
         }
+
         if (!autoNextEnabled) return;
 
         setCountdown(6);
@@ -106,41 +136,69 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
 
       player.addEventListener("ended", handleEnded);
       return () => player.removeEventListener("ended", handleEnded);
-    }, [autoNextEnabled, loopEnabled]);
+    }, [autoNextEnabled, loopEnabled, videoId]);
 
-    // RESET khi đổi video
+    // ✅ Reset state khi đổi video
     useEffect(() => {
       setShowNext(false);
       setCountdown(6);
       setHasRedirected(false);
+      hasCountedView.current = false;
+      hasSeeked.current = false;
     }, [videoId]);
 
-    // ✅ Update progress mỗi 5s
-    // ✅ Update progress mỗi 5s
+    // ✅ Save progress mỗi 5s
     useEffect(() => {
-      if (!onTimeUpdate) return;
-      const interval = setInterval(async () => {
+      const interval = setInterval(() => {
         const player = playerRef.current;
         if (!player) return;
-        await updateProgressMutation.mutateAsync({
+        if (player.paused) return;
+
+        updateProgressMutation.mutate({
           videoId,
-          progress: Math.floor(player.currentTime), // <-- Lấy phần nguyên
+          progress: Math.floor(player.currentTime),
         });
       }, 5000);
-      return () => clearInterval(interval);
-    }, [videoId, onTimeUpdate, updateProgressMutation]);
 
-    // Countdown overlay
+      return () => clearInterval(interval);
+    }, [videoId]);
+
+    // ✅ Save khi unmount / refresh / đổi route
+    useEffect(() => {
+      const saveProgress = () => {
+        const player = playerRef.current;
+        if (!player) return;
+
+        updateProgressMutation.mutate({
+          videoId,
+          progress: Math.floor(player.currentTime),
+        });
+      };
+
+      window.addEventListener("beforeunload", saveProgress);
+
+      return () => {
+        saveProgress();
+        window.removeEventListener("beforeunload", saveProgress);
+      };
+    }, [videoId]);
+
+    // ✅ Countdown overlay
     useEffect(() => {
       if (!showNext) return;
-      const interval = setInterval(() => setCountdown((p) => p - 1), 1000);
+
+      const interval = setInterval(() => {
+        setCountdown((p) => p - 1);
+      }, 1000);
+
       return () => clearInterval(interval);
     }, [showNext]);
 
-    // AUTO NEXT
+    // ✅ Auto next
     useEffect(() => {
       if (countdown <= 0 && nextVideo && !hasRedirected && autoNextEnabled) {
         setHasRedirected(true);
+
         if (onEnded) {
           onEnded();
         } else if (nextVideo.playlistId) {
@@ -163,10 +221,6 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           autoPlay={autoPlay}
           className="w-full h-full object-contain"
           accentColor="#FF2056"
-          onPlay={onPlay}
-          onTimeUpdate={(e: any) =>
-            onTimeUpdate?.(e.target.currentTime, e.target.duration)
-          }
         />
 
         {autoNextEnabled && showNext && nextVideo && (
@@ -174,6 +228,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
             <p className="mb-2 text-xs sm:text-sm opacity-80 text-center w-full">
               Video tiếp theo sau {countdown}
             </p>
+
             <div className="w-full max-w-md flex items-center gap-3 mb-4">
               <div className="relative flex-shrink-0 w-24 aspect-video rounded-lg overflow-hidden -translate-y-2">
                 <img
@@ -181,6 +236,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               </div>
+
               <p className="text-xs sm:text-sm font-medium line-clamp-2 flex-1">
                 {nextVideo.title}
               </p>
