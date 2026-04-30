@@ -155,42 +155,51 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
 
     useEffect(() => {
       if (!trackingEnabled) return;
+
       const player = playerRef.current;
       if (!player) return;
 
-      // 🔹 Lấy progress hiện tại từ localStorage hoặc server
-      const initial = parseInt(
-        localStorage.getItem(`video-${videoId}-progress`) || "0",
-        10,
-      );
-      lastKnownProgress.current = Math.max(savedProgress, initial);
-      localResumeRef.current = lastKnownProgress.current;
-
-      // 🔹 Reset lastSaved để đảm bảo timeupdate luôn trigger
-      let lastSaved = lastKnownProgress.current;
+      let lastSaved = 0;
 
       const handleTimeUpdate = () => {
         const current = Math.floor(player.currentTime || 0);
+
         lastKnownProgress.current = current;
         localResumeRef.current = current;
 
-        localStorage.setItem(`video-${videoId}-progress`, current.toString());
+        // 🔥 update cache local tức thì
+        utils.videos.getOne.setData({ id: videoId }, (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            progress: current,
+          };
+        });
 
-        if (!savingRef.current && current - lastSaved >= 2) {
-          lastSaved = current; // 🔹 reset lastSaved sau mỗi mutation
+        if (current - lastSaved >= 2 && !savingRef.current) {
+          lastSaved = current;
           savingRef.current = true;
 
           updateProgressMutation.mutate(
-            { videoId, progress: current },
-            { onSettled: () => (savingRef.current = false) },
+            {
+              videoId,
+              progress: current,
+            },
+            {
+              onSettled: () => {
+                savingRef.current = false;
+              },
+            },
           );
         }
       };
 
       player.addEventListener("timeupdate", handleTimeUpdate);
 
-      return () => player.removeEventListener("timeupdate", handleTimeUpdate);
-    }, [videoId, trackingEnabled, savedProgress]);
+      return () => {
+        player.removeEventListener("timeupdate", handleTimeUpdate);
+      };
+    }, [videoId, trackingEnabled]);
 
     // =========================
     // Save khi thoát trang / unmount
@@ -198,33 +207,25 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     useEffect(() => {
       const saveOnExit = () => {
         if (!trackingEnabled) return;
-        const progress = lastKnownProgress.current;
-        if (progress <= 0) return;
+        if (lastKnownProgress.current <= 0) return;
 
-        // 🔹 Lưu localStorage trước
-        localStorage.setItem(`video-${videoId}-progress`, progress.toString());
-
-        // 🔹 Gửi server
         navigator.sendBeacon(
           "/api/save-progress",
           JSON.stringify({
             videoId,
-            progress,
+            progress: lastKnownProgress.current,
           }),
         );
 
-        // 🔹 Invalidate cache TRPC (nếu cần)
         utils.videos.getMany.invalidate();
         utils.videos.getManyTrending.invalidate();
         utils.videos.getManySubscribed.invalidate();
         utils.videos.getManyShorts.invalidate();
         utils.suggestions.getMany.invalidate();
       };
-
       window.addEventListener("beforeunload", saveOnExit);
 
       return () => {
-        // Gọi 1 lần khi unmount
         saveOnExit();
         window.removeEventListener("beforeunload", saveOnExit);
       };

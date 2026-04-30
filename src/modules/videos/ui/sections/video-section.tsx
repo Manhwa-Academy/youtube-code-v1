@@ -121,17 +121,6 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
   if (trackingLoading || trackingEnabled === undefined) {
     return <VideoSectionSkeleton />;
   }
-  // Thêm trước return
-  // Lấy progress từ localStorage + server
-  const localProgress =
-    typeof window !== "undefined"
-      ? parseInt(
-          localStorage.getItem(`video-${currentVideoId}-progress`) || "0",
-          10,
-        )
-      : 0;
-
-  const savedProgress = Math.max(video.progress || 0, localProgress);
   return (
     <div className="flex flex-col gap-4">
       {/* 🎬 PLAYER */}
@@ -142,7 +131,7 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
           videoId={video.id}
           playbackId={video.muxPlaybackId}
           thumbnailUrl={video.thumbnailUrl}
-          savedProgress={trackingEnabled ? savedProgress : 0}
+          savedProgress={trackingEnabled ? video.progress || 0 : 0}
           trackingEnabled={trackingEnabled}
           autoPlay
           nextVideo={nextVideo}
@@ -218,3 +207,4 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
     </div>
   );
 };
+ 
