@@ -562,67 +562,115 @@ export const videosRouter = createTRPCRouter({
 
       return workflowRunId;
     }),
-  updateProgress: protectedProcedure
-    .input(
-      z.object({
-        videoId: z.string(),
-        progress: z.number(),
-        isRestart: z.boolean().optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { id: userId } = ctx.user;
-
-      // ✅ check user có bật lưu lịch sử không
-      const [me] = await db.select().from(users).where(eq(users.id, userId));
-      if (!me) throw new TRPCError({ code: "NOT_FOUND" });
-
-      if (!me.trackHistory) {
-        return { success: true }; // 🚫 không lưu gì hết
-      }
-
-      const [existing] = await db
-        .select()
-        .from(videoViews)
-        .where(
-          and(
-            eq(videoViews.userId, userId),
-            eq(videoViews.videoId, input.videoId),
-          ),
-        );
-
-      const oldProgress = existing?.progress ?? 0;
-      const newProgress = Math.max(0, Math.floor(input.progress));
-
-      let finalProgress = oldProgress;
-
-      if (input.isRestart) {
-        finalProgress = 0;
-      } else if (newProgress === 0 && oldProgress > 5) {
-        return { success: true };
-      } else if (newProgress >= oldProgress || oldProgress - newProgress < 3) {
-        finalProgress = newProgress;
-      } else {
-        return { success: true };
-      }
-
-      await db
-        .insert(videoViews)
-        .values({
-          userId,
-          videoId: input.videoId,
-          progress: finalProgress,
-        })
-        .onConflictDoUpdate({
-          target: [videoViews.userId, videoViews.videoId],
-          set: {
-            progress: finalProgress,
-            updatedAt: new Date(),
-          },
-        });
-
-      return { success: true };
+ updateProgress: protectedProcedure
+  .input(
+    z.object({
+      videoId: z.string(),
+      progress: z.number(),
+      isRestart: z.boolean().optional(),
     }),
+  )
+  .mutation(async ({ ctx, input }) => {
+    const { id: userId } = ctx.user;
+
+    const [me] = await db.select().from(users).where(eq(users.id, userId));
+    if (!me) throw new TRPCError({ code: "NOT_FOUND" });
+
+    if (!me.trackHistory) {
+      return { success: true };
+    }
+
+    const [videoInfo] = await db
+      .select({
+        duration: videos.duration,
+      })
+      .from(videos)
+      .where(eq(videos.id, input.videoId));
+
+    if (!videoInfo) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+
+    const durationSeconds = Math.floor((videoInfo.duration || 0) / 1000);
+
+    const [existing] = await db
+      .select()
+      .from(videoViews)
+      .where(
+        and(
+          eq(videoViews.userId, userId),
+          eq(videoViews.videoId, input.videoId),
+        ),
+      );
+
+    const oldProgress = existing?.progress ?? 0;
+    const newProgress = Math.max(0, Math.floor(input.progress));
+
+    const wasNearlyCompleted =
+      durationSeconds > 0 && oldProgress >= durationSeconds * 0.85;
+
+    let finalProgress = oldProgress;
+
+    // ====================================
+    // CASE 1: user bấm restart thủ công
+    // ====================================
+    if (input.isRestart) {
+      finalProgress = 0;
+    }
+
+    // ====================================
+    // CASE 2: currentTime=0 giả lúc load
+    // ====================================
+    else if (newProgress === 0 && oldProgress > 5 && !wasNearlyCompleted) {
+      return { success: true };
+    }
+
+    // ====================================
+    // CASE 3: video đã gần/full completed, user replay từ đầu
+    // cho phép tụt xuống
+    // ====================================
+    else if (wasNearlyCompleted && newProgress < oldProgress) {
+      finalProgress = newProgress;
+    }
+
+    // ====================================
+    // CASE 4: xem tiến tới bình thường
+    // ====================================
+    else if (newProgress >= oldProgress) {
+      finalProgress = newProgress;
+    }
+
+    // ====================================
+    // CASE 5: jitter nhẹ
+    // ====================================
+    else if (oldProgress - newProgress < 3) {
+      finalProgress = newProgress;
+    }
+
+    // ====================================
+    // CASE 6: tua lùi mạnh -> bỏ qua
+    // ====================================
+    else {
+      return { success: true };
+    }
+
+    await db
+      .insert(videoViews)
+      .values({
+        userId,
+        videoId: input.videoId,
+        progress: finalProgress,
+      })
+      .onConflictDoUpdate({
+        target: [videoViews.userId, videoViews.videoId],
+        set: {
+          progress: finalProgress,
+          updatedAt: new Date(),
+        },
+      });
+
+    return { success: true };
+  }),
   revalidate: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
@@ -784,6 +832,7 @@ export const videosRouter = createTRPCRouter({
       },
       cors_origin: "*", // TODO: In production, set to your url
     });
+
     const [video] = await db
       .insert(videos)
       .values({
