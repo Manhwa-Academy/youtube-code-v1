@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/trpc/client";
 import { PlaylistGetManyOutput } from "../../../types";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -12,7 +13,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVerticalIcon } from "lucide-react";
+import { MoreVerticalIcon, Trash2Icon } from "lucide-react";
 
 interface PlaylistInfoProps {
   data: PlaylistGetManyOutput["items"][number];
@@ -35,6 +36,7 @@ export const PlaylistInfo = ({ data }: PlaylistInfoProps) => {
     data.visibility,
   );
   const utils = trpc.useUtils(); // ✅ THÊM DÒNG NÀY
+  const router = useRouter();
   // TRPC mutation update visibility
   const updateVisibility = trpc.playlists.updateVisibility.useMutation({
     onSuccess: (data) => {
@@ -52,21 +54,41 @@ export const PlaylistInfo = ({ data }: PlaylistInfoProps) => {
     setVisibility(newVisibility); // update UI ngay
     updateVisibility.mutate({ playlistId: data.id, visibility: newVisibility }); // gửi lên server
   };
-
+  const removePlaylist = trpc.playlists.remove.useMutation({
+    onSuccess: () => {
+      toast.success("Đã xóa danh sách!");
+      utils.playlists.getPublicMixPlaylists.invalidate();
+      utils.playlists.getMany.invalidate();
+    },
+    onError: () => toast.error("Xóa danh sách thất bại!"),
+  });
+  const handleRemove = () => {
+    if (!confirm(`Bạn chắc chắn muốn xóa "${data.name}"?`)) return;
+    removePlaylist.mutate({ id: data.id });
+  };
   return (
     <div className="flex gap-3 items-center">
       <div className="min-w-0 flex-1">
         <h3 className="font-medium line-clamp-1 lg:line-clamp-2 text-sm break-words">
           {data.name}
         </h3>
-        <p className="text-sm text-muted-foreground">Danh sách phát</p>
+        <p className="text-sm text-muted-foreground">
+          {data.isMixPlaylist ? "Danh sách kết hợp" : "Danh sách phát"}
+        </p>
         <p
           className="text-sm text-muted-foreground font-semibold hover:text-primary cursor-pointer"
-          onClick={() => {
-            console.log("Mở tất cả video của playlist", data.name);
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (data.firstVideoId) {
+              router.push(
+                `/videos/${data.firstVideoId}?list=${data.id}&index=0`,
+              );
+            }
           }}
         >
-          Xem tất cả video
+          {data.isMixPlaylist ? "Phát danh sách" : "Xem tất cả video"}
         </p>
       </div>
 
@@ -83,6 +105,13 @@ export const PlaylistInfo = ({ data }: PlaylistInfoProps) => {
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleChange("private")}>
             Riêng tư {visibility === "private" ? "✔️" : ""}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleRemove}
+            className="text-red-500 focus:text-red-500"
+          >
+            <Trash2Icon className="mr-2 size-4" />
+            Xóa danh sách
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
