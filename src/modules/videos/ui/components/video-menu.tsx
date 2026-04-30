@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { PlaylistAddModal } from "@/modules/playlists/ui/components/playlist-add-modal";
-import { PlaylistCreateModal } from "@/modules/playlists/ui/components/playlist-create-modal";
+import { MixPlaylistCreateModal } from "@/modules/playlists/ui/components/mix-playlist-create-modal";
+import { MixPlaylistAddModal } from "@/modules/playlists/ui/components/mix-playlist-add-modal";
 
 interface VideoMenuProps {
   videoId: string;
@@ -33,7 +34,8 @@ export const VideoMenu = ({
 }: VideoMenuProps) => {
   const [isOpenPlaylistAddModal, setIsOpenPlaylistAddModal] = useState(false);
   const [isOpenCreateModal, setIsOpenCreateModal] = useState(false);
-
+  const [isOpenMixAddModal, setIsOpenMixAddModal] = useState(false);
+  
   const onShare = () => {
     const fullUrl = `${APP_URL}/videos/${videoId}`;
     navigator.clipboard.writeText(fullUrl);
@@ -42,20 +44,24 @@ export const VideoMenu = ({
 
   return (
     <>
-      {/* Modal thêm video vào playlist */}
+      {/* thêm vào danh sách phát thường */}
       <PlaylistAddModal
         videoId={videoId}
         open={isOpenPlaylistAddModal}
         onOpenChange={setIsOpenPlaylistAddModal}
       />
 
-      {/* Modal tạo playlist mới */}
-      <PlaylistCreateModal
+      {/* tạo danh sách kết hợp */}
+      <MixPlaylistCreateModal
         open={isOpenCreateModal}
         onOpenChange={setIsOpenCreateModal}
-        initialVideoIds={[videoId]} // ✅ tự động thêm video hiện tại vào playlist mới
+        initialVideoIds={[videoId]}
       />
-
+      <MixPlaylistAddModal
+        videoId={videoId}
+        open={isOpenMixAddModal}
+        onOpenChange={setIsOpenMixAddModal}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant={variant} size="icon" className="rounded-full">
@@ -76,7 +82,11 @@ export const VideoMenu = ({
 
           <DropdownMenuItem onClick={() => setIsOpenCreateModal(true)}>
             <PlusIcon className="mr-2 size-4" />
-            Tạo playlist kết hợp mới
+            Tạo danh sách kết hợp mới
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsOpenMixAddModal(true)}>
+            <ListPlusIcon className="mr-2 size-4" />
+            Thêm vào danh sách kết hợp
           </DropdownMenuItem>
           {onRemove && (
             <DropdownMenuItem onClick={onRemove}>
