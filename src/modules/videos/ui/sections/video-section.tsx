@@ -71,7 +71,7 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
         )
       : 0;
 
-  const finalProgress = Math.max(video.progress || 0, localProgress); // ✅ dùng max để ưu tiên server nếu có
+  const finalProgress = localProgress > 0 ? localProgress : video.progress || 0; // ✅ dùng max để ưu tiên server nếu có
   // 🔹 playlist public
   const { data: playlists } = trpc.playlists.getPublicMixPlaylists.useQuery();
   const playlist = playlists?.find((p) => p.id === playlistId);
