@@ -26,14 +26,21 @@ export const playlistsRouter = createTRPCRouter({
       const { id } = input;
       const { id: userId } = ctx.user;
 
+      const [existingPlaylist] = await db
+        .select()
+        .from(playlists)
+        .where(and(eq(playlists.id, id), eq(playlists.userId, userId)));
+
+      if (!existingPlaylist) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      await db.delete(playlistVideos).where(eq(playlistVideos.playlistId, id));
+
       const [deletedPlaylist] = await db
         .delete(playlists)
         .where(and(eq(playlists.id, id), eq(playlists.userId, userId)))
         .returning();
-
-      if (!deletedPlaylist) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
 
       return deletedPlaylist;
     }),
@@ -61,7 +68,7 @@ export const playlistsRouter = createTRPCRouter({
         cursor: z
           .object({
             id: z.string().uuid(),
-            updatedAt: z.date(),
+            addedAt: z.date(),
           })
           .nullish(),
         limit: z.number().min(1).max(100),
@@ -84,6 +91,7 @@ export const playlistsRouter = createTRPCRouter({
         db
           .select({
             videoId: playlistVideos.videoId,
+            addedAt: playlistVideos.createdAt,
           })
           .from(playlistVideos)
           .where(eq(playlistVideos.playlistId, playlistId)),
@@ -94,6 +102,7 @@ export const playlistsRouter = createTRPCRouter({
         .select({
           ...getTableColumns(videos),
           user: users,
+          addedAt: videosFromPlaylist.addedAt,
           viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
           likeCount: db.$count(
             videoReactions,
@@ -121,28 +130,27 @@ export const playlistsRouter = createTRPCRouter({
             eq(videos.visibility, "public"),
             cursor
               ? or(
-                  lt(videos.updatedAt, cursor.updatedAt),
+                  lt(videosFromPlaylist.addedAt, cursor.addedAt),
                   and(
-                    eq(videos.updatedAt, cursor.updatedAt),
+                    eq(videosFromPlaylist.addedAt, cursor.addedAt),
                     lt(videos.id, cursor.id),
                   ),
                 )
               : undefined,
           ),
         )
-        .orderBy(desc(videos.updatedAt), desc(videos.id))
-        // Add 1 to the limit to check if there is more data
+        .orderBy(videosFromPlaylist.addedAt, videos.id)
         .limit(limit + 1);
 
       const hasMore = data.length > limit;
-      // Remove the last item if there is more data
       const items = hasMore ? data.slice(0, -1) : data;
-      // Set the next cursor to the last item if there is more data
+
       const lastItem = items[items.length - 1];
+
       const nextCursor = hasMore
         ? {
             id: lastItem.id,
-            updatedAt: lastItem.updatedAt,
+            addedAt: lastItem.addedAt,
           }
         : null;
 
@@ -171,15 +179,6 @@ export const playlistsRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      const [existingVideo] = await db
-        .select()
-        .from(videos)
-        .where(eq(videos.id, videoId));
-
-      if (!existingVideo) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
       const [existingPlaylistVideo] = await db
         .select()
         .from(playlistVideos)
@@ -204,13 +203,97 @@ export const playlistsRouter = createTRPCRouter({
         )
         .returning();
 
+      const remainVideos = await db
+        .select()
+        .from(playlistVideos)
+        .where(eq(playlistVideos.playlistId, playlistId));
+
+      if (remainVideos.length === 0 && !existingPlaylist.isMixPlaylist) {
+        await db.delete(playlists).where(eq(playlists.id, playlistId));
+      } else {
+        await db
+          .update(playlists)
+          .set({ updatedAt: new Date() })
+          .where(eq(playlists.id, playlistId));
+      }
+
       return deletedPlaylistVideo;
+    }),
+  getManyMixForVideo: protectedProcedure
+    .input(
+      z.object({
+        videoId: z.string().uuid(),
+        cursor: z
+          .object({
+            id: z.string().uuid(),
+            updatedAt: z.date(),
+          })
+          .nullish(),
+        limit: z.number().min(1).max(100),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { id: userId } = ctx.user;
+      const { cursor, limit, videoId } = input;
+
+      const data = await db
+        .select({
+          ...getTableColumns(playlists),
+          videoCount: db.$count(
+            playlistVideos,
+            eq(playlists.id, playlistVideos.playlistId),
+          ),
+          user: users,
+          containsVideo: sql<boolean>`(
+          SELECT EXISTS (
+            SELECT 1
+            FROM ${playlistVideos} pv
+            WHERE pv.playlist_id = ${playlists.id}
+            AND pv.video_id = ${videoId}
+          )
+        )`,
+        })
+        .from(playlists)
+        .innerJoin(users, eq(playlists.userId, users.id))
+        .where(
+          and(
+            eq(playlists.userId, userId),
+            eq(playlists.isMixPlaylist, true),
+            cursor
+              ? or(
+                  lt(playlists.updatedAt, cursor.updatedAt),
+                  and(
+                    eq(playlists.updatedAt, cursor.updatedAt),
+                    lt(playlists.id, cursor.id),
+                  ),
+                )
+              : undefined,
+          ),
+        )
+        .orderBy(desc(playlists.updatedAt), desc(playlists.id))
+        .limit(limit + 1);
+
+      const hasMore = data.length > limit;
+      const items = hasMore ? data.slice(0, -1) : data;
+      const lastItem = items[items.length - 1];
+
+      const nextCursor = hasMore
+        ? {
+            id: lastItem.id,
+            updatedAt: lastItem.updatedAt,
+          }
+        : null;
+
+      return {
+        items,
+        nextCursor,
+      };
     }),
   createMixPlaylist: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1),
-        videoIds: z.array(z.string().uuid()).min(1),
+        videoIds: z.array(z.string().uuid()).default([]),
         description: z.string().optional(),
         visibility: z.enum(["public", "private"]).default("public"), // ✅ Thêm field này
       }),
@@ -220,18 +303,19 @@ export const playlistsRouter = createTRPCRouter({
       const { id: userId } = ctx.user;
 
       // Kiểm tra tất cả video là của chủ user
-      const userVideos = await db
-        .select()
-        .from(videos)
-        .where(and(eq(videos.userId, userId), inArray(videos.id, videoIds)));
+      if (videoIds.length > 0) {
+        const userVideos = await db
+          .select()
+          .from(videos)
+          .where(and(eq(videos.userId, userId), inArray(videos.id, videoIds)));
 
-      if (userVideos.length !== videoIds.length) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Chỉ chủ sở hữu video mới có quyền tạo playlist kết hợp",
-        });
+        if (userVideos.length !== videoIds.length) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Chỉ chủ sở hữu video mới có quyền tạo playlist kết hợp",
+          });
+        }
       }
-
       // Tạo playlist mix với visibility
       const [playlist] = await db
         .insert(playlists)
@@ -247,11 +331,14 @@ export const playlistsRouter = createTRPCRouter({
       if (!playlist) throw new TRPCError({ code: "BAD_REQUEST" });
 
       // Thêm video vào playlist
-      await db
-        .insert(playlistVideos)
-        .values(
-          videoIds.map((id) => ({ playlistId: playlist.id, videoId: id })),
+      if (videoIds.length > 0) {
+        await db.insert(playlistVideos).values(
+          videoIds.map((id) => ({
+            playlistId: playlist.id,
+            videoId: id,
+          })),
         );
+      }
 
       return playlist;
     }),
@@ -260,7 +347,10 @@ export const playlistsRouter = createTRPCRouter({
       .select()
       .from(playlists)
       .where(
-        eq(playlists.visibility, "public"), // ✅ CHỈ LỌC PUBLIC
+        and(
+          eq(playlists.visibility, "public"),
+          eq(playlists.isMixPlaylist, true),
+        ),
       )
       .orderBy(desc(playlists.updatedAt));
 
@@ -279,7 +369,7 @@ export const playlistsRouter = createTRPCRouter({
         .from(videos)
         .innerJoin(playlistVideos, eq(playlistVideos.videoId, videos.id))
         .where(eq(playlistVideos.playlistId, playlist.id))
-        .orderBy(desc(videos.updatedAt));
+        .orderBy(playlistVideos.createdAt);
 
       if (playlistVideosData.length === 0) continue;
 
@@ -366,13 +456,24 @@ export const playlistsRouter = createTRPCRouter({
         );
 
       if (existingPlaylistVideo) {
-        throw new TRPCError({ code: "CONFLICT" });
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Video đã tồn tại trong danh sách",
+        });
       }
 
       const [createdPlaylistVideo] = await db
         .insert(playlistVideos)
-        .values({ playlistId, videoId })
+        .values({
+          playlistId,
+          videoId,
+        })
         .returning();
+
+      await db
+        .update(playlists)
+        .set({ updatedAt: new Date() })
+        .where(eq(playlists.id, playlistId));
 
       return createdPlaylistVideo;
     }),
@@ -416,6 +517,7 @@ export const playlistsRouter = createTRPCRouter({
         .where(
           and(
             eq(playlists.userId, userId),
+            eq(playlists.isMixPlaylist, false), // ✅ CHỈ LẤY PLAYLIST THƯỜNG
             cursor
               ? or(
                   lt(playlists.updatedAt, cursor.updatedAt),
@@ -472,28 +574,29 @@ export const playlistsRouter = createTRPCRouter({
             eq(playlists.id, playlistVideos.playlistId),
           ),
           user: users,
+
           thumbnailUrl: sql<string | null>`(
-            SELECT v.thumbnail_url
-            FROM ${playlistVideos} pv
-            JOIN ${videos} v ON v.id = pv.video_id
-            WHERE pv.playlist_id = ${playlists.id}
-            ORDER BY pv.updated_at DESC
-            LIMIT 1
-          )`,
-          // 👇 THÊM ĐOẠN NÀY
+          SELECT v.thumbnail_url
+          FROM ${playlistVideos} pv
+          JOIN ${videos} v ON v.id = pv.video_id
+          WHERE pv.playlist_id = ${playlists.id}
+          ORDER BY pv.created_at ASC
+          LIMIT 1
+        )`,
+
           firstVideoId: sql<string | null>`(
-    SELECT pv.video_id
-    FROM ${playlistVideos} pv
-    WHERE pv.playlist_id = ${playlists.id}
-    ORDER BY pv.updated_at ASC
-    LIMIT 1
-  )`,
+          SELECT pv.video_id
+          FROM ${playlistVideos} pv
+          WHERE pv.playlist_id = ${playlists.id}
+          ORDER BY pv.created_at ASC
+          LIMIT 1
+        )`,
         })
         .from(playlists)
         .innerJoin(users, eq(playlists.userId, users.id))
         .where(
           and(
-            eq(playlists.userId, userId), // ✅ CHỈ CỦA MÌNH
+            eq(playlists.userId, userId),
             cursor
               ? or(
                   lt(playlists.updatedAt, cursor.updatedAt),
@@ -505,16 +608,14 @@ export const playlistsRouter = createTRPCRouter({
               : undefined,
           ),
         )
-
         .orderBy(desc(playlists.updatedAt), desc(playlists.id))
-        // Add 1 to the limit to check if there is more data
         .limit(limit + 1);
 
       const hasMore = data.length > limit;
-      // Remove the last item if there is more data
       const items = hasMore ? data.slice(0, -1) : data;
-      // Set the next cursor to the last item if there is more data
+
       const lastItem = items[items.length - 1];
+
       const nextCursor = hasMore
         ? {
             id: lastItem.id,
@@ -528,9 +629,14 @@ export const playlistsRouter = createTRPCRouter({
       };
     }),
   create: protectedProcedure
-    .input(z.object({ name: z.string().min(1) }))
+    .input(
+      z.object({
+        name: z.string().min(1),
+        visibility: z.enum(["public", "private"]).default("private"),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
-      const { name } = input;
+      const { name, visibility } = input;
       const { id: userId } = ctx.user;
 
       const [createdPlaylist] = await db
@@ -538,6 +644,8 @@ export const playlistsRouter = createTRPCRouter({
         .values({
           userId,
           name,
+          visibility,
+          isMixPlaylist: false, // ✅ playlist thường
         })
         .returning();
 
@@ -553,111 +661,111 @@ export const playlistsRouter = createTRPCRouter({
     if (!user) throw new TRPCError({ code: "NOT_FOUND" });
     return user.trackHistory; // trả về boolean
   }),
- getLiked: protectedProcedure
-  .input(
-    z.object({
-      cursor: z
-        .object({
-          id: z.string().uuid(),
-          likedAt: z.date(),
-        })
-        .nullish(),
-      limit: z.number().min(1).max(100),
-    }),
-  )
-  .query(async ({ input, ctx }) => {
-    const { id: userId } = ctx.user;
-    const { cursor, limit } = input;
+  getLiked: protectedProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            id: z.string().uuid(),
+            likedAt: z.date(),
+          })
+          .nullish(),
+        limit: z.number().min(1).max(100),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { id: userId } = ctx.user;
+      const { cursor, limit } = input;
 
-    // Subquery: video user đã like
-    const viewerVideoReactions = db.$with("viewer_video_reactions").as(
-      db
+      // Subquery: video user đã like
+      const viewerVideoReactions = db.$with("viewer_video_reactions").as(
+        db
+          .select({
+            videoId: videoReactions.videoId,
+            likedAt: videoReactions.updatedAt,
+          })
+          .from(videoReactions)
+          .where(
+            and(
+              eq(videoReactions.userId, userId),
+              eq(videoReactions.type, "like"),
+            ),
+          ),
+      );
+
+      // Subquery: lấy progress của user trong videoViews
+      const viewerVideoProgress = db.$with("viewer_video_progress").as(
+        db
+          .select({
+            videoId: videoViews.videoId,
+            progress: videoViews.progress,
+          })
+          .from(videoViews)
+          .where(eq(videoViews.userId, userId)),
+      );
+
+      const data = await db
+        .with(viewerVideoReactions, viewerVideoProgress)
         .select({
-          videoId: videoReactions.videoId,
-          likedAt: videoReactions.updatedAt,
+          ...getTableColumns(videos),
+          user: users,
+          likedAt: viewerVideoReactions.likedAt,
+          progress: viewerVideoProgress.progress, // 🔹 Thêm progress
+          viewCount: videos.viewsCount, // tổng viewCount
+          likeCount: db.$count(
+            videoReactions,
+            and(
+              eq(videoReactions.videoId, videos.id),
+              eq(videoReactions.type, "like"),
+            ),
+          ),
+          dislikeCount: db.$count(
+            videoReactions,
+            and(
+              eq(videoReactions.videoId, videos.id),
+              eq(videoReactions.type, "dislike"),
+            ),
+          ),
         })
-        .from(videoReactions)
+        .from(videos)
+        .innerJoin(users, eq(videos.userId, users.id))
+        .innerJoin(
+          viewerVideoReactions,
+          eq(videos.id, viewerVideoReactions.videoId),
+        )
+        .leftJoin(
+          viewerVideoProgress,
+          eq(videos.id, viewerVideoProgress.videoId),
+        )
         .where(
           and(
-            eq(videoReactions.userId, userId),
-            eq(videoReactions.type, "like"),
+            eq(videos.visibility, "public"),
+            cursor
+              ? or(
+                  lt(viewerVideoReactions.likedAt, cursor.likedAt),
+                  and(
+                    eq(viewerVideoReactions.likedAt, cursor.likedAt),
+                    lt(videos.id, cursor.id),
+                  ),
+                )
+              : undefined,
           ),
-        ),
-    );
+        )
+        .orderBy(desc(viewerVideoReactions.likedAt), desc(videos.id))
+        .limit(limit + 1);
 
-    // Subquery: lấy progress của user trong videoViews
-    const viewerVideoProgress = db.$with("viewer_video_progress").as(
-      db
-        .select({
-          videoId: videoViews.videoId,
-          progress: videoViews.progress,
-        })
-        .from(videoViews)
-        .where(eq(videoViews.userId, userId)),
-    );
+      const hasMore = data.length > limit;
+      const items = hasMore ? data.slice(0, -1) : data;
+      const lastItem = items[items.length - 1];
+      const nextCursor = hasMore
+        ? {
+            id: lastItem.id,
+            likedAt: lastItem.likedAt,
+          }
+        : null;
 
-    const data = await db
-      .with(viewerVideoReactions, viewerVideoProgress)
-      .select({
-        ...getTableColumns(videos),
-        user: users,
-        likedAt: viewerVideoReactions.likedAt,
-        progress: viewerVideoProgress.progress, // 🔹 Thêm progress
-        viewCount: videos.viewsCount, // tổng viewCount
-        likeCount: db.$count(
-          videoReactions,
-          and(
-            eq(videoReactions.videoId, videos.id),
-            eq(videoReactions.type, "like"),
-          ),
-        ),
-        dislikeCount: db.$count(
-          videoReactions,
-          and(
-            eq(videoReactions.videoId, videos.id),
-            eq(videoReactions.type, "dislike"),
-          ),
-        ),
-      })
-      .from(videos)
-      .innerJoin(users, eq(videos.userId, users.id))
-      .innerJoin(
-        viewerVideoReactions,
-        eq(videos.id, viewerVideoReactions.videoId),
-      )
-      .leftJoin(
-        viewerVideoProgress,
-        eq(videos.id, viewerVideoProgress.videoId),
-      )
-      .where(
-        and(
-          eq(videos.visibility, "public"),
-          cursor
-            ? or(
-                lt(viewerVideoReactions.likedAt, cursor.likedAt),
-                and(
-                  eq(viewerVideoReactions.likedAt, cursor.likedAt),
-                  lt(videos.id, cursor.id),
-                ),
-              )
-            : undefined,
-        ),
-      )
-      .orderBy(desc(viewerVideoReactions.likedAt), desc(videos.id))
-      .limit(limit + 1);
-
-    const hasMore = data.length > limit;
-    const items = hasMore ? data.slice(0, -1) : data;
-    const lastItem = items[items.length - 1];
-    const nextCursor = hasMore
-      ? {
-          id: lastItem.id,
-          likedAt: lastItem.likedAt,
-        }
-      : null;
-
-    return { items, nextCursor };
-  }),
+      return { items, nextCursor };
+    }),
   removeFromHistory: protectedProcedure
     .input(z.object({ videoId: z.string().uuid() }))
     .mutation(async ({ input, ctx }) => {
