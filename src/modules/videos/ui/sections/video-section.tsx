@@ -34,14 +34,12 @@ export const VideoSectionSkeleton = () => {
 
 const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
   const params = useSearchParams();
-  const [isTracking, setIsTracking] = useState(true);
-
-  const { data: trackingEnabled } =
-    trpc.playlists.getHistoryTracking.useQuery();
 
   const [showPlaylist, setShowPlaylist] = useState(false);
   const playlistId = params.get("list");
   const index = Number(params.get("index") || 0);
+  const { data: trackingEnabled, isLoading: trackingLoading } =
+    trpc.playlists.getHistoryTracking.useQuery();
 
   const [currentVideoId, setCurrentVideoId] = useState(videoId);
   const [currentIndex, setCurrentIndex] = useState(index);
@@ -65,19 +63,6 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
       refetchOnWindowFocus: true,
     },
   );
-
-  useEffect(() => {
-    if (trackingEnabled !== undefined) {
-      setIsTracking(trackingEnabled);
-    }
-  }, [trackingEnabled]);
-
-  // 🔹 bật tắt lưu lịch sử
-  trpc.playlists.toggleHistoryTracking.useMutation({
-    onSuccess: (_, variables) => {
-      setIsTracking(variables.enabled);
-    },
-  });
 
   // 🔹 playlist public
   const { data: playlists } = trpc.playlists.getPublicMixPlaylists.useQuery();
@@ -131,7 +116,9 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
   useEffect(() => {
     localStorage.setItem("loop", loopEnabled.toString());
   }, [loopEnabled]);
-
+  if (trackingLoading || trackingEnabled === undefined) {
+    return <VideoSectionSkeleton />;
+  }
   return (
     <div className="flex flex-col gap-4">
       {/* 🎬 PLAYER */}
@@ -142,7 +129,8 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
           videoId={video.id}
           playbackId={video.muxPlaybackId}
           thumbnailUrl={video.thumbnailUrl}
-          savedProgress={isTracking ? video.progress || 0 : 0}
+          savedProgress={trackingEnabled ? video.progress || 0 : 0}
+          trackingEnabled={trackingEnabled}
           autoPlay
           nextVideo={nextVideo}
           autoNextEnabled={autoNextEnabled}
