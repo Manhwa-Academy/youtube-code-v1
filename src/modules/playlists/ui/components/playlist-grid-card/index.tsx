@@ -4,11 +4,14 @@ import { THUMBNAIL_FALLBACK } from "@/modules/videos/constants";
 import { PlaylistGetManyOutput } from "@/modules/playlists/types";
 
 import { PlaylistInfo, PlaylistInfoSkeleton } from "./playlist-info";
-import { PlaylistThumbnail, PlaylistThumbnailSkeleton } from "./playlist-thumbnail";
+import {
+  PlaylistThumbnail,
+  PlaylistThumbnailSkeleton,
+} from "./playlist-thumbnail";
 
 interface PlaylistGridCardProps {
   data: PlaylistGetManyOutput["items"][number];
-};
+}
 
 export const PlaylistGridCardSkeleton = () => {
   return (
@@ -19,9 +22,7 @@ export const PlaylistGridCardSkeleton = () => {
   );
 };
 
-export const PlaylistGridCard = ({
-  data,
-}: PlaylistGridCardProps) => {
+export const PlaylistGridCard = ({ data }: PlaylistGridCardProps) => {
   return (
     <Link prefetch href={`/playlists/${data.id}`}>
       <div className="flex flex-col gap-2 w-full group">
