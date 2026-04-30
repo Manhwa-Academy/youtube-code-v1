@@ -6,8 +6,8 @@ interface UserTabsProps {
   userId: string;
   activeVideoTab: "latest" | "popular" | "oldest";
   setActiveVideoTabAction: (tab: "latest" | "popular" | "oldest") => void;
-  activeTab: "home" | "videos" | "shorts";
-  setActiveTabAction: (tab: "home" | "videos" | "shorts") => void;
+  activeTab: "home" | "videos" | "shorts" | "playlists";
+  setActiveTabAction: (tab: "home" | "videos" | "shorts" | "playlists") => void;
 }
 
 export const UserTabs = ({
@@ -20,8 +20,8 @@ export const UserTabs = ({
     { key: "home", label: "Trang chủ" },
     { key: "videos", label: "Video" },
     { key: "shorts", label: "Shorts" },
+    { key: "playlists", label: "Danh sách phát" },
   ];
-
   const videoSubTabs = [
     { key: "latest", label: "Mới nhất" },
     { key: "popular", label: "Phổ biến" },
@@ -35,10 +35,14 @@ export const UserTabs = ({
           <button
             key={tab.key}
             className={`pb-2 text-sm font-medium ${
-              activeTab === tab.key ? "border-b-2 border-black text-black" : "text-gray-500"
+              activeTab === tab.key
+                ? "border-b-2 border-black text-black"
+                : "text-gray-500"
             }`}
             onClick={() => {
-              setActiveTabAction(tab.key as "home" | "videos" | "shorts" );
+              setActiveTabAction(
+                tab.key as "home" | "videos" | "shorts" | "playlists",
+              );
               if (tab.key === "videos") setActiveVideoTabAction("latest");
             }}
           >
@@ -52,7 +56,11 @@ export const UserTabs = ({
           {videoSubTabs.map((sub) => (
             <button
               key={sub.key}
-              onClick={() => setActiveVideoTabAction(sub.key as "latest" | "popular" | "oldest")}
+              onClick={() =>
+                setActiveVideoTabAction(
+                  sub.key as "latest" | "popular" | "oldest",
+                )
+              }
               className={`px-3 py-1 text-sm rounded-full border ${
                 activeVideoTab === sub.key
                   ? "bg-black text-white border-black"
