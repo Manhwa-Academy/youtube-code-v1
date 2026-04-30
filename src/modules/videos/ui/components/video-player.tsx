@@ -113,7 +113,20 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         player.removeEventListener("play", handlePlay);
       };
     }, [videoId, onPlay]);
+    useEffect(() => {
+      const player = playerRef.current;
+      if (!player) return;
 
+      if (!trackingEnabled) return;
+      if (!savedProgress || savedProgress <= 0) return;
+
+      // ❗ nếu player đang ở 0 thì update lại
+      if (player.currentTime < 1) {
+        player.currentTime = savedProgress;
+        lastKnownProgress.current = savedProgress;
+        localResumeRef.current = savedProgress;
+      }
+    }, [savedProgress, trackingEnabled]);
     // =========================
     // Resume progress cũ
     // =========================
@@ -126,24 +139,28 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
 
         if (!trackingEnabled) {
           player.currentTime = 0;
-          lastKnownProgress.current = 0;
           hasSeeked.current = true;
           return;
         }
 
-        const duration = Math.floor(player.duration || 0);
-        const resumeAt = localResumeRef.current || 0;
+        const duration = player.duration || 0;
+        if (duration <= 0) return;
 
-        if (resumeAt > 0 && duration > 0) {
-          const watchedPercent = (resumeAt / duration) * 100;
+        // Lấy progress: ưu tiên savedProgress từ DB, fallback localStorage
+        const resumeAt = Math.max(
+          savedProgress || 0,
+          localResumeRef.current || 0,
+        );
 
-          if (watchedPercent < 95) {
-            player.currentTime = resumeAt;
-            lastKnownProgress.current = resumeAt;
-          } else {
-            player.currentTime = 0;
-            lastKnownProgress.current = 0;
-          }
+        // Nếu progress hợp lệ (< 95% video), seek tới đó
+        if (resumeAt > 0 && resumeAt < duration * 0.95) {
+          player.currentTime = resumeAt;
+          lastKnownProgress.current = resumeAt;
+          localResumeRef.current = resumeAt; // đảm bảo sync lại local ref
+        } else {
+          player.currentTime = 0;
+          lastKnownProgress.current = 0;
+          localResumeRef.current = 0;
         }
 
         hasSeeked.current = true;

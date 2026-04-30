@@ -63,7 +63,15 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
       refetchOnWindowFocus: false,
     },
   );
+  const localProgress =
+    typeof window !== "undefined"
+      ? parseInt(
+          localStorage.getItem(`video-${currentVideoId}-progress`) || "0",
+          10,
+        )
+      : 0;
 
+  const finalProgress = Math.max(video.progress || 0, localProgress); // ✅ dùng max để ưu tiên server nếu có
   // 🔹 playlist public
   const { data: playlists } = trpc.playlists.getPublicMixPlaylists.useQuery();
   const playlist = playlists?.find((p) => p.id === playlistId);
@@ -131,7 +139,7 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
           videoId={video.id}
           playbackId={video.muxPlaybackId}
           thumbnailUrl={video.thumbnailUrl}
-          savedProgress={trackingEnabled ? video.progress || 0 : 0}
+          savedProgress={trackingEnabled ? finalProgress : 0}
           trackingEnabled={trackingEnabled}
           autoPlay
           nextVideo={nextVideo}
@@ -207,4 +215,3 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
     </div>
   );
 };
- 
