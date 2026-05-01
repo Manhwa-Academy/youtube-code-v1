@@ -48,7 +48,7 @@ export const videosRouter = createTRPCRouter({
       const { id: userId } = ctx.user;
       const { cursor, limit } = input;
 
-      // Subscriptions của viewer
+      // danh sách creator mà viewer đang subscribe
       const viewerSubscriptions = db.$with("viewer_subscriptions").as(
         db
           .select({
@@ -63,8 +63,9 @@ export const videosRouter = createTRPCRouter({
         .select({
           ...getTableColumns(videos),
           user: users,
-          progress: videoViews.progress, // 🔹 tiến độ xem của viewer
-          viewCount: videos.viewsCount, // 🔹 lấy tổng viewCount từ videos luôn
+          progress: videoViews.progress,
+          viewCount: videos.viewsCount,
+
           likeCount: db.$count(
             videoReactions,
             and(
@@ -72,6 +73,7 @@ export const videosRouter = createTRPCRouter({
               eq(videoReactions.type, "like"),
             ),
           ),
+
           dislikeCount: db.$count(
             videoReactions,
             and(
@@ -93,6 +95,7 @@ export const videosRouter = createTRPCRouter({
         .where(
           and(
             eq(videos.visibility, "public"),
+
             cursor
               ? or(
                   lt(videos.updatedAt, cursor.updatedAt),
@@ -104,24 +107,28 @@ export const videosRouter = createTRPCRouter({
               : undefined,
           ),
         )
-        .orderBy(
-          ...(cursor
-            ? [desc(videos.updatedAt), desc(videos.id)]
-            : [sql`RANDOM()`]),
-        )
+
+        // ✅ FIX QUAN TRỌNG: luôn stable order, KHÔNG RANDOM
+        .orderBy(desc(videos.updatedAt), desc(videos.id))
         .limit(limit + 1);
 
       const hasMore = data.length > limit;
-      const items = hasMore ? data.slice(0, -1) : data;
-      const lastItem = items[items.length - 1];
-      const nextCursor = hasMore
-        ? {
-            id: lastItem.id,
-            updatedAt: lastItem.updatedAt,
-          }
-        : null;
+      const items = hasMore ? data.slice(0, limit) : data;
 
-      return { items, nextCursor };
+      const lastItem = items[items.length - 1];
+
+      const nextCursor =
+        hasMore && lastItem
+          ? {
+              id: lastItem.id,
+              updatedAt: lastItem.updatedAt,
+            }
+          : null;
+
+      return {
+        items,
+        nextCursor,
+      };
     }),
   getManyTrending: baseProcedure
     .input(
@@ -318,11 +325,13 @@ export const videosRouter = createTRPCRouter({
       const { cursor, limit, categoryId, userId } = input;
 
       let viewerId: string | undefined;
+
       if (ctx.clerkUserId) {
         const [user] = await db
           .select()
           .from(users)
           .where(eq(users.clerkId, ctx.clerkUserId));
+
         viewerId = user?.id;
       }
 
@@ -331,7 +340,6 @@ export const videosRouter = createTRPCRouter({
           ...getTableColumns(videos),
           user: users,
           progress: videoViews.progress,
-          // ✅ Sử dụng viewsCount từ videos để đồng bộ
           viewCount: videos.viewsCount,
           likeCount: db.$count(
             videoReactions,
@@ -375,11 +383,7 @@ export const videosRouter = createTRPCRouter({
               : undefined,
           ),
         )
-        .orderBy(
-          ...(cursor
-            ? [desc(videos.updatedAt), desc(videos.id)]
-            : [sql`RANDOM()`]),
-        )
+        .orderBy(desc(videos.updatedAt), desc(videos.id))
         .limit(limit + 1);
 
       const hasMore = data.length > limit;
@@ -509,13 +513,13 @@ export const videosRouter = createTRPCRouter({
         trackingEnabled = user?.trackHistory ?? true;
       }
 
-      // ✅ view tổng vẫn tăng
       await db
         .update(videos)
-        .set({ viewsCount: sql`${videos.viewsCount} + 1` })
+        .set({
+          viewsCount: sql`${videos.viewsCount} + 1`,
+        })
         .where(eq(videos.id, input.videoId));
 
-      // ✅ chỉ lưu lịch sử nếu bật tracking
       if (userId && trackingEnabled) {
         await db
           .insert(videoViews)
@@ -524,10 +528,7 @@ export const videosRouter = createTRPCRouter({
             videoId: input.videoId,
             progress: 0,
           })
-          .onConflictDoUpdate({
-            target: [videoViews.userId, videoViews.videoId],
-            set: { updatedAt: new Date() },
-          });
+          .onConflictDoNothing();
       }
 
       return { success: true };
@@ -562,115 +563,115 @@ export const videosRouter = createTRPCRouter({
 
       return workflowRunId;
     }),
- updateProgress: protectedProcedure
-  .input(
-    z.object({
-      videoId: z.string(),
-      progress: z.number(),
-      isRestart: z.boolean().optional(),
-    }),
-  )
-  .mutation(async ({ ctx, input }) => {
-    const { id: userId } = ctx.user;
+  updateProgress: protectedProcedure
+    .input(
+      z.object({
+        videoId: z.string(),
+        progress: z.number(),
+        isRestart: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
 
-    const [me] = await db.select().from(users).where(eq(users.id, userId));
-    if (!me) throw new TRPCError({ code: "NOT_FOUND" });
+      const [me] = await db.select().from(users).where(eq(users.id, userId));
+      if (!me) throw new TRPCError({ code: "NOT_FOUND" });
 
-    if (!me.trackHistory) {
-      return { success: true };
-    }
+      if (!me.trackHistory) {
+        return { success: true };
+      }
 
-    const [videoInfo] = await db
-      .select({
-        duration: videos.duration,
-      })
-      .from(videos)
-      .where(eq(videos.id, input.videoId));
+      const [videoInfo] = await db
+        .select({
+          duration: videos.duration,
+        })
+        .from(videos)
+        .where(eq(videos.id, input.videoId));
 
-    if (!videoInfo) {
-      throw new TRPCError({ code: "NOT_FOUND" });
-    }
+      if (!videoInfo) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
 
-    const durationSeconds = Math.floor((videoInfo.duration || 0) / 1000);
+      const durationSeconds = Math.floor((videoInfo.duration || 0) / 1000);
 
-    const [existing] = await db
-      .select()
-      .from(videoViews)
-      .where(
-        and(
-          eq(videoViews.userId, userId),
-          eq(videoViews.videoId, input.videoId),
-        ),
-      );
+      const [existing] = await db
+        .select()
+        .from(videoViews)
+        .where(
+          and(
+            eq(videoViews.userId, userId),
+            eq(videoViews.videoId, input.videoId),
+          ),
+        );
 
-    const oldProgress = existing?.progress ?? 0;
-    const newProgress = Math.max(0, Math.floor(input.progress));
+      const oldProgress = existing?.progress ?? 0;
+      const newProgress = Math.max(0, Math.floor(input.progress));
 
-    const wasNearlyCompleted =
-      durationSeconds > 0 && oldProgress >= durationSeconds * 0.85;
+      const wasNearlyCompleted =
+        durationSeconds > 0 && oldProgress >= durationSeconds * 0.85;
 
-    let finalProgress = oldProgress;
+      let finalProgress = oldProgress;
 
-    // ====================================
-    // CASE 1: user bấm restart thủ công
-    // ====================================
-    if (input.isRestart) {
-      finalProgress = 0;
-    }
+      // ====================================
+      // CASE 1: user bấm restart thủ công
+      // ====================================
+      if (input.isRestart) {
+        finalProgress = 0;
+      }
 
-    // ====================================
-    // CASE 2: currentTime=0 giả lúc load
-    // ====================================
-    else if (newProgress === 0 && oldProgress > 5 && !wasNearlyCompleted) {
-      return { success: true };
-    }
+      // ====================================
+      // CASE 2: currentTime=0 giả lúc load
+      // ====================================
+      else if (newProgress === 0 && oldProgress > 5 && !wasNearlyCompleted) {
+        return { success: true };
+      }
 
-    // ====================================
-    // CASE 3: video đã gần/full completed, user replay từ đầu
-    // cho phép tụt xuống
-    // ====================================
-    else if (wasNearlyCompleted && newProgress < oldProgress) {
-      finalProgress = newProgress;
-    }
+      // ====================================
+      // CASE 3: video đã gần/full completed, user replay từ đầu
+      // cho phép tụt xuống
+      // ====================================
+      else if (wasNearlyCompleted && newProgress < oldProgress) {
+        finalProgress = newProgress;
+      }
 
-    // ====================================
-    // CASE 4: xem tiến tới bình thường
-    // ====================================
-    else if (newProgress >= oldProgress) {
-      finalProgress = newProgress;
-    }
+      // ====================================
+      // CASE 4: xem tiến tới bình thường
+      // ====================================
+      else if (newProgress >= oldProgress) {
+        finalProgress = newProgress;
+      }
 
-    // ====================================
-    // CASE 5: jitter nhẹ
-    // ====================================
-    else if (oldProgress - newProgress < 3) {
-      finalProgress = newProgress;
-    }
+      // ====================================
+      // CASE 5: jitter nhẹ
+      // ====================================
+      else if (oldProgress - newProgress < 3) {
+        finalProgress = newProgress;
+      }
 
-    // ====================================
-    // CASE 6: tua lùi mạnh -> bỏ qua
-    // ====================================
-    else {
-      return { success: true };
-    }
+      // ====================================
+      // CASE 6: tua lùi mạnh -> bỏ qua
+      // ====================================
+      else {
+        return { success: true };
+      }
 
-    await db
-      .insert(videoViews)
-      .values({
-        userId,
-        videoId: input.videoId,
-        progress: finalProgress,
-      })
-      .onConflictDoUpdate({
-        target: [videoViews.userId, videoViews.videoId],
-        set: {
+      await db
+        .insert(videoViews)
+        .values({
+          userId,
+          videoId: input.videoId,
           progress: finalProgress,
-          updatedAt: new Date(),
-        },
-      });
+        })
+        .onConflictDoUpdate({
+          target: [videoViews.userId, videoViews.videoId],
+          set: {
+            progress: finalProgress,
+            updatedAt: new Date(),
+          },
+        });
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
   revalidate: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
