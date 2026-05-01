@@ -186,7 +186,7 @@ export const videosRouter = createTRPCRouter({
                 eq(videoViews.videoId, videos.id),
                 eq(videoViews.userId, viewerId),
               )
-            : undefined,
+            : sql`1=0`,
         )
         .where(
           and(
@@ -274,7 +274,7 @@ export const videosRouter = createTRPCRouter({
                 eq(videoViews.videoId, videos.id),
                 eq(videoViews.userId, viewerId),
               )
-            : undefined,
+            : sql`1=0`,
         )
         .where(
           and(
@@ -365,7 +365,7 @@ export const videosRouter = createTRPCRouter({
                 eq(videoViews.videoId, videos.id),
                 eq(videoViews.userId, viewerId),
               )
-            : undefined,
+            : sql`1=0`,
         )
         .where(
           and(
@@ -477,7 +477,7 @@ export const videosRouter = createTRPCRouter({
                 eq(videoViews.videoId, videos.id),
                 eq(videoViews.userId, userId),
               )
-            : undefined,
+            : sql`1=0`,
         )
         .where(eq(videos.id, input.id));
 
