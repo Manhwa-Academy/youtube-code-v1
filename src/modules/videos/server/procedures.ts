@@ -820,6 +820,12 @@ export const videosRouter = createTRPCRouter({
       new_asset_settings: {
         passthrough: userId,
         playback_policy: ["public"],
+        static_renditions: [
+          {
+            resolution: "highest",
+          },
+        ],
+
         input: [
           {
             generated_subtitles: [

@@ -88,6 +88,7 @@ export const VideoTopRow = ({
           <VideoPlaybackMenu
             playerRef={playerRef}
             playbackId={video.muxPlaybackId}
+            assetId={video.muxAssetId}
             playbackRate={playbackRate}
             setPlaybackRate={setPlaybackRate}
             autoNextEnabled={autoNextEnabled}

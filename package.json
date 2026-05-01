@@ -15,7 +15,7 @@
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
     "@hookform/resolvers": "^3.10.0",
-    "@mux/mux-node": "^9.0.1",
+    "@mux/mux-node": "^14.0.1",
     "@mux/mux-player-react": "^3.2.4",
     "@mux/mux-uploader-react": "^1.1.1",
     "@neondatabase/serverless": "0.10.4",

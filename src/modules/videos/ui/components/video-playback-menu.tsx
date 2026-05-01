@@ -23,6 +23,8 @@ import { toast } from "sonner";
 interface Props {
   playerRef: React.RefObject<any>;
   playbackId?: string | null;
+  assetId?: string | null;
+
   autoNextEnabled: boolean;
   setAutoNextEnabledAction: (v: boolean) => void;
   loopEnabled: boolean;
@@ -36,6 +38,7 @@ const SPEED_OPTIONS = [0.5, 1, 1.5, 2];
 export const VideoPlaybackMenu = ({
   playerRef,
   playbackId,
+  assetId,
   autoNextEnabled,
   setAutoNextEnabledAction,
   loopEnabled,
@@ -44,50 +47,42 @@ export const VideoPlaybackMenu = ({
   setPlaybackRate,
 }: Props) => {
   const [downloading, setDownloading] = useState(false);
+
   const handleDownload = async () => {
     if (downloading) return;
 
-    if (!playbackId) {
-      toast.error("Không tìm thấy video");
+    if (!assetId) {
+      toast.error("Không tìm thấy file video");
       return;
     }
 
     setDownloading(true);
 
-    const toastId = toast.loading("Đang xử lý và chuẩn bị tải video...");
+    const toastId = toast.loading("Đang chuẩn bị tải video...");
 
     try {
-      const response = await fetch(
-        `/api/download-video?playbackId=${playbackId}`,
-      );
+      const response = await fetch(`/api/download-video?assetId=${assetId}`, {
+        method: "GET",
+        redirect: "follow",
+      });
 
       if (!response.ok) {
         toast.dismiss(toastId);
-        toast.error("Không thể xử lý video");
+        toast.error("MP4 chưa sẵn sàng hoặc không thể tải");
         return;
       }
 
-      const blob = await response.blob();
-
-      if (blob.size <= 0) {
-        toast.dismiss(toastId);
-        toast.error("Video tải về rỗng");
-        return;
-      }
-
-      const downloadUrl = window.URL.createObjectURL(blob);
+      const finalUrl = response.url;
 
       const a = document.createElement("a");
-      a.href = downloadUrl;
-      a.download = `video-${playbackId}.mp4`;
+      a.href = finalUrl;
+      a.download = `video-${assetId}.mp4`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
 
-      window.URL.revokeObjectURL(downloadUrl);
-
       toast.dismiss(toastId);
-      toast.success("Tải video thành công");
+      toast.success("Đang tải video...");
     } catch (error) {
       console.log(error);
       toast.dismiss(toastId);
