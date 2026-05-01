@@ -16,10 +16,13 @@ import {
   SkipForwardIcon,
   SettingsIcon,
   ClockIcon,
+  DownloadIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Props {
   playerRef: React.RefObject<any>;
+  playbackId?: string | null;
   autoNextEnabled: boolean;
   setAutoNextEnabledAction: (v: boolean) => void;
   loopEnabled: boolean;
@@ -32,6 +35,7 @@ const SPEED_OPTIONS = [0.5, 1, 1.5, 2];
 
 export const VideoPlaybackMenu = ({
   playerRef,
+  playbackId,
   autoNextEnabled,
   setAutoNextEnabledAction,
   loopEnabled,
@@ -39,6 +43,43 @@ export const VideoPlaybackMenu = ({
   playbackRate,
   setPlaybackRate,
 }: Props) => {
+  const handleDownload = async () => {
+    if (!playbackId) {
+      toast.error("Không tìm thấy video");
+      return;
+    }
+
+    const toastId = toast.loading("Đang xử lý và chuẩn bị tải video...");
+
+    try {
+      const res = await fetch(`/api/download-video?playbackId=${playbackId}`);
+
+      if (!res.ok) {
+        toast.dismiss(toastId);
+        toast.error("Không thể tải video");
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `video-${playbackId}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(url);
+
+      toast.dismiss(toastId);
+      toast.success("Tải video thành công");
+    } catch (err) {
+      console.log(err);
+      toast.dismiss(toastId);
+      toast.error("Tải video thất bại");
+    }
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -72,7 +113,6 @@ export const VideoPlaybackMenu = ({
             />
           </div>
         </DropdownMenuItem>
-
         {/* LOOP */}
         <DropdownMenuItem
           className="flex items-center justify-between"
@@ -95,6 +135,14 @@ export const VideoPlaybackMenu = ({
           </div>
         </DropdownMenuItem>
 
+        {/* DOWNLOAD Submenu */}
+        <DropdownMenuItem
+          className="flex items-center gap-2"
+          onClick={handleDownload}
+        >
+          <DownloadIcon className="w-4 h-4 text-gray-500" />
+          <span>Tải video</span>
+        </DropdownMenuItem>
         {/* SPEED Submenu */}
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center justify-between">
