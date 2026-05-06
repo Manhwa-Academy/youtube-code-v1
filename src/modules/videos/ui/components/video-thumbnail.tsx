@@ -35,8 +35,8 @@ export const VideoThumbnail = ({
   const progressPercent =
     totalSeconds > 0 ? Math.min((progress / totalSeconds) * 100, 100) : 0;
 
-  // ✅ xác định video dọc hay ngang
-  const isVertical = videoHeight && videoWidth ? videoHeight > videoWidth : false;
+  // ✅ xác định video dọc hay ngang (tỉ lệ dọc)
+  const isVertical = !!(videoHeight && videoWidth && videoHeight > videoWidth);
   const wrapperClass = isVertical ? "aspect-[9/16]" : "aspect-video";
 
   return (

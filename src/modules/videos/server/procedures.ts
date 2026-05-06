@@ -11,6 +11,7 @@ import {
   lt,
   or,
   lte,
+  gt,
 } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -29,6 +30,7 @@ import {
   videos,
   videoUpdateSchema,
   videoViews,
+  comments,
 } from "@/db/schema";
 
 export const videosRouter = createTRPCRouter({
@@ -280,7 +282,7 @@ export const videosRouter = createTRPCRouter({
         .where(
           and(
             eq(videos.visibility, "public"),
-            lte(videos.duration, 60 * 1000), // chỉ video ≤ 1 phút
+            gt(videos.videoHeight, videos.videoWidth), // Chỉ lấy video có chiều cao > chiều rộng (9:16)
             categoryId ? eq(videos.categoryId, categoryId) : undefined,
             cursor
               ? or(
@@ -390,9 +392,9 @@ export const videosRouter = createTRPCRouter({
 
       const hasMore = data.length > limit;
       const items = hasMore ? data.slice(0, -1) : data;
-      const lastItem = items[items.length - 1];
+      const lastItem = items.length > 0 ? items[items.length - 1] : null;
 
-      const nextCursor = hasMore
+      const nextCursor = (hasMore && lastItem)
         ? {
             id: lastItem.id,
             updatedAt: lastItem.updatedAt,
@@ -464,6 +466,10 @@ export const videosRouter = createTRPCRouter({
               eq(videoReactions.videoId, videos.id),
               eq(videoReactions.type, "dislike"),
             ),
+          ),
+          commentCount: db.$count(
+            comments,
+            eq(comments.videoId, videos.id)
           ),
           viewerReaction: viewerReactions.type,
         })

@@ -56,6 +56,8 @@ export const VideoGridCard = ({
           title={data.title}
           duration={data.duration}
           progress={progress}
+          videoWidth={data.videoWidth ?? undefined}
+          videoHeight={data.videoHeight ?? undefined}
         />
       </Link>
 

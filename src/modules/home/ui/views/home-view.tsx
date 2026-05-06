@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect } from "react";
 import { CategoriesSection } from "../sections/categories-section";
 import { HomeVideosSection } from "../sections/home-videos-section";
 import { HomeShortsSection } from "../sections/home-shorts-section";
@@ -8,6 +11,12 @@ interface HomeViewProps {
 };
 
 export const HomeView = ({ categoryId }: HomeViewProps) => {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("shorts_nav_depth", "0");
+    }
+  }, []);
+
   return (
     <div className="max-w-[2400px] mx-auto mb-10 px-4 pt-2.5 flex flex-col gap-y-6">
       

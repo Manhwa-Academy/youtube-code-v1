@@ -12,12 +12,13 @@ import { VideoTopRow, VideoTopRowSkeleton } from "../components/video-top-row";
 
 interface VideoSectionProps {
   videoId: string;
+  hideInfo?: boolean;
 }
-export const VideoSection = ({ videoId }: VideoSectionProps) => {
+export const VideoSection = ({ videoId, hideInfo }: VideoSectionProps) => {
   return (
     <Suspense fallback={<VideoSectionSkeleton />}>
       <ErrorBoundary fallback={<p>Error</p>}>
-        <VideoSectionSuspense videoId={videoId} />
+        <VideoSectionSuspense videoId={videoId} hideInfo={hideInfo} />
       </ErrorBoundary>
     </Suspense>
   );
@@ -42,7 +43,7 @@ type Playlist = {
   name: string;
   videos: PlaylistVideo[];
 };
-const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
+const VideoSectionSuspense = ({ videoId, hideInfo }: VideoSectionProps) => {
   const params = useSearchParams();
 
   const [showPlaylist, setShowPlaylist] = useState(false);
@@ -176,17 +177,19 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
       </div>
 
       {/* 🧾 INFO */}
-      <VideoTopRow
-        video={video}
-        playerRef={playerRef}
-        autoNextEnabled={autoNextEnabled}
-        setAutoNextEnabledAction={setAutoNextEnabled}
-        loopEnabled={loopEnabled}
-        setLoopEnabledAction={setLoopEnabled}
-      />
+      {!hideInfo && (
+        <VideoTopRow
+          video={video}
+          playerRef={playerRef}
+          autoNextEnabled={autoNextEnabled}
+          setAutoNextEnabledAction={setAutoNextEnabled}
+          loopEnabled={loopEnabled}
+          setLoopEnabledAction={setLoopEnabled}
+        />
+      )}
 
       {/* 📌 PLAYLIST TOGGLE */}
-      {playlist && (
+      {!hideInfo && playlist && (
         <button
           className="text-sm text-blue-500 hover:text-blue-600 font-medium mt-1 self-start"
           onClick={() => setShowPlaylist((prev) => !prev)}
@@ -196,7 +199,7 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
       )}
 
       {/* 📚 PLAYLIST */}
-      {showPlaylist && playlist && (
+      {!hideInfo && showPlaylist && playlist && (
         <div className="w-full mt-2 max-h-72 overflow-y-auto bg-gray-900/90 backdrop-blur-md rounded-lg shadow-xl p-3 border border-gray-700">
           <div className="text-white font-semibold text-sm mb-2">
             {playlist.name}
