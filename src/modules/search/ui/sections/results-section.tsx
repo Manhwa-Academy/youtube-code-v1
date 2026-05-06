@@ -8,19 +8,23 @@ import { DEFAULT_LIMIT } from "@/constants";
 import { InfiniteScroll } from "@/components/infinite-scroll";
 import { VideoRowCard, VideoRowCardSkeleton } from "@/modules/videos/ui/components/video-row-card";
 import { VideoGridCard, VideoGridCardSkeleton } from "@/modules/videos/ui/components/video-grid-card";
+import { UserSearchCard } from "@/modules/users/ui/components/user-search-card";
 
 interface ResultsSectionProps {
   query: string | undefined;
   categoryId: string | undefined;
+  type: "all" | "video" | "shorts" | "channel" | undefined;
+  duration: "any" | "under_3" | "3_to_20" | "over_20" | undefined;
+  uploadDate: "any" | "today" | "this_week" | "this_month" | "this_year" | undefined;
 };
 
 export const ResultsSection = (props: ResultsSectionProps) => {
   return (
     <Suspense 
-      key={`${props.query}-${props.categoryId}`}  
+      key={`${props.query}-${props.categoryId}-${props.type}-${props.duration}-${props.uploadDate}`}  
       fallback={<ResultsSectionSkeleton />}
     >
-      <ErrorBoundary fallback={<p>Error</p>}>
+      <ErrorBoundary fallback={<p className="text-center py-10">Đã xảy ra lỗi khi tìm kiếm.</p>}>
         <ResultsSectionSuspense {...props} />
       </ErrorBoundary>
     </Suspense>
@@ -47,13 +51,29 @@ export const ResultsSectionSkeleton = () => {
 const ResultsSectionSuspense = ({
   query,
   categoryId,
+  type,
+  duration,
+  uploadDate,
 }: ResultsSectionProps) => {
   const [results, resultsQuery] = trpc.search.getMany.useSuspenseInfiniteQuery(
-    { query, categoryId, limit: DEFAULT_LIMIT },
+    { 
+      query, 
+      categoryId, 
+      type,
+      duration,
+      uploadDate,
+      limit: DEFAULT_LIMIT 
+    },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
+
+  const items = results.pages.flatMap((page) => page.items);
+
+  if (items.length === 0) {
+    return <div className="text-center py-20 text-muted-foreground">Không tìm thấy kết quả nào phù hợp.</div>;
+  }
 
   // 🔥 map progress cho mỗi video, default = 0
   const mapVideoWithProgress = (video: any) => ({
@@ -63,31 +83,33 @@ const ResultsSectionSuspense = ({
 
   return (
     <>
-      {/* Mobile / Grid */}
-      <div className="flex flex-col gap-4 gap-y-10 md:hidden">
-        {results.pages
-          .flatMap((page) => page.items)
-          .map((video) => (
-            <VideoGridCard
-              key={video.id}
-              data={mapVideoWithProgress(video)} // 🔥 thêm progress
-            />
-          ))
-        }
-      </div>
+      <div className="flex flex-col gap-4">
+        {items.map((item: any) => {
+          if (item.itemType === "channel") {
+            return (
+              <div key={`channel-${item.id}`} className="w-full">
+                <UserSearchCard data={item} />
+                <hr className="my-4 md:my-6 border-neutral-200 dark:border-neutral-800" />
+              </div>
+            );
+          }
 
-      {/* Desktop / Row */}
-      <div className="hidden flex-col gap-4 md:flex">
-        {results.pages
-          .flatMap((page) => page.items)
-          .map((video) => (
-            <VideoRowCard
-              key={video.id}
-              data={mapVideoWithProgress(video)} // 🔥 thêm progress
-              progress={mapVideoWithProgress(video).progress} // 🔥 truyền riêng cho VideoRowCard
-            />
-          ))
-        }
+          const video = mapVideoWithProgress(item);
+
+          return (
+            <div key={`video-${video.id}`}>
+              {/* Mobile / Grid */}
+              <div className="block md:hidden mb-10">
+                <VideoGridCard data={video} />
+              </div>
+
+              {/* Desktop / Row */}
+              <div className="hidden md:block mb-4">
+                <VideoRowCard data={video} progress={video.progress} />
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <InfiniteScroll
