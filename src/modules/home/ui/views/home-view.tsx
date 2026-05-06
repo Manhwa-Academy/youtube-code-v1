@@ -17,7 +17,7 @@ export const HomeView = ({ categoryId }: HomeViewProps) => {
       <PlaylistsView />
 
       {/* 🎬 Shorts shelf */}
-      <HomeShortsSection />
+      <HomeShortsSection categoryId={categoryId} />
 
       <HomeVideosSection categoryId={categoryId} />
 

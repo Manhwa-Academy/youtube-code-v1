@@ -12,11 +12,15 @@ import {
   VideoShortsCardSkeleton,
 } from "@/modules/videos/ui/components/video-shorts-card";
 
-export const HomeShortsSection = () => {
+interface HomeShortsSectionProps {
+  categoryId?: string;
+};
+
+export const HomeShortsSection = ({ categoryId }: HomeShortsSectionProps) => {
   return (
-    <Suspense fallback={<HomeShortsSectionSkeleton />}>
+    <Suspense key={categoryId} fallback={<HomeShortsSectionSkeleton />}>
       <ErrorBoundary fallback={null}>
-        <HomeShortsSectionSuspense />
+        <HomeShortsSectionSuspense categoryId={categoryId} />
       </ErrorBoundary>
     </Suspense>
   );
@@ -43,13 +47,13 @@ const HomeShortsSectionSkeleton = () => {
   );
 };
 
-const HomeShortsSectionSuspense = () => {
+const HomeShortsSectionSuspense = ({ categoryId }: HomeShortsSectionProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
   const [videos] = trpc.videos.getManyShorts.useSuspenseInfiniteQuery(
-    { limit: 20 },
+    { limit: 20, categoryId },
     { getNextPageParam: (lastPage) => lastPage.nextCursor }
   );
 

@@ -221,6 +221,7 @@ export const videosRouter = createTRPCRouter({
   getManyShorts: baseProcedure
     .input(
       z.object({
+        categoryId: z.string().uuid().nullish(),
         cursor: z
           .object({
             id: z.string().uuid(),
@@ -231,7 +232,7 @@ export const videosRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { cursor, limit } = input;
+      const { cursor, limit, categoryId } = input;
 
       let viewerId: string | undefined;
 
@@ -280,6 +281,7 @@ export const videosRouter = createTRPCRouter({
           and(
             eq(videos.visibility, "public"),
             lte(videos.duration, 60 * 1000), // chỉ video ≤ 1 phút
+            categoryId ? eq(videos.categoryId, categoryId) : undefined,
             cursor
               ? or(
                   lt(videos.viewsCount, cursor.viewCount),
