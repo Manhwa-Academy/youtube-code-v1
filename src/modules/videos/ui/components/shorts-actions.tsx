@@ -162,11 +162,36 @@ export const ShortsActions = ({
       {/* Download */}
       <div className="flex flex-col items-center gap-1">
         <Button
-          onClick={() => {
-            if (video.muxPlaybackId) {
-              window.open(`https://stream.mux.com/${video.muxPlaybackId}/high.mp4`, "_blank");
-            } else {
+          onClick={async () => {
+            if (!video.muxPlaybackId) {
               toast.error("Không tìm thấy tệp tải xuống");
+              return;
+            }
+
+            const downloadUrl = `https://stream.mux.com/${video.muxPlaybackId}/highest.mp4`;
+            
+            try {
+              toast.info("Đang chuẩn bị tệp tải xuống...");
+              
+              // Mở link trong tab mới để trình duyệt tự xử lý (fallback nếu fetch bị chặn CORS)
+              window.open(downloadUrl, "_blank");
+              
+              // Hoặc cố gắng tải trực tiếp nếu muốn (có thể lỗi CORS tùy config của Mux)
+              /*
+              const response = await fetch(downloadUrl);
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `${video.title || "video"}.mp4`;
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(url);
+              document.body.removeChild(a);
+              */
+            } catch (error) {
+              console.error("Download error:", error);
+              toast.error("Không thể tải video trực tiếp. Vui lòng thử lại sau.");
             }
           }}
           size="icon"

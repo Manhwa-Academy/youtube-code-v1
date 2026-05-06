@@ -317,9 +317,15 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
 
         if (!autoNextEnabled) return;
 
-        setCountdown(6);
-        setShowNext(true);
-        setHasRedirected(false);
+        if (isVertical) {
+          setCountdown(0);
+          setShowNext(false);
+          setHasRedirected(false);
+        } else {
+          setCountdown(6);
+          setShowNext(true);
+          setHasRedirected(false);
+        }
       };
 
       player.addEventListener("ended", handleEnded);

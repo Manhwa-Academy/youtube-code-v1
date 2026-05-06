@@ -80,6 +80,7 @@ const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp 
       refetchOnWindowFocus: false,
     },
   );
+  const isVertical = (video.videoHeight || 0) > (video.videoWidth || 0);
   const localProgress =
     typeof window !== "undefined"
       ? parseInt(
@@ -109,7 +110,7 @@ const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp 
   }, [currentVideoId, playlistId]);
 
   const { data: suggestions } = trpc.suggestions.getMany.useQuery(
-    { videoId: currentVideoId, limit: 5, excludeIds: history },
+    { videoId: currentVideoId, limit: 5, excludeIds: history, isShort: isVertical },
     { enabled: !playlistId },
   );
   useEffect(() => {
@@ -150,7 +151,6 @@ const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp 
   if (trackingLoading || trackingEnabled === undefined) {
     return <VideoSectionSkeleton />;
   }
-  const isVertical = (video.videoHeight || 0) > (video.videoWidth || 0);
 
   const playerWrapperClass = isVertical
     ? "aspect-[9/16] max-w-[470px] max-h-[550px] mx-auto"
