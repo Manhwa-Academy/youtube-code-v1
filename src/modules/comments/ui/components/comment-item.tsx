@@ -11,6 +11,8 @@ import {
   ThumbsDownIcon,
   ThumbsUpIcon,
   Trash2Icon,
+  PinIcon,
+  HeartIcon,
 } from "lucide-react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -60,6 +62,34 @@ export const CommentItem = ({
     },
   });
 
+  const pin = trpc.comments.pin.useMutation({
+    onSuccess: () => {
+      toast.success(comment.isPinned ? "Đã bỏ ghim bình luận" : "Đã ghim bình luận");
+      utils.comments.getMany.invalidate({ videoId: comment.videoId });
+    },
+    onError: (error) => {
+      toast.error("Đã xảy ra lỗi");
+      if (error.data?.code === "UNAUTHORIZED") {
+        clerk.openSignIn();
+      }
+    },
+  });
+
+  const heart = trpc.comments.heart.useMutation({
+    onSuccess: () => {
+      utils.comments.getMany.invalidate({ videoId: comment.videoId });
+    },
+    onError: (error) => {
+      toast.error("Đã xảy ra lỗi");
+      if (error.data?.code === "UNAUTHORIZED") {
+        clerk.openSignIn();
+      }
+    },
+  });
+
+  const isVideoOwner = comment.videoOwnerClerkId === userId;
+  const isCommentOwner = comment.user.clerkId === userId;
+
   const like = trpc.commentReactions.like.useMutation({
     onSuccess: () => {
       utils.comments.getMany.invalidate({ videoId: comment.videoId });
@@ -87,6 +117,12 @@ export const CommentItem = ({
 
   return (
     <div>
+      {comment.isPinned && variant === "comment" && (
+        <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground pl-14">
+          <PinIcon className="size-3" />
+          <span>Đã ghim bởi chủ kênh</span>
+        </div>
+      )}
       <div className="flex gap-4">
         <Link prefetch href={`/users/${comment.userId}`}>
           <UserAvatar
@@ -151,6 +187,12 @@ export const CommentItem = ({
               <span className="text-xs text-muted-foreground">
                 {comment.dislikeCount}
               </span>
+              {comment.creatorHearted && (
+                <div className="flex items-center justify-center ml-2 relative">
+                  <UserAvatar size="xs" imageUrl={comment.videoOwnerImageUrl} name={comment.videoOwnerName} />
+                  <HeartIcon className="size-3 fill-red-500 text-red-500 absolute -bottom-1 -right-1 bg-white dark:bg-black rounded-full p-[1px]" />
+                </div>
+              )}
             </div>
             {variant === "comment" && (
               <Button
@@ -172,14 +214,26 @@ export const CommentItem = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => setIsReplyOpen(true)}>
-              <MessageSquareIcon className="size-4" />
+              <MessageSquareIcon className="size-4 mr-2" />
               Trả lời
             </DropdownMenuItem>
-            {comment.user.clerkId === userId && (
+            {isVideoOwner && (
+              <>
+                <DropdownMenuItem onClick={() => pin.mutate({ id: comment.id })}>
+                  <PinIcon className="size-4 mr-2" />
+                  {comment.isPinned ? "Bỏ ghim" : "Ghim"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => heart.mutate({ id: comment.id })}>
+                  <HeartIcon className={cn("size-4 mr-2", comment.creatorHearted && "fill-red-500 text-red-500")} />
+                  {comment.creatorHearted ? "Bỏ thả tim" : "Thả tim"}
+                </DropdownMenuItem>
+              </>
+            )}
+            {(isCommentOwner || isVideoOwner) && (
               <DropdownMenuItem
                 onClick={() => remove.mutate({ id: comment.id })}
               >
-                <Trash2Icon className="size-4" />
+                <Trash2Icon className="size-4 mr-2" />
                 Xóa
               </DropdownMenuItem>
             )}

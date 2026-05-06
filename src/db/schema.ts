@@ -226,6 +226,8 @@ export const comments = pgTable(
       .references(() => videos.id, { onDelete: "cascade" })
       .notNull(),
     value: text("value").notNull(),
+    isPinned: boolean("is_pinned").default(false).notNull(),
+    creatorHearted: boolean("creator_hearted").default(false).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

@@ -15,7 +15,7 @@ import {
 
 import { db } from "@/db";
 import { TRPCError } from "@trpc/server";
-import { commentReactions, comments, users } from "@/db/schema";
+import { commentReactions, comments, users, videos } from "@/db/schema";
 import {
   baseProcedure,
   createTRPCRouter,
@@ -33,16 +33,90 @@ export const commentsRouter = createTRPCRouter({
       const { id } = input;
       const { id: userId } = ctx.user;
 
-      const [deletedComment] = await db
-        .delete(comments)
-        .where(and(eq(comments.id, id), eq(comments.userId, userId)))
-        .returning();
+      const [comment] = await db
+        .select({
+           commentUserId: comments.userId,
+           videoUserId: videos.userId,
+        })
+        .from(comments)
+        .innerJoin(videos, eq(comments.videoId, videos.id))
+        .where(eq(comments.id, id));
 
-      if (!deletedComment) {
+      if (!comment) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
+      if (comment.commentUserId !== userId && comment.videoUserId !== userId) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
+      const [deletedComment] = await db
+        .delete(comments)
+        .where(eq(comments.id, id))
+        .returning();
+
       return deletedComment;
+    }),
+  pin: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ input, ctx }) => {
+      const { id } = input;
+      const { id: userId } = ctx.user;
+
+      const [comment] = await db
+        .select({
+           videoId: comments.videoId,
+           isPinned: comments.isPinned,
+           videoUserId: videos.userId,
+        })
+        .from(comments)
+        .innerJoin(videos, eq(comments.videoId, videos.id))
+        .where(eq(comments.id, id));
+
+      if (!comment) throw new TRPCError({ code: "NOT_FOUND" });
+      if (comment.videoUserId !== userId) throw new TRPCError({ code: "FORBIDDEN" });
+
+      if (comment.isPinned) {
+        const [updatedComment] = await db.update(comments)
+          .set({ isPinned: false })
+          .where(eq(comments.id, id))
+          .returning();
+        return updatedComment;
+      } else {
+        await db.update(comments)
+          .set({ isPinned: false })
+          .where(eq(comments.videoId, comment.videoId));
+
+        const [updatedComment] = await db.update(comments)
+          .set({ isPinned: true })
+          .where(eq(comments.id, id))
+          .returning();
+        return updatedComment;
+      }
+    }),
+  heart: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ input, ctx }) => {
+      const { id } = input;
+      const { id: userId } = ctx.user;
+
+      const [comment] = await db
+        .select({
+           creatorHearted: comments.creatorHearted,
+           videoUserId: videos.userId,
+        })
+        .from(comments)
+        .innerJoin(videos, eq(comments.videoId, videos.id))
+        .where(eq(comments.id, id));
+
+      if (!comment) throw new TRPCError({ code: "NOT_FOUND" });
+      if (comment.videoUserId !== userId) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const [updatedComment] = await db.update(comments)
+        .set({ creatorHearted: !comment.creatorHearted })
+        .where(eq(comments.id, id))
+        .returning();
+      return updatedComment;
     }),
   create: protectedProcedure
     .input(
@@ -178,6 +252,10 @@ export const commentsRouter = createTRPCRouter({
               eq(commentReactions.commentId, comments.id),
             ),
           ),
+          videoOwnerId: videos.userId,
+          videoOwnerClerkId: sql<string>`(SELECT clerk_id FROM users WHERE id = ${videos.userId})`,
+          videoOwnerName: sql<string>`(SELECT name FROM users WHERE id = ${videos.userId})`,
+          videoOwnerImageUrl: sql<string>`(SELECT image_url FROM users WHERE id = ${videos.userId})`,
         })
         .from(comments)
         .where(
@@ -199,9 +277,11 @@ export const commentsRouter = createTRPCRouter({
           ),
         )
         .innerJoin(users, eq(comments.userId, users.id))
+        .innerJoin(videos, eq(comments.videoId, videos.id))
         .leftJoin(viewerReactions, eq(comments.id, viewerReactions.commentId))
         .leftJoin(replies, eq(comments.id, replies.parentId))
         .orderBy(
+          desc(comments.isPinned),
           ...(sortBy === "newest"
             ? [desc(comments.createdAt), desc(comments.id)]
             : [desc(score), desc(comments.createdAt), desc(comments.id)]),
