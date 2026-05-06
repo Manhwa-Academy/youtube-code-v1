@@ -14,7 +14,7 @@ export const HomeLayout = ({ children }: HomeLayoutProps) => {
         <HomeNavbar />
         <div className="flex flex-1 pt-16 overflow-hidden">
           <HomeSidebar />
-          <main className="flex-1 overflow-y-auto bg-background">
+          <main id="main-scroll-container" className="flex-1 overflow-y-auto bg-background">
             {children}
           </main>
         </div>

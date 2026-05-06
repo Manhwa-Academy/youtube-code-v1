@@ -114,8 +114,8 @@ export const videosRouter = createTRPCRouter({
         .orderBy(desc(videos.updatedAt), desc(videos.id))
         .limit(limit + 1);
 
-      const hasMore = data.length > limit;
-      const items = hasMore ? data.slice(0, limit) : data;
+      const hasMore = (data?.length || 0) > limit;
+      const items = hasMore ? data.slice(0, limit) : (data || []);
 
       const lastItem = items[items.length - 1];
 
@@ -207,11 +207,11 @@ export const videosRouter = createTRPCRouter({
         .orderBy(desc(videos.viewsCount), desc(videos.id)) // sắp xếp theo viewsCount tổng
         .limit(limit + 1);
 
-      const hasMore = data.length > limit;
-      const items = hasMore ? data.slice(0, -1) : data;
+      const hasMore = (data?.length || 0) > limit;
+      const items = hasMore ? data.slice(0, -1) : (data || []);
       const lastItem = items[items.length - 1];
 
-      const nextCursor = hasMore
+      const nextCursor = (hasMore && lastItem)
         ? {
             id: lastItem.id,
             viewCount: lastItem.viewCount,
@@ -298,11 +298,11 @@ export const videosRouter = createTRPCRouter({
         .orderBy(desc(videos.viewsCount), desc(videos.id)) // sắp xếp theo tổng viewCount
         .limit(limit + 1);
 
-      const hasMore = data.length > limit;
-      const items = hasMore ? data.slice(0, -1) : data;
+      const hasMore = (data?.length || 0) > limit;
+      const items = hasMore ? data.slice(0, -1) : (data || []);
       const lastItem = items[items.length - 1];
 
-      const nextCursor = hasMore
+      const nextCursor = (hasMore && lastItem)
         ? {
             id: lastItem.id,
             viewCount: lastItem.viewCount,
@@ -390,9 +390,9 @@ export const videosRouter = createTRPCRouter({
         .orderBy(desc(videos.updatedAt), desc(videos.id))
         .limit(limit + 1);
 
-      const hasMore = data.length > limit;
-      const items = hasMore ? data.slice(0, -1) : data;
-      const lastItem = items.length > 0 ? items[items.length - 1] : null;
+      const hasMore = (data?.length || 0) > limit;
+      const items = hasMore ? data.slice(0, -1) : (data || []);
+      const lastItem = (items?.length || 0) > 0 ? items[items.length - 1] : null;
 
       const nextCursor = (hasMore && lastItem)
         ? {

@@ -6,15 +6,34 @@ export const ScrollToTopCharacter = () => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
+    const container = document.getElementById("main-scroll-container");
+    
     const handleScroll = () => {
-      setShow(window.scrollY > 300);
+      if (container) {
+        setShow(container.scrollTop > 300);
+      } else {
+        setShow(window.scrollY > 300);
+      }
     };
+
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    }
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    return () => {
+      if (container) container.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const container = document.getElementById("main-scroll-container");
+    if (container) {
+      container.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   return (
