@@ -12,6 +12,7 @@ import { ShortsInfo } from "../components/shorts-info";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface VideoViewProps {
   videoId: string;
@@ -54,7 +55,8 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
   // Lấy suggestions để xử lý nút "Next" cho Shorts
   const { data: suggestions } = trpc.suggestions.getMany.useQuery({ 
     videoId, 
-    limit: 5 
+    limit: 5,
+    isShort,
   });
 
   const handleNextShort = () => {
@@ -74,16 +76,48 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
     }
   };
 
+  const [loopEnabled, setLoopEnabled] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const saved = localStorage.getItem("loop");
+    return saved === "true";
+  });
+
+  const [autoNextEnabled, setAutoNextEnabled] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const saved = localStorage.getItem("autoNext");
+    return saved === null ? true : saved === "true";
+  });
+
+  const toggleLoop = () => {
+    const newState = !loopEnabled;
+    setLoopEnabled(newState);
+    localStorage.setItem("loop", newState.toString());
+  };
+
+  const toggleAutoNext = () => {
+    const newState = !autoNextEnabled;
+    setAutoNextEnabled(newState);
+    localStorage.setItem("autoNext", newState.toString());
+  };
+
+  const handleNotInterested = () => {
+    toast.success("Đã ẩn video tạm thời");
+    handleNextShort();
+  };
+
   if (isShort) {
     return (
       <div className="flex justify-center pt-4 md:pt-6 min-h-[calc(100vh-80px)] bg-black md:bg-transparent pb-10">
         <div className="flex gap-4 md:gap-6 max-w-full">
           {/* 🎬 Khung trình phát Shorts */}
           <div className="relative aspect-[9/16] h-[75vh] md:h-[82vh] lg:h-[86vh] bg-black rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-neutral-800">
-            <VideoSection videoId={videoId} hideInfo />
+            <VideoSection 
+              videoId={videoId} 
+              hideInfo 
+              loopEnabled={loopEnabled} 
+            />
             
             {/* 📝 Thông tin Overlay (Tên kênh, tiêu đề...) */}
-            {/* Giảm z-index và tăng pb để không đè lên thanh tua của MuxPlayer */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pt-32 pb-12 z-0 pointer-events-none">
               <div className="pointer-events-auto">
                 <ShortsInfo video={video} />
@@ -93,7 +127,15 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
 
           {/* ⚡ Cột nút hành động (Like, Dislike, Comment...) */}
           <div className="flex flex-col justify-end pb-2">
-            <ShortsActions video={video} />
+            <ShortsActions 
+              video={video} 
+              isLooping={loopEnabled}
+              onToggleLoop={toggleLoop}
+              isAutoNext={autoNextEnabled}
+              onToggleAutoNext={toggleAutoNext}
+              onNext={handleNextShort}
+              onNotInterested={handleNotInterested}
+            />
           </div>
 
           {/* ⬆️⬇️ Cột điều hướng riêng biệt */}

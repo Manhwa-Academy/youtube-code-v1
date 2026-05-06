@@ -13,12 +13,17 @@ import { VideoTopRow, VideoTopRowSkeleton } from "../components/video-top-row";
 interface VideoSectionProps {
   videoId: string;
   hideInfo?: boolean;
+  loopEnabled?: boolean;
 }
-export const VideoSection = ({ videoId, hideInfo }: VideoSectionProps) => {
+export const VideoSection = ({ videoId, hideInfo, loopEnabled }: VideoSectionProps) => {
   return (
     <Suspense fallback={<VideoSectionSkeleton />}>
       <ErrorBoundary fallback={<p>Error</p>}>
-        <VideoSectionSuspense videoId={videoId} hideInfo={hideInfo} />
+        <VideoSectionSuspense 
+          videoId={videoId} 
+          hideInfo={hideInfo} 
+          loopEnabled={loopEnabled} 
+        />
       </ErrorBoundary>
     </Suspense>
   );
@@ -43,7 +48,7 @@ type Playlist = {
   name: string;
   videos: PlaylistVideo[];
 };
-const VideoSectionSuspense = ({ videoId, hideInfo }: VideoSectionProps) => {
+const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp }: VideoSectionProps) => {
   const params = useSearchParams();
 
   const [showPlaylist, setShowPlaylist] = useState(false);
@@ -171,7 +176,7 @@ const VideoSectionSuspense = ({ videoId, hideInfo }: VideoSectionProps) => {
           autoPlay
           nextVideo={nextVideo}
           autoNextEnabled={autoNextEnabled}
-          loopEnabled={loopEnabled}
+          loopEnabled={loopEnabledProp ?? loopEnabled}
           isVertical={isVertical}
         />
       </div>
@@ -183,7 +188,7 @@ const VideoSectionSuspense = ({ videoId, hideInfo }: VideoSectionProps) => {
           playerRef={playerRef}
           autoNextEnabled={autoNextEnabled}
           setAutoNextEnabledAction={setAutoNextEnabled}
-          loopEnabled={loopEnabled}
+          loopEnabled={loopEnabledProp ?? loopEnabled}
           setLoopEnabledAction={setLoopEnabled}
         />
       )}

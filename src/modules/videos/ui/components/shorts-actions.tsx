@@ -1,13 +1,31 @@
 "use client";
 
 import { useClerk } from "@clerk/nextjs";
-import { MessageSquareIcon, Share2Icon, ThumbsDownIcon, ThumbsUpIcon, RotateCcwIcon } from "lucide-react";
+import { 
+  MessageSquareIcon, 
+  Share2Icon, 
+  ThumbsDownIcon, 
+  ThumbsUpIcon, 
+  RotateCcwIcon,
+  DownloadIcon,
+  RepeatIcon,
+  MoreVerticalIcon,
+  CheckIcon,
+  PlayIcon,
+  XCircleIcon
+} from "lucide-react";
 import { toast } from "sonner";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { trpc } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { 
   Sheet, 
   SheetContent, 
@@ -20,9 +38,23 @@ import { CommentsSection } from "../sections/comments-section";
 
 interface ShortsActionsProps {
   video: VideoGetOneOutput;
+  isLooping: boolean;
+  onToggleLoop: () => void;
+  isAutoNext: boolean;
+  onToggleAutoNext: () => void;
+  onNext: () => void;
+  onNotInterested: () => void;
 }
 
-export const ShortsActions = ({ video }: ShortsActionsProps) => {
+export const ShortsActions = ({ 
+  video,
+  isLooping,
+  onToggleLoop,
+  isAutoNext,
+  onToggleAutoNext,
+  onNext,
+  onNotInterested,
+}: ShortsActionsProps) => {
   const clerk = useClerk();
   const utils = trpc.useUtils();
 
@@ -127,16 +159,71 @@ export const ShortsActions = ({ video }: ShortsActionsProps) => {
         <span className="text-xs font-medium text-black dark:text-white drop-shadow-sm">Chia sẻ</span>
       </div>
 
-      {/* Remix */}
+      {/* Download */}
       <div className="flex flex-col items-center gap-1">
         <Button
+          onClick={() => {
+            if (video.muxPlaybackId) {
+              window.open(`https://stream.mux.com/${video.muxPlaybackId}/high.mp4`, "_blank");
+            } else {
+              toast.error("Không tìm thấy tệp tải xuống");
+            }
+          }}
           size="icon"
           variant="secondary"
           className="size-12 rounded-full bg-neutral-800/80 hover:bg-neutral-700 text-white shadow-md"
         >
-          <RotateCcwIcon className="size-6" />
+          <DownloadIcon className="size-6" />
         </Button>
-        <span className="text-xs font-medium text-black dark:text-white text-center leading-tight drop-shadow-sm">Phối lại</span>
+        <span className="text-xs font-medium text-black dark:text-white drop-shadow-sm">Tải xuống</span>
+      </div>
+
+      {/* More */}
+      <div className="flex flex-col items-center gap-1">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="icon"
+              variant="secondary"
+              className="size-12 rounded-full bg-neutral-800/80 hover:bg-neutral-700 text-white shadow-md"
+            >
+              <MoreVerticalIcon className="size-6" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-64 bg-neutral-900 border-neutral-800 text-white p-1">
+            <DropdownMenuItem 
+              onClick={onToggleAutoNext}
+              className="focus:bg-neutral-800 focus:text-white cursor-pointer flex items-center justify-between py-3"
+            >
+              <div className="flex items-center gap-3">
+                <PlayIcon className="size-4" />
+                <span>Tự động phát tiếp</span>
+              </div>
+              {isAutoNext && <CheckIcon className="size-4 text-blue-500" />}
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem 
+              onClick={onToggleLoop}
+              className="focus:bg-neutral-800 focus:text-white cursor-pointer flex items-center justify-between py-3"
+            >
+              <div className="flex items-center gap-3">
+                <RepeatIcon className="size-4" />
+                <span>Lặp lại video</span>
+              </div>
+              {isLooping && <CheckIcon className="size-4 text-blue-500" />}
+            </DropdownMenuItem>
+
+            <div className="h-px bg-neutral-800 my-1" />
+
+            <DropdownMenuItem 
+              onClick={onNotInterested}
+              className="focus:bg-neutral-800 focus:text-red-400 text-red-500 cursor-pointer flex items-center gap-3 py-3"
+            >
+              <XCircleIcon className="size-4" />
+              <span>Không quan tâm</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

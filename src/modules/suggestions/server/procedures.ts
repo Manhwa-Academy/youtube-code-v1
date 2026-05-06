@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { eq, and, getTableColumns, not, inArray, sql } from "drizzle-orm";
+import { eq, and, getTableColumns, not, inArray, sql, gt, lte } from "drizzle-orm";
 
 import { db } from "@/db";
 import { TRPCError } from "@trpc/server";
@@ -13,10 +13,17 @@ export const suggestionsRouter = createTRPCRouter({
         videoId: z.string().uuid(),
         limit: z.number().min(1).max(20).default(5),
         excludeIds: z.array(z.string().uuid()).optional(),
+        isShort: z.boolean().optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { videoId, limit, excludeIds = [] } = input;
+      const { videoId, limit, excludeIds = [], isShort } = input;
+
+      const aspectFilter = isShort === undefined 
+        ? undefined 
+        : isShort 
+          ? gt(videos.videoHeight, videos.videoWidth) 
+          : lte(videos.videoHeight, videos.videoWidth);
 
       // 🔍 Lấy video hiện tại
       const [existingVideo] = await db
@@ -77,6 +84,7 @@ export const suggestionsRouter = createTRPCRouter({
         .where(
           and(
             eq(videos.visibility, "public"),
+            aspectFilter, // 🔥 Lọc theo tỉ lệ khung hình
             existingVideo.categoryId
               ? eq(videos.categoryId, existingVideo.categoryId)
               : undefined,
@@ -127,6 +135,7 @@ export const suggestionsRouter = createTRPCRouter({
         .where(
           and(
             eq(videos.visibility, "public"),
+            aspectFilter, // 🔥 Lọc theo tỉ lệ khung hình
             not(inArray(videos.id, excluded)),
           ),
         )
