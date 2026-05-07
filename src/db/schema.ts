@@ -73,6 +73,8 @@ export const postPollOptions = pgTable("post_poll_options", {
   text: text("text"),
   imageUrl: text("image_url"),
   imageKey: text("image_key"),
+  isCorrect: boolean("is_correct").default(false).notNull(),
+  explanation: text("explanation"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

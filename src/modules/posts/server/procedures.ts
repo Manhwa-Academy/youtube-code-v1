@@ -32,6 +32,8 @@ export const postsRouter = createTRPCRouter({
             text: z.string().optional(),
             url: z.string().optional(),
             key: z.string().optional(),
+            isCorrect: z.boolean().optional(),
+            explanation: z.string().optional(),
           })),
         }).optional(),
       })
@@ -74,6 +76,8 @@ export const postsRouter = createTRPCRouter({
             text: opt.text,
             imageUrl: opt.url,
             imageKey: opt.key,
+            isCorrect: opt.isCorrect,
+            explanation: opt.explanation,
           }))
         );
       }

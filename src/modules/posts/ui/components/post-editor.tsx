@@ -76,10 +76,10 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
 
     createPost.mutate({
       content,
-      type: postType === "question" ? "text" : postType,
+      type: postType === "question" ? "poll" : postType,
       images: postType === "image" ? selectedImages : undefined,
-      poll: postType === "poll" ? {
-        type: pollType,
+      poll: (postType === "poll" || postType === "question") ? {
+        type: postType === "question" ? "text" : pollType,
         options: pollOptions.map(opt => ({ text: opt.text, url: opt.imageUrl, key: opt.imageKey })),
       } : undefined,
     });
@@ -179,20 +179,23 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                          </div>
                        ) : (
                          <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
-                            {postType === "question" ? (
-                              <X className="size-4 text-gray-500" />
+                            {postType === "poll" ? (
+                               <X className="size-4 text-gray-500" />
                             ) : (
-                              <div className="w-5 h-5 rounded-full border-2 border-gray-400" />
+                               <div className="w-5 h-5 rounded-full border-2 border-gray-400" />
                             )}
                          </div>
                        )}
                        
                        <div className="flex-1 relative">
                           <Input
-                            placeholder={postType === "question" ? "Thêm lựa chọn" : `Lựa chọn ${index + 1}`}
+                            placeholder={postType === "question" ? `Câu trả lời ${index + 1}` : "Thêm lựa chọn"}
                             value={option.text}
                             onChange={(e) => {
-                              setPollOptions(prev => prev.map(opt => opt.id === option.id ? { ...opt, text: e.target.value } : opt));
+                              const limit = (postType === "poll" && pollType === "image") ? 14 : 65;
+                              if (e.target.value.length <= limit) {
+                                setPollOptions(prev => prev.map(opt => opt.id === option.id ? { ...opt, text: e.target.value } : opt));
+                              }
                             }}
                             className={cn(
                               "bg-transparent border-gray-300 dark:border-neutral-700 h-10 px-0 rounded-none border-t-0 border-x-0 border-b focus-visible:ring-0",
@@ -200,20 +203,19 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                             )}
                           />
                           <span className="absolute right-0 bottom-1 text-[10px] text-gray-500">
-                             0/{postType === "question" ? "65" : "36"}
+                             {option.text.length}/{(postType === "poll" && pollType === "image") ? "14" : "65"}
                           </span>
                        </div>
                        
-                       {postType === "poll" && (
-                         <Button 
-                           variant="ghost" 
-                           size="icon" 
-                           className="size-8 text-gray-500 hover:text-red-500"
-                           onClick={() => removePollOption(option.id)}
-                         >
-                           <Trash2 className="size-4" />
-                         </Button>
-                       )}
+                       <Button 
+                         variant="ghost" 
+                         size="icon" 
+                         className="size-8 text-gray-500 hover:text-red-500"
+                         onClick={() => removePollOption(option.id)}
+                         disabled={pollOptions.length <= 2}
+                       >
+                         <Trash2 className="size-4" />
+                       </Button>
                     </div>
                  </div>
                ))}
@@ -224,8 +226,9 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                     size="sm" 
                     className="text-blue-500 hover:bg-blue-50 px-0"
                     onClick={addPollOption}
+                    disabled={pollOptions.length >= 5}
                   >
-                    {postType === "question" ? "Thêm lựa chọn khác" : "Thêm lựa chọn"}
+                    {postType === "question" ? "Thêm câu trả lời" : "Thêm lựa chọn khác"}
                   </Button>
                   {pollType === "image" && postType === "poll" && (
                     <Button variant="outline" size="sm" className="flex-1 rounded-full">
@@ -337,7 +340,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                   <Button 
                     size="sm" 
                     className="bg-black dark:bg-white text-white dark:text-black rounded-full px-6"
-                    disabled={(!content.trim() && selectedImages.length === 0 && postType !== "poll") || isUploading || createPost.isPending}
+                    disabled={(!content.trim() && selectedImages.length === 0 && postType !== "poll" && postType !== "question") || isUploading || createPost.isPending}
                     onClick={handlePost}
                   >
                     {createPost.isPending ? "Đang đăng..." : "Đăng"}

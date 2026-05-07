@@ -15,7 +15,7 @@ import {
 
 import { db } from "@/db";
 import { TRPCError } from "@trpc/server";
-import { commentReactions, comments, users, videos } from "@/db/schema";
+import { commentReactions, comments, users, videos, posts } from "@/db/schema";
 import {
   baseProcedure,
   createTRPCRouter,
