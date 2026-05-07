@@ -153,16 +153,20 @@ const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp 
   }
 
   const playerWrapperClass = isVertical
-    ? "aspect-[9/16] max-w-[470px] max-h-[550px] mx-auto"
+    ? cn(
+        "aspect-[9/16] mx-auto w-full h-full",
+        !hideInfo && "max-w-[470px] max-h-[550px]",
+      )
     : "aspect-video";
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={cn("flex flex-col gap-4", hideInfo && "h-full gap-0")}>
       {/* 🎬 PLAYER */}
       <div
         className={cn(
           playerWrapperClass,
-          "rounded-xl overflow-hidden relative shadow-lg w-full",
+          "rounded-xl overflow-hidden relative shadow-lg",
+          !hideInfo && "w-full",
         )}
       >
         <VideoPlayer
