@@ -107,10 +107,10 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
 
   if (isShort) {
     return (
-      <div className="flex justify-center pt-4 md:pt-6 min-h-[calc(100vh-80px)] bg-black md:bg-transparent pb-10">
-        <div className="flex gap-4 md:gap-6 max-w-full">
+      <div className="flex justify-center pt-0 md:pt-6 h-[calc(100vh-80px)] md:min-h-[calc(100vh-80px)] bg-black md:bg-transparent pb-0 md:pb-10 overflow-hidden">
+        <div className="flex gap-0 md:gap-6 max-w-full relative h-full">
           {/* 🎬 Khung trình phát Shorts */}
-          <div className="relative aspect-[9/16] h-[75vh] md:h-[82vh] lg:h-[86vh] bg-black rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-neutral-800">
+          <div className="relative aspect-[9/16] h-full md:h-[82vh] lg:h-[86vh] bg-black md:rounded-2xl overflow-hidden shadow-none md:shadow-[0_20px_50px_rgba(0,0,0,0.5)] md:border md:border-neutral-800">
             <VideoSection 
               videoId={videoId} 
               hideInfo 
@@ -123,10 +123,24 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
                 <ShortsInfo video={video} />
               </div>
             </div>
+
+            {/* ⚡ Mobile Actions Overlay (Hidden on Desktop) */}
+            <div className="absolute right-2 bottom-20 md:hidden flex flex-col items-center z-10 scale-90 sm:scale-100 origin-right">
+              <ShortsActions 
+                video={video} 
+                isLooping={loopEnabled}
+                onToggleLoop={toggleLoop}
+                isAutoNext={autoNextEnabled}
+                onToggleAutoNext={toggleAutoNext}
+                onNext={handleNextShort}
+                onNotInterested={handleNotInterested}
+                variant="overlay"
+              />
+            </div>
           </div>
 
-          {/* ⚡ Cột nút hành động (Like, Dislike, Comment...) */}
-          <div className="flex flex-col justify-end pb-2">
+          {/* ⚡ Desktop Actions (Hidden on Mobile) */}
+          <div className="hidden md:flex flex-col justify-end pb-2">
             <ShortsActions 
               video={video} 
               isLooping={loopEnabled}
@@ -135,11 +149,12 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
               onToggleAutoNext={toggleAutoNext}
               onNext={handleNextShort}
               onNotInterested={handleNotInterested}
+              variant="default"
             />
           </div>
 
-          {/* ⬆️⬇️ Cột điều hướng riêng biệt */}
-          <div className="flex flex-col justify-end pb-2 gap-2">
+          {/* ⬆️⬇️ Cột điều hướng riêng biệt (Hidden on Mobile, use swipe/scroll behavior instead) */}
+          <div className="hidden md:flex flex-col justify-end pb-2 gap-2">
             {canGoBack && (
               <Button
                 onClick={handlePrevShort}

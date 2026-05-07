@@ -44,6 +44,7 @@ interface ShortsActionsProps {
   onToggleAutoNext: () => void;
   onNext: () => void;
   onNotInterested: () => void;
+  variant?: "default" | "overlay";
 }
 
 export const ShortsActions = ({ 
@@ -54,6 +55,7 @@ export const ShortsActions = ({
   onToggleAutoNext,
   onNext,
   onNotInterested,
+  variant = "default",
 }: ShortsActionsProps) => {
   const clerk = useClerk();
   const utils = trpc.useUtils();
@@ -82,6 +84,11 @@ export const ShortsActions = ({
     return Intl.NumberFormat("vi-VN", { notation: "compact" }).format(video.likeCount);
   }, [video.likeCount]);
 
+  const labelClass = cn(
+    "text-xs font-medium drop-shadow-sm",
+    variant === "overlay" ? "text-white" : "text-black dark:text-white"
+  );
+
   return (
     <div className="flex flex-col items-center gap-4 py-4">
       {/* Like */}
@@ -98,7 +105,7 @@ export const ShortsActions = ({
         >
           <ThumbsUpIcon className={cn("size-6", video.viewerReaction === "like" && "fill-current animate-likeBounce")} />
         </Button>
-        <span className="text-xs font-medium text-black dark:text-white drop-shadow-sm">{compactLikes}</span>
+        <span className={labelClass}>{compactLikes}</span>
       </div>
 
       {/* Dislike */}
@@ -115,7 +122,7 @@ export const ShortsActions = ({
         >
           <ThumbsDownIcon className={cn("size-6", video.viewerReaction === "dislike" && "fill-current animate-likeBounce")} />
         </Button>
-        <span className="text-xs font-medium text-black dark:text-white drop-shadow-sm">Không thích</span>
+        <span className={labelClass}>Không thích</span>
       </div>
 
       {/* Comments */}
@@ -139,7 +146,7 @@ export const ShortsActions = ({
             </div>
           </SheetContent>
         </Sheet>
-        <span className="text-xs font-medium text-black dark:text-white drop-shadow-sm">{video.commentCount || 0}</span>
+        <span className={labelClass}>{video.commentCount || 0}</span>
       </div>
 
       {/* Share */}
@@ -156,7 +163,7 @@ export const ShortsActions = ({
         >
           <Share2Icon className="size-6" />
         </Button>
-        <span className="text-xs font-medium text-black dark:text-white drop-shadow-sm">Chia sẻ</span>
+        <span className={labelClass}>Chia sẻ</span>
       </div>
 
       {/* Download */}
@@ -200,7 +207,7 @@ export const ShortsActions = ({
         >
           <DownloadIcon className="size-6" />
         </Button>
-        <span className="text-xs font-medium text-black dark:text-white drop-shadow-sm">Tải xuống</span>
+        <span className={labelClass}>Tải xuống</span>
       </div>
 
       {/* More */}

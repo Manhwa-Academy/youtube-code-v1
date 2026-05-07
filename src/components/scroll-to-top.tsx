@@ -40,22 +40,22 @@ export const ScrollToTopCharacter = () => {
     <div>
       {show && (
         <div
-          className="fixed right-4 cursor-pointer z-30 transition-all duration-300 hover:scale-125 bottom-16 sm:bottom-4"
+          className="fixed right-2 cursor-pointer z-0 transition-all duration-300 hover:scale-110 bottom-32 sm:bottom-4 sm:right-4 md:z-30"
           onClick={scrollToTop}
         >
           <img
             src="/characters/char_full.png"
             alt="Nhân vật lên đầu"
-            className="w-34 h-[90px]"
+            className="w-16 sm:w-24 md:w-32 h-auto"
           />
         </div>
       )}
       {!show && (
-        <div className="fixed right-0 z-30 bottom-12 sm:bottom-0">
+        <div className="fixed right-0 z-0 bottom-24 sm:bottom-0 md:z-30">
           <img
             src="/characters/char_peek.png"
             alt="Nhân vật nửa ẩn"
-            className="w-24 h-45 opacity-90"
+            className="w-12 sm:w-20 md:w-24 h-auto opacity-90"
           />
         </div>
       )}
