@@ -107,8 +107,8 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
 
   if (isShort) {
     return (
-      <div className="flex justify-center pt-0 md:pt-6 h-[calc(100vh-80px)] md:min-h-[calc(100vh-80px)] bg-black md:bg-transparent pb-0 md:pb-10 overflow-hidden">
-        <div className="flex gap-0 md:gap-6 max-w-full relative h-full">
+      <div className="flex justify-center items-center pt-2 md:pt-6 h-[calc(100vh-80px)] md:min-h-[calc(100vh-80px)] bg-black md:bg-transparent pb-4 md:pb-10 overflow-hidden">
+        <div className="flex gap-0 md:gap-6 max-w-full relative h-[95%] md:h-full">
           {/* 🎬 Khung trình phát Shorts */}
           <div className="relative aspect-[9/16] h-full md:h-[82vh] lg:h-[86vh] bg-black md:rounded-2xl overflow-hidden shadow-none md:shadow-[0_20px_50px_rgba(0,0,0,0.5)] md:border md:border-neutral-800">
             <VideoSection 
