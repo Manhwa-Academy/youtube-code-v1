@@ -32,6 +32,135 @@ export const playlistVisibility = pgEnum("playlist_visibility", [
   "private",
 ]);
 
+export const postType = pgEnum("post_type", ["text", "image", "poll", "video"]);
+
+export const posts = pgTable("posts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  content: text("content"),
+  type: postType("type").default("text").notNull(),
+  videoId: uuid("video_id").references(() => videos.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const postImages = pgTable("post_images", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  postId: uuid("post_id")
+    .references(() => posts.id, { onDelete: "cascade" })
+    .notNull(),
+  imageUrl: text("image_url").notNull(),
+  imageKey: text("image_key"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const postPolls = pgTable("post_polls", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  postId: uuid("post_id")
+    .references(() => posts.id, { onDelete: "cascade" })
+    .notNull(),
+  type: text("type", { enum: ["text", "image"] }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const postPollOptions = pgTable("post_poll_options", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  pollId: uuid("poll_id")
+    .references(() => postPolls.id, { onDelete: "cascade" })
+    .notNull(),
+  text: text("text"),
+  imageUrl: text("image_url"),
+  imageKey: text("image_key"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const postPollVotes = pgTable(
+  "post_poll_votes",
+  {
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    optionId: uuid("option_id")
+      .references(() => postPollOptions.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({ name: "post_poll_votes_pk", columns: [t.userId, t.optionId] }),
+  ],
+);
+
+export const postReactions = pgTable(
+  "post_reactions",
+  {
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    postId: uuid("post_id")
+      .references(() => posts.id, { onDelete: "cascade" })
+      .notNull(),
+    type: reactionType("type").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({ name: "post_reactions_pk", columns: [t.userId, t.postId] }),
+  ],
+);
+
+export const postRelations = relations(posts, ({ one, many }) => ({
+  user: one(users, { fields: [posts.userId], references: [users.id] }),
+  video: one(videos, { fields: [posts.videoId], references: [videos.id] }),
+  images: many(postImages),
+  poll: one(postPolls, { fields: [posts.id], references: [postPolls.postId] }),
+  reactions: many(postReactions),
+}));
+
+export const postImageRelations = relations(postImages, ({ one }) => ({
+  post: one(posts, { fields: [postImages.postId], references: [posts.id] }),
+}));
+
+export const postPollRelations = relations(postPolls, ({ one, many }) => ({
+  post: one(posts, { fields: [postPolls.postId], references: [posts.id] }),
+  options: many(postPollOptions),
+}));
+
+export const postPollOptionRelations = relations(
+  postPollOptions,
+  ({ one, many }) => ({
+    poll: one(postPolls, {
+      fields: [postPollOptions.pollId],
+      references: [postPolls.id],
+    }),
+    votes: many(postPollVotes),
+  }),
+);
+
+export const postPollVoteRelations = relations(postPollVotes, ({ one }) => ({
+  user: one(users, { fields: [postPollVotes.userId], references: [users.id] }),
+  option: one(postPollOptions, {
+    fields: [postPollVotes.optionId],
+    references: [postPollOptions.id],
+  }),
+}));
+
+export const postReactionRelations = relations(postReactions, ({ one }) => ({
+  user: one(users, { fields: [postReactions.userId], references: [users.id] }),
+  post: one(posts, { fields: [postReactions.postId], references: [posts.id] }),
+}));
+
+export const postSelectSchema = createSelectSchema(posts);
+export const postInsertSchema = createInsertSchema(posts);
+export const postUpdateSchema = createUpdateSchema(posts);
+
+export const postPollOptionSelectSchema = createSelectSchema(postPollOptions);
+export const postPollOptionInsertSchema = createInsertSchema(postPollOptions);
+
+export const postPollSelectSchema = createSelectSchema(postPolls);
+export const postPollInsertSchema = createInsertSchema(postPolls);
+
 // ====================== USERS ======================
 export const users = pgTable(
   "users",

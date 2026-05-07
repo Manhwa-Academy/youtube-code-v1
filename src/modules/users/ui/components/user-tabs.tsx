@@ -6,8 +6,8 @@ interface UserTabsProps {
   userId: string;
   activeVideoTab: "latest" | "popular" | "oldest";
   setActiveVideoTabAction: (tab: "latest" | "popular" | "oldest") => void;
-  activeTab: "home" | "videos" | "shorts" | "playlists";
-  setActiveTabAction: (tab: "home" | "videos" | "shorts" | "playlists") => void;
+  activeTab: "home" | "videos" | "shorts" | "playlists" | "posts";
+  setActiveTabAction: (tab: "home" | "videos" | "shorts" | "playlists" | "posts") => void;
 }
 
 export const UserTabs = ({
@@ -21,6 +21,7 @@ export const UserTabs = ({
     { key: "videos", label: "Video" },
     { key: "shorts", label: "Shorts" },
     { key: "playlists", label: "Danh sách phát" },
+    { key: "posts", label: "Bài đăng" },
   ];
   const videoSubTabs = [
     { key: "latest", label: "Mới nhất" },
@@ -41,7 +42,7 @@ export const UserTabs = ({
             }`}
             onClick={() => {
               setActiveTabAction(
-                tab.key as "home" | "videos" | "shorts" | "playlists",
+                tab.key as "home" | "videos" | "shorts" | "playlists" | "posts",
               );
               if (tab.key === "videos") setActiveVideoTabAction("latest");
             }}

@@ -7,13 +7,14 @@ import { UserTabs } from "../components/user-tabs";
 import { FlameIcon } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 import { PlaylistsSection } from "../sections/playlists-section";
+import { PostsSection } from "@/modules/posts/ui/sections/posts-section";
 interface UserViewProps {
   userId: string;
 }
 
 export const UserView = ({ userId }: UserViewProps) => {
   const [activeTab, setActiveTab] = useState<
-    "home" | "videos" | "shorts" | "playlists"
+    "home" | "videos" | "shorts" | "playlists" | "posts"
   >("home");
   const [activeVideoTab, setActiveVideoTab] = useState<
     "latest" | "popular" | "oldest"
@@ -92,6 +93,7 @@ export const UserView = ({ userId }: UserViewProps) => {
         <VideosSection userId={userId} filterType="shorts" />
       )}
       {activeTab === "playlists" && <PlaylistsSection userId={userId} />}
+      {activeTab === "posts" && <PostsSection userId={userId} />}
     </div>
   );
 };
