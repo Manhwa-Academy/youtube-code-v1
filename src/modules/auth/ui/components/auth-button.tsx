@@ -9,11 +9,26 @@ import { Button } from "@/components/ui/button";
 
 export const AuthButton = () => {
   const clerk = useClerk();
-  const { setTheme, resolvedTheme } = useTheme();
+  const { setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     setMounted(true);
+    
+    // Đồng bộ theme ban đầu
+    const isDark = document.documentElement.classList.contains("dark");
+    setCurrentTheme(isDark ? "dark" : "light");
+
+    // Lắng nghe sự thay đổi class trên html
+    const observer = new MutationObserver(() => {
+      const isDarkNow = document.documentElement.classList.contains("dark");
+      setCurrentTheme(isDarkNow ? "dark" : "light");
+    });
+
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+
+    return () => observer.disconnect();
   }, []);
 
   if (!mounted) {
@@ -50,9 +65,9 @@ export const AuthButton = () => {
               labelIcon={<ClapperboardIcon className="size-4" />}
             />
             <UserButton.Action
-              label={`Giao diện: ${resolvedTheme === "dark" ? "Tối" : "Sáng"}`}
+              label={`Giao diện: ${currentTheme === "dark" ? "Tối" : "Sáng"}`}
               labelIcon={
-                resolvedTheme === "dark" ? (
+                currentTheme === "dark" ? (
                   <MoonIcon className="size-4" />
                 ) : (
                   <SunIcon className="size-4" />
