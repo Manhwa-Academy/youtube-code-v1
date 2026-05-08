@@ -20,15 +20,62 @@
     "yourVideos": "Your videos",
     "likedVideos": "Liked videos",
     "allPlaylists": "All playlists",
-    "downloads": "Downloads"
+    "downloads": "Downloads",
+    "allSubscriptions": "All subscriptions",
+    "subscribedChannels": "Subscriptions"
   },
   "Video": {
     "subscribe": "Subscribe",
     "subscribed": "Subscribed",
     "subscribers": "subscribers",
-    "videos": "videos"
+    "videos": "videos",
+    "views": "views",
+    "noViews": "No views"
   },
   "Home": {
-    "search": "Search"
+    "search": "Search",
+    "all": "All",
+    "noPlaylists": "No playlists found",
+    "endOfFeed": "You've reached the end"
+  },
+  "Studio": {
+    "title": "Video details",
+    "desc": "Manage your video information",
+    "save": "Save",
+    "revalidate": "Refresh",
+    "delete": "Delete",
+    "videoName": "Video title",
+    "videoDesc": "Video description",
+    "videoPlaceholder": "Enter video title",
+    "descPlaceholder": "Enter video description",
+    "thumbnail": "Thumbnail",
+    "category": "Category",
+    "selectCategory": "Select category",
+    "visibility": "Visibility",
+    "public": "Public",
+    "private": "Private",
+    "videoLink": "Video link",
+    "videoStatus": "Video status",
+    "trackStatus": "Subtitle status",
+    "processing": "Processing",
+    "noSubtitle": "No subtitles",
+    "uploadTitle": "Upload video",
+    "uploadDrop": "Drag and drop video here to upload",
+    "uploadHint": "Your video will be private until you publish it",
+    "selectFile": "Select file",
+    "dashboard": "Channel dashboard",
+    "latestPerformance": "Latest video performance",
+    "views": "Views",
+    "avgViewPercent": "Average view percentage",
+    "likes": "Likes",
+    "comments": "Comments",
+    "currentSubscribers": "Current subscribers",
+    "summary28Days": "Summary (Last 28 days)",
+    "watchTime": "Watch time (hours)",
+    "topContent48Hours": "Top content (Last 48 hours)",
+    "goToAnalytics": "Go to channel analytics",
+    "recentSubscribers": "Recent subscribers",
+    "success": "Success",
+    "error": "An error occurred"
   }
 }

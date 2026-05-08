@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { SidebarHeader, SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 
 export const StudioSidebarHeader = () => {
+  const t = useTranslations("AuthButton");
+  const s = useTranslations("Sidebar");
   const { user } = useUser();
   const { state } = useSidebar();
 
@@ -24,14 +27,14 @@ export const StudioSidebarHeader = () => {
   if (state === "collapsed") {
     return (
       <SidebarMenuItem>
-        <SidebarMenuButton tooltip="Hồ sơ của bạn" asChild>
+        <SidebarMenuButton tooltip={t("myProfile")} asChild>
           <Link prefetch href="/users/current">
             <UserAvatar
               imageUrl={user.imageUrl}
-              name={user.fullName ?? "Người dùng"}
+              name={user.fullName ?? "User"}
               size="xs"
             />
-            <span className="text-sm">Hồ sơ</span>
+            <span className="text-sm">{t("myProfile")}</span>
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -43,13 +46,13 @@ export const StudioSidebarHeader = () => {
       <Link prefetch href="/users/current">
         <UserAvatar
           imageUrl={user.imageUrl}
-          name={user.fullName ?? "Người dùng"}
+          name={user.fullName ?? "User"}
           className="size-[112px] hover:opacity-80 transition-opacity"
         />
       </Link>
       <div className="flex flex-col items-center mt-2 gap-y-1">
         <p className="text-sm font-medium">
-          Hồ sơ của bạn
+          {t("myProfile")}
         </p>
         <p className="text-xs text-muted-foreground">
           {user.fullName}

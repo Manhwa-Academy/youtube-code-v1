@@ -20,15 +20,62 @@
     "yourVideos": "Video của bạn",
     "likedVideos": "Video đã thích",
     "allPlaylists": "Tất cả danh sách phát",
-    "downloads": "Nội dung tải xuống"
+    "downloads": "Nội dung tải xuống",
+    "allSubscriptions": "Tất cả kênh đã đăng ký",
+    "subscribedChannels": "Kênh đã đăng ký"
   },
   "Video": {
     "subscribe": "Đăng ký",
     "subscribed": "Đã đăng ký",
     "subscribers": "người đăng ký",
-    "videos": "video"
+    "videos": "video",
+    "views": "lượt xem",
+    "noViews": "Chưa có lượt xem"
   },
   "Home": {
-    "search": "Tìm kiếm"
+    "search": "Tìm kiếm",
+    "all": "Tất cả",
+    "noPlaylists": "Chưa có danh sách kết hợp nào",
+    "endOfFeed": "Bạn đã xem hết rồi"
+  },
+  "Studio": {
+    "title": "Chi tiết video",
+    "desc": "Quản lý thông tin video của bạn",
+    "save": "Lưu",
+    "revalidate": "Làm mới",
+    "delete": "Xóa",
+    "videoName": "Tên video",
+    "videoDesc": "Mô tả video",
+    "videoPlaceholder": "Nhập tiêu đề video",
+    "descPlaceholder": "Nhập mô tả video",
+    "thumbnail": "Ảnh bìa",
+    "category": "Danh mục",
+    "selectCategory": "Chọn danh mục",
+    "visibility": "Quyền riêng tư",
+    "public": "Công khai",
+    "private": "Riêng tư",
+    "videoLink": "Liên kết video",
+    "videoStatus": "Trạng thái video",
+    "trackStatus": "Trạng thái phụ đề",
+    "processing": "Đang xử lý",
+    "noSubtitle": "Không có phụ đề",
+    "uploadTitle": "Tải video lên",
+    "uploadDrop": "Kéo và thả video vào đây để tải lên",
+    "uploadHint": "Video sẽ ở chế độ riêng tư cho đến khi bạn xuất bản",
+    "selectFile": "Chọn tệp",
+    "dashboard": "Tổng quan kênh",
+    "latestPerformance": "Hiệu suất video mới nhất",
+    "views": "Số lượt xem",
+    "avgViewPercent": "Tỷ lệ xem trung bình",
+    "likes": "Số lượt thích",
+    "comments": "Số bình luận",
+    "currentSubscribers": "Số người đăng ký hiện tại",
+    "summary28Days": "Tóm tắt (28 ngày qua)",
+    "watchTime": "Thời gian xem (giờ)",
+    "topContent48Hours": "Nội dung hàng đầu (48 giờ qua)",
+    "goToAnalytics": "Chuyển đến số liệu phân tích",
+    "recentSubscribers": "Người đăng ký gần đây",
+    "success": "Thành công",
+    "error": "Đã xảy ra lỗi"
   }
 }

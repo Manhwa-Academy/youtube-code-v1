@@ -9,6 +9,7 @@ import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ErrorBoundary } from "react-error-boundary";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import {
   CopyCheckIcon,
   CopyIcon,
@@ -24,7 +25,6 @@ import {
 
 import { trpc } from "@/trpc/client";
 import { Input } from "@/components/ui/input";
-import { snakeCaseToTitle } from "@/lib/utils";
 import { videoUpdateSchema } from "@/db/schema";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -35,6 +35,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Form,
@@ -103,7 +104,7 @@ export const FormSectionSkeleton = () => {
           </div>
         </div>
         <div className="flex flex-col gap-y-8 lg:col-span-2">
-          <div className="flex flex-col gap-4 bg-[#F9F9F9] rounded-xl overflow-hidden">
+          <div className="flex flex-col gap-4 bg-muted/40 rounded-xl overflow-hidden">
             <Skeleton className="aspect-video" />
             <div className="px-4 py-4 space-y-6">
               <div className="space-y-2">
@@ -131,6 +132,7 @@ export const FormSectionSkeleton = () => {
 };
 
 const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
+  const t = useTranslations("Studio");
   const router = useRouter();
   const utils = trpc.useUtils();
 
@@ -145,21 +147,21 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     onSuccess: () => {
       utils.studio.getMany.invalidate();
       utils.studio.getOne.invalidate({ id: videoId });
-      toast.success("Cập nhật video thành công");
+      toast.success(t("success"));
     },
     onError: () => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("error"));
     },
   });
 
   const remove = trpc.videos.remove.useMutation({
     onSuccess: () => {
       utils.studio.getMany.invalidate();
-      toast.success("Video đã được xóa");
+      toast.success(t("success"));
       router.push("/studio");
     },
     onError: () => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("error"));
     },
   });
 
@@ -167,34 +169,27 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     onSuccess: () => {
       utils.studio.getMany.invalidate();
       utils.studio.getOne.invalidate({ id: videoId });
-      toast.success("Đã làm mới video");
+      toast.success(t("success"));
     },
     onError: () => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("error"));
     },
   });
 
   const generateDescription = trpc.videos.generateDescription.useMutation({
     onSuccess: () => {
-      toast.success("Đang xử lý...", {
-        description: "Việc này có thể mất một chút thời gian",
-      });
+      toast.success(t("processing"));
     },
     onError: () => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("error"));
     },
   });
   const generateTitle = trpc.videos.generateTitle.useMutation({
-    onMutate: (variables) => {
-      console.log("🚀 Sending request:", variables);
+    onSuccess: () => {
+      toast.success(t("processing"));
     },
-    onSuccess: (data) => {
-      console.log("✅ Workflow triggered:", data);
-      toast.success("Đang xử lý...");
-    },
-    onError: (err) => {
-      console.error("❌ Error:", err);
-      toast.error("Đã xảy ra lỗi");
+    onError: () => {
+      toast.error(t("error"));
     },
   });
 
@@ -202,10 +197,10 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     onSuccess: () => {
       utils.studio.getMany.invalidate();
       utils.studio.getOne.invalidate({ id: videoId });
-      toast.success("Thumbnail đã được khôi phục");
+      toast.success(t("success"));
     },
     onError: () => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("error"));
     },
   });
 
@@ -246,9 +241,9 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold">Chi tiết video</h1>
+              <h1 className="text-2xl font-bold">{t("title")}</h1>
               <p className="text-xs text-muted-foreground">
-                Quản lý thông tin video của bạn
+                {t("desc")}
               </p>
             </div>
             <div className="flex items-center gap-x-2">
@@ -256,7 +251,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                 type="submit"
                 disabled={update.isPending || !form.formState.isDirty}
               >
-                Lưu
+                {t("save")}
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -269,13 +264,15 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     onClick={() => revalidate.mutate({ id: videoId })}
                   >
                     <RotateCcwIcon className="size-4 mr-2" />
-                    Làm mới
+                    {t("revalidate")}
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => remove.mutate({ id: videoId })}
+                    className="text-red-500 focus:text-red-500"
                   >
                     <TrashIcon className="size-4 mr-2" />
-                    Xóa
+                    {t("delete")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -290,14 +287,13 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   <FormItem>
                     <FormLabel>
                       <div className="flex items-center gap-x-2">
-                        Tên video
+                        {t("videoName")}
                         <Button
                           size="icon"
                           variant="outline"
                           type="button"
                           className="rounded-full size-6 [&_svg]:size-3"
                           onClick={() => {
-                            console.log("🔥 Click AI Title", videoId);
                             generateTitle.mutate({ id: videoId });
                           }}
                           disabled={
@@ -313,7 +309,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                       </div>
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Nhập tiêu đề video" />
+                      <Input {...field} placeholder={t("videoPlaceholder")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -326,7 +322,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   <FormItem>
                     <FormLabel>
                       <div className="flex items-center gap-x-2">
-                        Mô tả video
+                        {t("videoDesc")}
                         <Button
                           size="icon"
                           variant="outline"
@@ -353,7 +349,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                         value={field.value ?? ""}
                         rows={10}
                         className="resize-none pr-10"
-                        placeholder="Nhập mô tả video"
+                        placeholder={t("descPlaceholder")}
                       />
                     </FormControl>
                     <FormMessage />
@@ -365,7 +361,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                 control={form.control}
                 render={() => (
                   <FormItem>
-                    <FormLabel>Ảnh bìa</FormLabel>
+                    <FormLabel>{t("thumbnail")}</FormLabel>
                     <FormControl>
                       <div className="p-0.5 border border-dashed border-neutral-400 relative h-[84px] w-[153px] group">
                         <Image
@@ -405,7 +401,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                               }
                             >
                               <RotateCcwIcon className="size-4 mr-1" />
-                              Khôi phục
+                              {t("revalidate")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -419,14 +415,14 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                 name="categoryId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Danh mục</FormLabel>
+                    <FormLabel>{t("category")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value ?? undefined}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Chọn danh mục" />
+                          <SelectValue placeholder={t("selectCategory")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -443,10 +439,10 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
               />
             </div>
             <div className="flex flex-col gap-y-8 lg:col-span-2">
-              <div className="flex flex-col gap-4 bg-[#F9F9F9] rounded-xl overflow-hidden h-fit">
+              <div className="flex flex-col gap-4 bg-muted/40 rounded-xl overflow-hidden h-fit">
                 <div className="aspect-video overflow-hidden relative">
                   <VideoPlayer
-                    videoId={video.id} // ✅ BẮT BUỘC
+                    videoId={video.id}
                     playbackId={video.muxPlaybackId}
                     thumbnailUrl={video.thumbnailUrl}
                   />
@@ -455,7 +451,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   <div className="flex justify-between items-center gap-x-2">
                     <div className="flex flex-col gap-y-1">
                       <p className="text-muted-foreground text-xs">
-                        Liên kết video
+                        {t("videoLink")}
                       </p>
                       <div className="flex items-center gap-x-2">
                         <Link prefetch href={`/videos/${video.id}`}>
@@ -480,12 +476,12 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   <div className="flex justify-between items-center">
                     <div className="flex flex-col gap-y-1">
                       <p className="text-muted-foreground text-xs">
-                        Trạng thái video
+                        {t("videoStatus")}
                       </p>
                       <p className="text-sm">
                         {STATUS_MAP[
                           video.muxStatus as keyof typeof STATUS_MAP
-                        ] || "Đang xử lý"}
+                        ] || t("processing")}
                       </p>
                     </div>
                   </div>
@@ -493,12 +489,12 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   <div className="flex justify-between items-center">
                     <div className="flex flex-col gap-y-1">
                       <p className="text-muted-foreground text-xs">
-                        Trạng thái phụ đề
+                        {t("trackStatus")}
                       </p>
                       <p className="text-sm">
                         {TRACK_STATUS_MAP[
                           video.muxTrackStatus as keyof typeof TRACK_STATUS_MAP
-                        ] || "Không có phụ đề"}
+                        ] || t("noSubtitle")}
                       </p>
                     </div>
                   </div>
@@ -510,27 +506,27 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                 name="visibility"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Quyền riêng tư</FormLabel>
+                    <FormLabel>{t("visibility")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value ?? undefined}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Chọn quyền riêng tư" />
+                          <SelectValue placeholder={t("visibility")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="public">
                           <div className="flex items-center">
                             <Globe2Icon className="size-4 mr-2" />
-                            Công khai
+                            {t("public")}
                           </div>
                         </SelectItem>
                         <SelectItem value="private">
                           <div className="flex items-center">
                             <LockIcon className="size-4 mr-2" />
-                            Riêng tư
+                            {t("private")}
                           </div>
                         </SelectItem>
                       </SelectContent>
