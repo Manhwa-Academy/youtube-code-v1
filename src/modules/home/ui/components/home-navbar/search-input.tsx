@@ -7,6 +7,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { APP_URL } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from "@/components/ui/popover";
+
+import { VirtualKeyboard } from "./virtual-keyboard";
 
 export const SearchInput = () => {
   return (
@@ -128,14 +135,25 @@ const SearchInputSuspense = () => {
           />
           
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-800"
-            >
-              <KeyboardIcon className="size-5 text-muted-foreground" />
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-800"
+                >
+                  <KeyboardIcon className="size-5 text-muted-foreground" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent side="bottom" align="end" className="p-0 border-none bg-transparent shadow-none w-auto">
+                <VirtualKeyboard 
+                  onInput={(char) => setValue((prev) => prev + char)}
+                  onBackspace={() => setValue((prev) => prev.slice(0, -1))}
+                  onClose={() => {}} // Popover handles closing
+                />
+              </PopoverContent>
+            </Popover>
 
             {value && (
               <Button

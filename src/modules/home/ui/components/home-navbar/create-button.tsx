@@ -30,7 +30,7 @@ export const CreateButton = () => {
           </DropdownMenuItem>
         </StudioUploadModal>
         <DropdownMenuItem 
-          onClick={() => router.push("/studio")} 
+          onClick={() => router.push("/users/current?tab=posts")} 
           className="gap-3 cursor-pointer rounded-lg py-2"
         >
           <SquarePenIcon className="size-5" />

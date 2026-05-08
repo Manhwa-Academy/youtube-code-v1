@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { UserSection } from "../sections/user-section";
 import { VideosSection } from "../sections/videos-section";
 import { UserTabs } from "../components/user-tabs";
@@ -8,14 +9,29 @@ import { FlameIcon } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 import { PlaylistsSection } from "../sections/playlists-section";
 import { PostsSection } from "@/modules/posts/ui/sections/posts-section";
+
 interface UserViewProps {
   userId: string;
 }
 
 export const UserView = ({ userId }: UserViewProps) => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const tab = searchParams.get("tab") as "home" | "videos" | "shorts" | "playlists" | "posts" | null;
+
   const [activeTab, setActiveTab] = useState<
     "home" | "videos" | "shorts" | "playlists" | "posts"
-  >("home");
+  >(tab || "home");
+
+  // Sync state with URL when tab changes internally
+  const handleTabChange = (newTab: typeof activeTab) => {
+    setActiveTab(newTab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", newTab);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+
   const [activeVideoTab, setActiveVideoTab] = useState<
     "latest" | "popular" | "oldest"
   >("latest");
@@ -33,7 +49,7 @@ export const UserView = ({ userId }: UserViewProps) => {
         activeVideoTab={activeVideoTab}
         setActiveVideoTabAction={setActiveVideoTab}
         activeTab={activeTab}
-        setActiveTabAction={setActiveTab}
+        setActiveTabAction={handleTabChange}
       />
 
       {/* Homepage */}
