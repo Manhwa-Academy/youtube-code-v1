@@ -65,7 +65,10 @@ export const OfflineHomeSection = () => {
     return shuffled;
   };
 
-  const suggestedVideos = shuffleVideos(videos);
+  // Only suggest if we have more than 1 video, and exclude the very first one if possible
+  const suggestedVideos = videos.length > 1 
+    ? shuffleVideos(videos.slice(1)).slice(0, 10) 
+    : [];
 
   return (
     <div className="space-y-8">
@@ -108,42 +111,46 @@ export const OfflineHomeSection = () => {
         ))}
       </div>
 
-      <div className="flex items-center gap-3 pt-4 border-t border-muted">
-        <PlayCircleIcon className="w-5 h-5 text-red-600" />
-        <h2 className="text-lg font-bold">Video đã tải xuống đề xuất</h2>
-      </div>
-      <p className="text-sm text-muted-foreground -mt-4 italic">
-        (Dựa trên nội dung bạn đã tải về máy)
-      </p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 gap-y-10 opacity-80">
-        {suggestedVideos.map((video) => (
-          <div 
-            key={video.id + "-suggested"} 
-            className="cursor-pointer"
-            onClick={() => router.push("/playlists/download")}
-          >
-            <VideoGridCard
-              data={{
-                id: video.id,
-                title: video.title,
-                thumbnailUrl: video.thumbnailUrl,
-                user: {
-                  name: video.authorName,
-                  imageUrl: video.authorImageUrl || "",
-                  id: "",
-                },
-                viewCount: 0,
-                createdAt: new Date(video.downloadedAt),
-                duration: video.duration,
-                muxStatus: "ready",
-                muxPlaybackId: video.playbackId,
-              } as any}
-              menu={<VideoMenu videoId={video.id} playbackId={video.playbackId} onRemove={() => setVideos(v => v.filter(x => x.id !== video.id))} />}
-            />
+      {suggestedVideos.length > 0 && (
+        <>
+          <div className="flex items-center gap-3 pt-4 border-t border-muted">
+            <PlayCircleIcon className="w-5 h-5 text-red-600" />
+            <h2 className="text-lg font-bold">Video đã tải xuống đề xuất</h2>
           </div>
-        ))}
-      </div>
+          <p className="text-sm text-muted-foreground -mt-4 italic">
+            (Dựa trên nội dung bạn đã tải về máy)
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 gap-y-10 opacity-80">
+            {suggestedVideos.map((video) => (
+              <div 
+                key={video.id + "-suggested"} 
+                className="cursor-pointer"
+                onClick={() => router.push("/playlists/download")}
+              >
+                <VideoGridCard
+                  data={{
+                    id: video.id,
+                    title: video.title,
+                    thumbnailUrl: video.thumbnailUrl,
+                    user: {
+                      name: video.authorName,
+                      imageUrl: video.authorImageUrl || "",
+                      id: "",
+                    },
+                    viewCount: 0,
+                    createdAt: new Date(video.downloadedAt),
+                    duration: video.duration,
+                    muxStatus: "ready",
+                    muxPlaybackId: video.playbackId,
+                  } as any}
+                  menu={<VideoMenu videoId={video.id} playbackId={video.playbackId} onRemove={() => setVideos(v => v.filter(x => x.id !== video.id))} />}
+                />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };
