@@ -23,11 +23,16 @@ import {
 
 import { VideoThumbnail } from "@/modules/videos/ui/components/video-thumbnail";
 
-export const VideosSection = () => {
+interface VideosSectionProps {
+  limit: number;
+  isShorts?: boolean;
+}
+
+export const VideosSection = ({ limit, isShorts }: VideosSectionProps) => {
   return (
-    <Suspense fallback={<VideosSectionSkeleton />}>
+    <Suspense key={`${limit}-${isShorts}`} fallback={<VideosSectionSkeleton />}>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <VideosSectionSuspense />
+        <VideosSectionSuspense limit={limit} isShorts={isShorts} />
       </ErrorBoundary>
     </Suspense>
   );
@@ -88,10 +93,11 @@ const VideosSectionSkeleton = () => {
   );
 };
 
-const VideosSectionSuspense = () => {
+const VideosSectionSuspense = ({ limit, isShorts }: VideosSectionProps) => {
   const [videos, query] = trpc.studio.getMany.useSuspenseInfiniteQuery(
     {
-      limit: DEFAULT_LIMIT,
+      limit,
+      isShorts,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,

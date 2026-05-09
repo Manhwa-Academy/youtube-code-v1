@@ -1,11 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
 
+import { Suspense } from "react";
+
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { AuthButton } from "@/modules/auth/ui/components/auth-button";
-
-import { StudioUploadModal } from "../studio-upload-modal";
+import { CreateButton } from "@/modules/home/ui/components/home-navbar/create-button";
+import { StudioSearch } from "./studio-search";
 
 export const StudioNavbar = () => {
   return  (
@@ -22,11 +24,15 @@ export const StudioNavbar = () => {
           </Link>
         </div>
 
-        {/* Spacer */}
-        <div className="flex-1" />
+        {/* Search Bar */}
+        <div className="flex-1 flex justify-center max-w-[720px] mx-auto">
+          <Suspense fallback={<div className="w-full max-w-[600px] h-10 bg-neutral-900 rounded-full animate-pulse" />}>
+            <StudioSearch />
+          </Suspense>
+        </div>
 
         <div className="flex-shrink-0 items-center flex gap-4">
-          <StudioUploadModal />
+          <CreateButton />
           <AuthButton />
         </div>
       </div>

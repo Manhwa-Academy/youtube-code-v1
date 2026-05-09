@@ -140,12 +140,6 @@ const itemsWithAvgView = await Promise.all(
 
 ### 🔴 Ưu tiên cao — Nên làm ngay
 
-#### 1. Hệ Thống Thông Báo (Notifications)
-- Thông báo khi có người subscribe, bình luận, like video
-- Real-time notifications bằng WebSocket hoặc Server-Sent Events
-- Bell icon trên navbar với badge count
-- Trang quản lý thông báo
-
 #### 2. Trang Số Liệu Phân Tích (Analytics Page)
 - Route `/studio/analytics` đã có trong sidebar nhưng chưa build
 - Biểu đồ lượt xem theo thời gian (dùng Recharts — đã install)

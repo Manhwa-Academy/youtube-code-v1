@@ -33,7 +33,7 @@ import { CommentsGetManyOutput } from "../../types";
 
 interface CommentItemProps {
   comment: CommentsGetManyOutput["items"][number];
-  variant?: "reply" | "comment";
+  variant?: "reply" | "comment" | "studio";
 }
 
 export const CommentItem = ({

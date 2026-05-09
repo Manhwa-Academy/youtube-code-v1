@@ -94,7 +94,7 @@ export const postsRouter = createTRPCRouter({
   getMany: baseProcedure
     .input(
       z.object({
-        userId: z.string().uuid(),
+        userId: z.string(),
         status: z.enum(["published", "scheduled", "archived"]).default("published"),
         cursor: z
           .object({
@@ -103,11 +103,25 @@ export const postsRouter = createTRPCRouter({
           })
           .nullish(),
         limit: z.number().min(1).max(100),
+        direction: z.string().optional(),
       })
     )
     .query(async ({ input, ctx }) => {
-      const { userId, status, cursor, limit } = input;
+      const { userId: inputUserId, status, cursor, limit } = input;
       
+      let targetUserId = inputUserId;
+
+      // Nếu inputUserId là Clerk ID, tìm UUID tương ứng
+      if (inputUserId.startsWith("user_")) {
+        const [dbUser] = await db
+          .select()
+          .from(users)
+          .where(eq(users.clerkId, inputUserId));
+        
+        if (!dbUser) throw new TRPCError({ code: "NOT_FOUND" });
+        targetUserId = dbUser.id;
+      }
+
       let viewerId: string | undefined;
       if (ctx.clerkUserId) {
         const [user] = await db
@@ -143,7 +157,7 @@ export const postsRouter = createTRPCRouter({
         .leftJoin(videos, eq(posts.videoId, videos.id))
         .where(
           and(
-            eq(posts.userId, userId),
+            eq(posts.userId, targetUserId),
             status === "published" 
               ? or(isNull(posts.scheduledAt), lte(posts.scheduledAt, now))
               : status === "scheduled"

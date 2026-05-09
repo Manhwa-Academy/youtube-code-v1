@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { eq, and, or, lt, desc, getTableColumns } from "drizzle-orm";
+import { eq, and, or, lt, gt, lte, isNull, desc, getTableColumns } from "drizzle-orm";
 import {
   subscriptions,
   comments,
@@ -8,6 +8,11 @@ import {
   videoReactions,
   videos,
   videoViews,
+  posts,
+  postImages,
+  postPolls,
+  postPollOptions,
+  postReactions,
 } from "@/db/schema";
 import { db } from "@/db";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
@@ -85,11 +90,20 @@ export const studioRouter = createTRPCRouter({
           .object({ id: z.string().uuid(), updatedAt: z.date() })
           .nullish(),
         limit: z.number().min(1).max(100),
+        isShorts: z.boolean().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { cursor, limit } = input;
+      const { cursor, limit, isShorts } = input;
       const { id: userId } = ctx.user;
+
+      // Lọc theo loại video (Shorts vs Regular)
+      const typeFilter = isShorts 
+        ? gt(videos.videoHeight, videos.videoWidth)
+        : or(
+            lte(videos.videoHeight, videos.videoWidth),
+            and(isNull(videos.videoHeight), isNull(videos.videoWidth))
+          );
 
       // Lấy video và thống kê
       const data = await db
@@ -109,6 +123,7 @@ export const studioRouter = createTRPCRouter({
         .where(
           and(
             eq(videos.userId, userId),
+            typeFilter,
             cursor
               ? or(
                   lt(videos.updatedAt, cursor.updatedAt),
@@ -150,5 +165,60 @@ export const studioRouter = createTRPCRouter({
         : null;
 
       return { items: itemsWithAvgView, nextCursor };
+    }),
+
+  getPost: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+      const { id } = input;
+
+      const [post] = await db
+        .select({
+          ...getTableColumns(posts),
+          likeCount: db.$count(
+            postReactions,
+            and(eq(postReactions.postId, posts.id), eq(postReactions.type, "like"))
+          ),
+          commentCount: db.$count(
+            comments,
+            eq(comments.postId, posts.id)
+          ),
+        })
+        .from(posts)
+        .where(and(eq(posts.id, id), eq(posts.userId, userId)));
+
+      if (!post) throw new TRPCError({ code: "NOT_FOUND" });
+
+      // Lấy images
+      const images = await db
+        .select()
+        .from(postImages)
+        .where(eq(postImages.postId, post.id));
+
+      // Lấy poll
+      const [poll] = await db
+        .select()
+        .from(postPolls)
+        .where(eq(postPolls.postId, post.id));
+
+      let pollWithOptions = null;
+      if (poll) {
+        const options = await db
+          .select()
+          .from(postPollOptions)
+          .where(eq(postPollOptions.pollId, poll.id));
+        
+        pollWithOptions = {
+          ...poll,
+          options,
+        };
+      }
+
+      return {
+        ...post,
+        images,
+        poll: pollWithOptions,
+      };
     }),
 });

@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/sidebar";
 
 import { StudioSidebarHeader } from "./studio-sidebar-header";
+import { PostDetailsSidebar } from "./post-details-sidebar";
+import { VideoDetailsSidebar } from "./video-details-sidebar";
 
 const menuItems = [
   {
@@ -48,44 +50,52 @@ const menuItems = [
 export const StudioSidebar = () => {
   const pathname = usePathname();
 
+  const isPostDetails = pathname.includes("/studio/posts/");
+  const isVideoDetails = pathname.includes("/studio/videos/");
+
   return (
     <Sidebar className="pt-16 z-40" collapsible="icon">
       <SidebarContent className="bg-background">
-        <SidebarGroup>
-          <SidebarMenu>
-            <StudioSidebarHeader />
+        {isPostDetails && <PostDetailsSidebar />}
+        {isVideoDetails && <VideoDetailsSidebar />}
+        
+        {!isPostDetails && !isVideoDetails && (
+          <SidebarGroup>
+            <SidebarMenu>
+              <StudioSidebarHeader />
 
-            {menuItems.map((item) => {
-              const Icon = item.icon;
+              {menuItems.map((item) => {
+                const Icon = item.icon;
 
-              return (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    isActive={pathname === item.href}
-                    tooltip={item.label}
-                    asChild
-                  >
-                    <Link prefetch href={item.href}>
-                      <Icon className="size-5" />
-                      <span className="text-sm">{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );
-            })}
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      isActive={pathname === item.href}
+                      tooltip={item.label}
+                      asChild
+                    >
+                      <Link prefetch href={item.href}>
+                        <Icon className="size-5" />
+                        <span className="text-sm">{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
 
-            <Separator />
+              <Separator />
 
-            <SidebarMenuItem>
-              <SidebarMenuButton tooltip="Thoát Studio" asChild>
-                <Link prefetch href="/">
-                  <LogOutIcon className="size-5" />
-                  <span className="text-sm">Thoát Studio</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Thoát Studio" asChild>
+                  <Link prefetch href="/">
+                    <LogOutIcon className="size-5" />
+                    <span className="text-sm">Thoát Studio</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );
