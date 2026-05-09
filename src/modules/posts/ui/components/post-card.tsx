@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { formatDistanceToNow, format, isAfter } from "date-fns";
 import { vi } from "date-fns/locale";
+import Link from "next/link";
 import { UserAvatar } from "@/components/user-avatar";
 
 import { Button } from "@/components/ui/button";
@@ -80,10 +81,14 @@ export const PostCard = ({ post }: PostCardProps) => {
   return (
     <div className="border border-gray-200 dark:border-neutral-800 rounded-xl p-4 bg-white dark:bg-neutral-900 shadow-sm hover:border-gray-300 transition-colors">
        <div className="flex gap-3">
-          <UserAvatar name={post.user.name} imageUrl={post.user.imageUrl} size="sm" />
+          <Link href={`/users/${post.user.id}`}>
+            <UserAvatar name={post.user.name} imageUrl={post.user.imageUrl} size="sm" />
+          </Link>
           <div className="flex-1">
              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-semibold">{post.user.name}</span>
+                <Link href={`/users/${post.user.id}`} className="hover:opacity-70 transition-opacity">
+                   <span className="text-sm font-semibold">{post.user.name}</span>
+                </Link>
                 <span className="text-[11px] text-muted-foreground">
                    {post.scheduledAt && isAfter(new Date(post.scheduledAt), new Date()) ? (
                       `Đã lên lịch đăng vào ${format(new Date(post.scheduledAt), "HH:mm d 'thg' M, yyyy", { locale: vi })} (giờ địa phương)`

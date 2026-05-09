@@ -24,15 +24,15 @@ import {
 
 const items = [
   {
-    title: "Kênh của bạn",
-    url: "/users/current",
-    icon: UserSquare2Icon,
-    auth: true,
-  },
-  {
     title: "Thông báo",
     url: "/notifications",
     icon: BellIcon,
+    auth: true,
+  },
+  {
+    title: "Kênh của bạn",
+    url: "/users/current",
+    icon: UserSquare2Icon,
     auth: true,
   },
   {

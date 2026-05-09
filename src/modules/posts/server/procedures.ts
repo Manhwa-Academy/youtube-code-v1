@@ -253,6 +253,89 @@ export const postsRouter = createTRPCRouter({
       return { items: postsWithData, nextCursor };
     }),
 
+  getOne: baseProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+
+      let viewerId: string | undefined;
+      if (ctx.clerkUserId) {
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.clerkId, ctx.clerkUserId));
+        viewerId = user?.id;
+      }
+
+      const [post] = await db
+        .select({
+          ...getTableColumns(posts),
+          user: users,
+          video: videos,
+          likeCount: db.$count(
+            postReactions,
+            and(eq(postReactions.postId, posts.id), eq(postReactions.type, "like"))
+          ),
+          dislikeCount: db.$count(
+            postReactions,
+            and(eq(postReactions.postId, posts.id), eq(postReactions.type, "dislike"))
+          ),
+          commentCount: db.$count(
+            comments,
+            eq(comments.postId, posts.id)
+          ),
+        })
+        .from(posts)
+        .innerJoin(users, eq(posts.userId, users.id))
+        .leftJoin(videos, eq(posts.videoId, videos.id))
+        .where(eq(posts.id, id));
+
+      if (!post) throw new TRPCError({ code: "NOT_FOUND" });
+
+      // Fetch images
+      const images = await db.select().from(postImages).where(eq(postImages.postId, post.id));
+
+      // Fetch poll
+      const [poll] = await db.select().from(postPolls).where(eq(postPolls.postId, post.id));
+      
+      let pollWithSelection = null;
+      if (poll) {
+        const options = await db.select().from(postPollOptions).where(eq(postPollOptions.pollId, poll.id));
+        
+        const optionsWithData = await Promise.all(options.map(async (opt) => {
+          const voteCount = await db.$count(postPollVotes, eq(postPollVotes.optionId, opt.id));
+          const hasVoted = viewerId 
+            ? (await db.select().from(postPollVotes).where(and(eq(postPollVotes.userId, viewerId), eq(postPollVotes.optionId, opt.id)))).length > 0
+            : false;
+          
+          return {
+            ...opt,
+            voteCount,
+            viewerVoted: hasVoted,
+          };
+        }));
+
+        pollWithSelection = {
+          ...poll,
+          options: optionsWithData,
+        };
+      }
+
+      // Fetch viewer reaction
+      let viewerReaction = null;
+      if (viewerId) {
+        const [reaction] = await db.select().from(postReactions).where(and(eq(postReactions.userId, viewerId), eq(postReactions.postId, post.id)));
+        viewerReaction = reaction?.type || null;
+      }
+
+      return {
+        ...post,
+        images,
+        poll: pollWithSelection,
+        viewerReaction,
+      };
+    }),
+
   removeMany: protectedProcedure
     .input(z.object({ ids: z.array(z.string().uuid()) }))
     .mutation(async ({ ctx, input }) => {

@@ -8,7 +8,8 @@ import {
   MessageSquareIcon,
   BarChart3Icon,
   ClapperboardIcon,
-  TypeIcon
+  TypeIcon,
+  ExternalLinkIcon
 } from "lucide-react";
 
 import {
@@ -59,7 +60,7 @@ export const VideoDetailsSidebar = () => {
         </SidebarMenuItem>
 
         <div className="px-2 py-4">
-          <div className="relative aspect-video bg-neutral-800 rounded-md flex items-center justify-center border border-neutral-700 overflow-hidden mb-2">
+          <div className="relative aspect-video bg-neutral-800 rounded-md flex items-center justify-center border border-neutral-700 overflow-hidden mb-2 group/thumbnail">
             {video.thumbnailUrl ? (
               <img 
                 src={video.thumbnailUrl} 
@@ -69,6 +70,16 @@ export const VideoDetailsSidebar = () => {
             ) : (
               <ClapperboardIcon className="size-8 text-neutral-500" />
             )}
+            <Link 
+              href={`/videos/${videoId}`} 
+              target="_blank"
+              className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover/thumbnail:opacity-100 transition-opacity gap-y-1"
+            >
+              <ExternalLinkIcon className="size-5 text-white" />
+              <span className="text-[10px] text-white font-medium px-2 py-0.5 bg-black/40 rounded-sm">
+                Xem video trên YouTube
+              </span>
+            </Link>
           </div>
           <div className="space-y-1">
             <p className="text-xs text-neutral-400 font-medium">Video của bạn</p>
