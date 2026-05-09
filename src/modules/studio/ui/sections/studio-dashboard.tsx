@@ -3,59 +3,69 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/trpc/client";
 import { EyeIcon, ThumbsUpIcon, MessageCircleIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { format, formatDistanceToNow } from "date-fns";
+import { vi } from "date-fns/locale";
+import Link from "next/link";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const StudioDashboardSkeleton = () => {
   return (
-    <div className="flex flex-col lg:flex-row gap-6 w-full min-h-screen">
-      <Card className="w-full lg:w-[450px] lg:h-[500px] shadow-md rounded-lg flex-shrink-0">
-        <CardHeader>
-          <Skeleton className="h-7 w-3/4" />
-        </CardHeader>
-        <CardContent className="space-y-4 p-4">
-          <div className="flex gap-4 items-start">
-            <Skeleton className="w-40 h-24 rounded flex-shrink-0" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-5 w-full" />
-              <Skeleton className="h-5 w-1/2" />
-            </div>
-          </div>
-          <div className="mt-2 grid grid-cols-2 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="space-y-2">
-                <Skeleton className="h-3 w-20" />
-                <Skeleton className="h-5 w-16" />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex flex-col gap-6 w-full lg:max-w-[400px]">
-        <Card className="shadow-md rounded-lg flex-1">
-          <CardHeader>
-            <Skeleton className="h-6 w-1/2" />
-          </CardHeader>
+    <div className="flex flex-col xl:flex-row gap-6 w-full min-h-screen">
+      {/* CỘT TRÁI SKELETON */}
+      <div className="flex flex-col gap-6 w-full xl:w-[500px] flex-shrink-0">
+        {/* Latest Video Skeleton */}
+        <Card className="shadow-md rounded-lg overflow-hidden">
+          <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
           <CardContent className="space-y-4">
-            <Skeleton className="h-8 w-1/4" />
+            <Skeleton className="aspect-video w-full rounded-md" />
+            <Skeleton className="h-5 w-full" />
+            <div className="grid grid-cols-2 gap-4">
+               {Array.from({ length: 4 }).map((_, i) => (
+                 <div key={i} className="space-y-2">
+                   <Skeleton className="h-3 w-1/2" />
+                   <Skeleton className="h-6 w-3/4" />
+                 </div>
+               ))}
+            </div>
+          </CardContent>
+        </Card>
+        {/* Latest Post Skeleton */}
+        <Card className="shadow-md rounded-lg overflow-hidden">
+          <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-2">
+               <Skeleton className="size-6 rounded-full" />
+               <Skeleton className="h-4 w-24" />
+            </div>
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="aspect-video w-full rounded-md" />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* CỘT PHẢI SKELETON */}
+      <div className="flex flex-col gap-6 flex-1 min-w-0">
+        <Card className="shadow-md rounded-lg">
+          <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-10 w-1/4" />
+            <Skeleton className="h-20 w-full" />
           </CardContent>
         </Card>
         <Card className="shadow-md rounded-lg flex-1">
-          <CardHeader>
-            <Skeleton className="h-6 w-1/3" />
-          </CardHeader>
+          <CardHeader><Skeleton className="h-6 w-1/3" /></CardHeader>
           <CardContent className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex gap-3">
-                <Skeleton className="w-10 h-10 rounded" />
-                <div className="flex-1 space-y-1">
-                  <Skeleton className="h-3 w-1/2" />
-                  <Skeleton className="h-4 w-full" />
-                </div>
-              </div>
+               <div key={i} className="flex gap-3">
+                 <Skeleton className="size-10 rounded" />
+                 <div className="flex-1 space-y-2">
+                    <Skeleton className="h-3 w-1/2" />
+                    <Skeleton className="h-4 w-full" />
+                 </div>
+               </div>
             ))}
           </CardContent>
         </Card>
@@ -65,174 +75,237 @@ export const StudioDashboardSkeleton = () => {
 };
 
 export const StudioDashboard = () => {
-  const { data, isLoading } = trpc.studio.getMany.useQuery({ limit: 10 });
-  const { data: statsData } = trpc.studio.getStats.useQuery();
+  const { data: videoData, isLoading: isVideosLoading } = trpc.studio.getMany.useQuery({ limit: 10 });
+  const { data: statsData, isLoading: isStatsLoading } = trpc.studio.getStats.useQuery();
 
-  if (isLoading) return <StudioDashboardSkeleton />;
-  if (!data || !data.items || data.items.length === 0)
-    return <div>Không có dữ liệu video</div>;
+  if (isVideosLoading || isStatsLoading) return <StudioDashboardSkeleton />;
+  if (!videoData || !videoData.items)
+    return <div>Không có dữ liệu</div>;
 
-  // Video mới nhất
-  const latestVideo = data.items[0];
-
-  // Tổng lượt xem
-  const totalViews = data.items.reduce(
-    (acc, v) => acc + (v.viewsCount || 0),
-    0,
-  );
-
-  // Tỷ lệ xem trung bình cho video mới nhất
-  const averageViewPercent = latestVideo.averageViewPercent ?? 0;
+  const latestVideo = videoData.items[0];
+  const totalViews = videoData.items.reduce((acc, v) => acc + (v.viewsCount || 0), 0);
+  const averageViewPercent = latestVideo?.averageViewPercent ?? 0;
+  const latestPost = statsData?.latestPost;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 w-full min-h-screen">
-      {/* Card video mới nhất */}
-      <Card className="w-full lg:w-[450px] lg:h-[500px] shadow-md rounded-lg flex-shrink-0">
-        <CardHeader>
-          <CardTitle>Hiệu suất video ngắn mới nhất trên YouTube</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 p-2">
-          {/* Thumbnail + Title */}
-          <div className="flex gap-4 items-start">
-            <img
-              src={latestVideo.thumbnailUrl || "/fallback-thumbnail.jpg"}
-              alt={latestVideo.title || "Video"}
-              className="w-40 h-24 rounded object-cover"
-            />
-            <div className="flex-1 flex flex-col justify-between">
-              <div className="font-semibold line-clamp-2">
-                {latestVideo.title || "Không có tiêu đề"}
+    <div className="flex flex-col xl:flex-row gap-6 w-full min-h-screen">
+      {/* CỘT TRÁI: Video & Bài đăng mới nhất */}
+      <div className="flex flex-col gap-6 w-full xl:w-[500px] flex-shrink-0">
+        {/* Card video mới nhất */}
+        {latestVideo && (
+          <Card className="shadow-md rounded-lg overflow-hidden border-neutral-200 dark:border-neutral-800">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-bold">Hiệu suất của video mới nhất</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="relative aspect-video rounded-md overflow-hidden bg-neutral-100 dark:bg-neutral-800 group cursor-pointer">
+                <img
+                  src={latestVideo.thumbnailUrl || "/fallback-thumbnail.jpg"}
+                  alt={latestVideo.title}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                   <Link href={`/studio/videos/${latestVideo.id}`} className="px-4 py-2 bg-white text-black text-sm font-bold rounded-full shadow-lg">
+                      CHI TIẾT VIDEO
+                   </Link>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Stats chi tiết: mỗi chỉ số xuống dòng */}
-          <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-600">
-            <div className="flex flex-col">
-              <span className="text-gray-400">Số lượt xem</span>
-              <span className="flex items-center gap-1 font-medium">
-                <EyeIcon className="w-4 h-4" /> {latestVideo.viewsCount || 0}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-gray-400">Tỷ lệ xem trung bình</span>
-              <span className="font-medium">{averageViewPercent}%</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-gray-400">Số lượt thích</span>
-              <span className="flex items-center gap-1 font-medium">
-                <ThumbsUpIcon className="w-4 h-4" />{" "}
-                {latestVideo.likeCount || 0}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-gray-400">Số bình luận</span>
-              <span className="flex items-center gap-1 font-medium">
-                <MessageCircleIcon className="w-4 h-4" />{" "}
-                {latestVideo.commentCount || 0}
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold line-clamp-2">{latestVideo.title}</p>
+              </div>
 
-      {/* Column bên phải: Tổng quan + Bình luận + Người đăng ký */}
-      <div className="flex flex-col gap-6 w-full lg:max-w-[400px]">
-        {/* Card tổng quan kênh */}
-        <Card className="shadow-md rounded-lg flex-1">
-          <CardHeader>
-            <CardTitle>Số liệu phân tích về kênh</CardTitle>
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="space-y-0.5 border-r border-neutral-100 dark:border-neutral-800 pr-2">
+                  <p className="text-xs text-muted-foreground">Số lượt xem</p>
+                  <p className="text-lg font-bold">{latestVideo.viewsCount || 0}</p>
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-xs text-muted-foreground">Tỷ lệ xem trung bình</p>
+                  <p className="text-lg font-bold">{averageViewPercent}%</p>
+                </div>
+                <div className="space-y-0.5 border-r border-neutral-100 dark:border-neutral-800 pr-2">
+                  <p className="text-xs text-muted-foreground">Số lượt thích</p>
+                  <p className="text-lg font-bold">{latestVideo.likeCount || 0}</p>
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-xs text-muted-foreground">Số bình luận</p>
+                  <p className="text-lg font-bold">{latestVideo.commentCount || 0}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Card Bài đăng mới nhất */}
+        <Card className="shadow-md rounded-lg overflow-hidden border-neutral-200 dark:border-neutral-800">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-bold">Bài đăng mới nhất</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            {/* Số người đăng ký hiện tại */}
-            <div className="text-lg font-bold">Số người đăng ký hiện tại:</div>
-            <div className="text-3xl font-extrabold mb-2">
-              {statsData?.totalSubscribers || 0}
-            </div>
+          <CardContent className="space-y-4">
+            {latestPost ? (
+              <>
+                <div className="flex items-center gap-x-2">
+                  <img src={statsData?.userAvatar || "/avatar.png"} alt="User" className="size-6 rounded-full" />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold">{statsData?.userName}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {format(new Date(latestPost.createdAt), "d 'thg' M, yyyy", { locale: vi })}
+                    </span>
+                  </div>
+                </div>
 
-            <hr className="border-t border-gray-300 my-2" />
+                <div className="text-sm line-clamp-3">
+                  {latestPost.content || "Không có nội dung"}
+                </div>
 
-            {/* Tóm tắt 28 ngày qua */}
-            <div className="font-semibold">Tóm tắt (28 ngày qua)</div>
-            <div className="ml-2">
-              <div>Số lượt xem: {totalViews}</div>
-              <div>Thời gian xem (giờ): {(totalViews / 60).toFixed(1)}</div>
-            </div>
+                {latestPost.images?.[0] && (
+                  <div className="aspect-video relative rounded-md overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+                    <img src={latestPost.images[0].imageUrl} alt="Post" className="w-full h-full object-cover" />
+                  </div>
+                )}
 
-            <hr className="border-t border-gray-300 my-2" />
+                {latestPost.poll && (
+                  <div className="space-y-1 mt-2">
+                    {latestPost.poll.options.slice(0, 2).map((opt: any) => {
+                       const totalVotes = latestPost.poll?.options.reduce((acc: number, o: any) => acc + (o.voteCount || 0), 0) || 0;
+                       const percentage = totalVotes > 0 ? Math.round((opt.voteCount / totalVotes) * 100) : 0;
+                       return (
+                         <div key={opt.id} className="relative h-7 border rounded overflow-hidden flex items-center px-3 group">
+                            <div className="absolute inset-y-0 left-0 bg-neutral-100 dark:bg-neutral-800" style={{ width: `${percentage}%` }} />
+                            <span className="relative text-xs font-medium flex-1 truncate">{opt.text}</span>
+                            <span className="relative text-[10px] font-bold">{percentage}%</span>
+                         </div>
+                       );
+                    })}
+                  </div>
+                )}
 
-            {/* Nội dung hàng đầu */}
-            <div className="font-semibold">Nội dung hàng đầu (48 giờ qua)</div>
-            {latestVideo && (
-              <div className="ml-2 line-clamp-1">
-                {latestVideo.title} · {latestVideo.viewsCount || 0} lượt xem
+                <div className="grid grid-cols-3 gap-2 pt-2 text-center">
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] text-muted-foreground uppercase">Số phiếu</p>
+                    <p className="text-base font-bold">
+                       {latestPost.poll?.options.reduce((acc: number, o: any) => acc + (o.voteCount || 0), 0) || 0}
+                    </p>
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] text-muted-foreground uppercase">Bình luận</p>
+                    <p className="text-base font-bold">{latestPost.commentCount || 0}</p>
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] text-muted-foreground uppercase">Lượt thích</p>
+                    <p className="text-base font-bold">{latestPost.likeCount || 0}</p>
+                  </div>
+                </div>
+
+                <Button variant="outline" className="w-full text-xs font-bold h-9 rounded-full mt-2" asChild>
+                   <Link href="/studio?tab=posts">
+                      CHUYỂN ĐẾN THẺ BÀI ĐĂNG
+                   </Link>
+                </Button>
+              </>
+            ) : (
+              <div className="text-center py-10">
+                <p className="text-sm text-muted-foreground">Bạn chưa có bài đăng nào</p>
+                <Button variant="link" className="text-xs font-bold" asChild>
+                   <Link href="/studio?tab=posts">Tạo bài đăng đầu tiên</Link>
+                </Button>
               </div>
             )}
+          </CardContent>
+        </Card>
+      </div>
 
-            <button className="mt-4 w-full px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-400">
-              Chuyển đến số liệu phân tích
-            </button>
+      {/* CỘT PHẢI: Analytics, Bình luận, Người đăng ký */}
+      <div className="flex flex-col gap-6 flex-1 min-w-0">
+        {/* Card tổng quan kênh */}
+        <Card className="shadow-md rounded-lg border-neutral-200 dark:border-neutral-800">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-bold">Số liệu phân tích về kênh</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <p className="text-xs text-muted-foreground">Số người đăng ký hiện tại</p>
+              <p className="text-4xl font-extrabold">{statsData?.totalSubscribers || 0}</p>
+            </div>
+
+            <div className="pt-2 pb-2 border-y border-neutral-100 dark:border-neutral-800">
+               <p className="text-xs font-bold mb-3 uppercase text-neutral-500">Tóm tắt (28 ngày qua)</p>
+               <div className="flex justify-between items-center text-sm py-1">
+                  <span>Số lượt xem</span>
+                  <span className="font-bold">{totalViews}</span>
+               </div>
+               <div className="flex justify-between items-center text-sm py-1">
+                  <span>Thời gian xem (giờ)</span>
+                  <span className="font-bold">{(totalViews / 60).toFixed(1)}</span>
+               </div>
+            </div>
+
+            <div>
+               <p className="text-xs font-bold mb-3 uppercase text-neutral-500">Nội dung hàng đầu (48 giờ qua)</p>
+               {latestVideo && (
+                 <div className="flex items-center justify-between text-sm group cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800 p-1 rounded transition-colors">
+                    <span className="truncate flex-1">{latestVideo.title}</span>
+                    <span className="font-bold ml-2">{latestVideo.viewsCount || 0}</span>
+                 </div>
+               )}
+            </div>
+
+            <Button variant="secondary" className="w-full text-xs font-bold h-9 rounded-full" asChild>
+              <Link href="/studio?tab=analytics">CHUYỂN ĐẾN SỐ LIỆU PHÂN TÍCH</Link>
+            </Button>
           </CardContent>
         </Card>
 
         {/* Card Bình luận */}
-        <Card className="shadow-md rounded-lg flex-1">
-          <CardHeader>
-            <CardTitle>Bình luận</CardTitle>
+        <Card className="shadow-md rounded-lg border-neutral-200 dark:border-neutral-800 flex-1">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <CardTitle className="text-base font-bold">Bình luận mới nhất</CardTitle>
+            <Button variant="link" size="sm" className="text-blue-500 font-bold p-0" asChild>
+               <Link href="/studio?tab=comments">Xem tất cả</Link>
+            </Button>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm max-h-72 overflow-auto">
-            {statsData?.latestComments?.map((c: any) => (
-              <div
-                key={c.id}
-                className="flex gap-3 items-start p-2 border-b last:border-b-0"
-              >
-                {/* Thumbnail video */}
-                <img
-                  src={c.videoThumbnail || "/fallback-thumbnail.jpg"}
-                  alt={c.videoTitle || "Video"}
-                  className="w-14 h-14 rounded object-cover flex-shrink-0"
-                />
-
-                <div className="flex-1 flex flex-col gap-1">
-                  {/* Tên video */}
-                  <span className="text-xs font-semibold text-gray-600 line-clamp-1">
-                    {c.videoTitle || "Không có tiêu đề"}
-                  </span>
-
-                  {/* User info + comment */}
-                  <div className="flex items-start gap-2">
-                    <img
-                      src={c.userAvatar}
-                      alt={c.userName}
-                      className="w-6 h-6 rounded-full flex-shrink-0"
-                    />
-                    <div className="flex-1">
-                      <span className="font-medium">{c.userName}</span>
-                      <p className="text-gray-700 mt-0.5">{c.value}</p>
+          <CardContent className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+            {statsData?.latestComments && statsData.latestComments.length > 0 ? (
+              statsData.latestComments.map((c: any) => (
+                <div key={c.id} className="flex gap-x-3 items-start p-2 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-lg transition-colors group">
+                  <img src={c.userAvatar} alt={c.userName} className="size-8 rounded-full flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-x-1.5 mb-0.5">
+                      <span className="text-xs font-bold truncate">{c.userName}</span>
+                      <span className="text-[10px] text-muted-foreground">• {c.createdAt ? formatDistanceToNow(new Date(c.createdAt), { addSuffix: true, locale: vi }) : "Vừa xong"}</span>
                     </div>
+                    <p className="text-sm line-clamp-2">{c.value}</p>
                   </div>
+                  {c.videoThumbnail && (
+                    <img src={c.videoThumbnail} alt="video" className="size-12 rounded object-cover flex-shrink-0" />
+                  )}
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-center text-sm text-muted-foreground py-10">Không có bình luận nào</p>
+            )}
           </CardContent>
         </Card>
 
         {/* Card Người đăng ký gần đây */}
-        <Card className="shadow-md rounded-lg flex-1">
-          <CardHeader>
-            <CardTitle>Người đăng ký gần đây</CardTitle>
+        <Card className="shadow-md rounded-lg border-neutral-200 dark:border-neutral-800">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <CardTitle className="text-base font-bold">Người đăng ký gần đây</CardTitle>
+            <Button variant="link" size="sm" className="text-blue-500 font-bold p-0">Xem tất cả</Button>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm max-h-60 overflow-auto">
-            {statsData?.recentSubscribers?.map((s: any) => (
-              <div key={s.viewerId} className="flex items-center gap-2">
-                <img
-                  src={s.avatarUrl}
-                  alt={s.name}
-                  className="w-6 h-6 rounded-full"
-                />
-                <div>{s.name}</div>
-              </div>
-            ))}
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+               {statsData?.recentSubscribers?.map((s: any) => (
+                 <div key={s.viewerId} className="flex flex-col items-center text-center gap-y-1.5">
+                    <img src={s.avatarUrl} alt={s.name} className="size-10 rounded-full border dark:border-neutral-700" />
+                    <div className="w-full">
+                       <p className="text-[11px] font-bold truncate">{s.name}</p>
+                       <p className="text-[9px] text-muted-foreground">{s.subscriberCount || 0} người đăng ký</p>
+                    </div>
+                 </div>
+               ))}
+            </div>
           </CardContent>
         </Card>
       </div>

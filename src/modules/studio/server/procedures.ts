@@ -12,6 +12,7 @@ import {
   postImages,
   postPolls,
   postPollOptions,
+  postPollVotes,
   postReactions,
 } from "@/db/schema";
 import { db } from "@/db";
@@ -51,8 +52,9 @@ export const studioRouter = createTRPCRouter({
         value: comments.value,
         userName: users.name,
         userAvatar: users.imageUrl,
-        videoThumbnail: videos.thumbnailUrl, // thêm dòng này
-        videoTitle: videos.title, // thêm dòng này
+        videoThumbnail: videos.thumbnailUrl,
+        videoTitle: videos.title,
+        createdAt: comments.createdAt,
       })
       .from(comments)
       .innerJoin(users, eq(comments.userId, users.id))
@@ -62,12 +64,16 @@ export const studioRouter = createTRPCRouter({
       .limit(5)
       .execute();
 
-    // Người đăng ký gần đây 5 cái
+    // Người đăng ký gần đây 5 cái + số sub của họ
     const recentSubscribers = await db
       .select({
         viewerId: subscriptions.viewerId,
         name: users.name,
         avatarUrl: users.imageUrl,
+        subscriberCount: db.$count(
+          subscriptions,
+          eq(subscriptions.creatorId, users.id)
+        ),
       })
       .from(subscriptions)
       .innerJoin(users, eq(subscriptions.viewerId, users.id))
@@ -76,10 +82,62 @@ export const studioRouter = createTRPCRouter({
       .limit(5)
       .execute();
 
+    // Bài đăng mới nhất
+    const [latestPost] = await db
+      .select({
+        ...getTableColumns(posts),
+        likeCount: db.$count(
+          postReactions,
+          and(eq(postReactions.postId, posts.id), eq(postReactions.type, "like"))
+        ),
+        commentCount: db.$count(
+          comments,
+          eq(comments.postId, posts.id)
+        ),
+      })
+      .from(posts)
+      .where(eq(posts.userId, userId))
+      .orderBy(desc(posts.createdAt))
+      .limit(1);
+
+    let latestPostWithData = null;
+    if (latestPost) {
+       const images = await db.select().from(postImages).where(eq(postImages.postId, latestPost.id));
+       const [poll] = await db.select().from(postPolls).where(eq(postPolls.postId, latestPost.id));
+       
+       let pollData = null;
+       if (poll) {
+          const options = await db.select().from(postPollOptions).where(eq(postPollOptions.pollId, poll.id));
+          const optionsWithVotes = await Promise.all(options.map(async (opt) => {
+             const voteCount = await db.$count(postPollVotes, eq(postPollVotes.optionId, opt.id));
+             return { ...opt, voteCount };
+          }));
+          pollData = { ...poll, options: optionsWithVotes };
+       }
+
+       latestPostWithData = {
+          ...latestPost,
+          images,
+          poll: pollData,
+       };
+    }
+
+    // Lấy thông tin user hiện tại (chủ kênh)
+    const [channelUser] = await db
+      .select({
+        name: users.name,
+        imageUrl: users.imageUrl,
+      })
+      .from(users)
+      .where(eq(users.id, userId));
+
     return {
       totalSubscribers: totalSubscribers.length,
       latestComments,
       recentSubscribers,
+      latestPost: latestPostWithData,
+      userName: channelUser?.name,
+      userAvatar: channelUser?.imageUrl,
     };
   }),
 

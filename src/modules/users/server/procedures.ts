@@ -47,7 +47,8 @@ export const usersRouter = createTRPCRouter({
             subscriptions,
             eq(subscriptions.creatorId, users.id),
           ),
-          bio: users.bio, // lấy bio từ DB
+          viewCount: sql<number>`COALESCE((SELECT SUM(${videos.viewsCount}) FROM ${videos} WHERE ${videos.userId} = ${users.id}), 0)`.mapWith(Number),
+          bio: users.bio,
         })
         .from(users)
         .leftJoin(
