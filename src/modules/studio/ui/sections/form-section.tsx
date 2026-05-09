@@ -177,16 +177,18 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   });
 
   const generateDescription = trpc.videos.generateDescription.useMutation({
-    onSuccess: () => {
-      toast.success(t("processing"));
+    onSuccess: (data) => {
+      form.setValue("description", data.description);
+      toast.success(t("success"));
     },
     onError: () => {
       toast.error(t("error"));
     },
   });
   const generateTitle = trpc.videos.generateTitle.useMutation({
-    onSuccess: () => {
-      toast.success(t("processing"));
+    onSuccess: (data) => {
+      form.setValue("title", data.title);
+      toast.success(t("success"));
     },
     onError: () => {
       toast.error(t("error"));

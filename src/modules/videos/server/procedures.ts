@@ -500,12 +500,53 @@ export const videosRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id: userId } = ctx.user;
 
-      const { workflowRunId } = await workflow.trigger({
-        url: `${process.env.UPSTASH_WORKFLOW_URL}/api/videos/workflows/description`,
-        body: { userId, videoId: input.id },
+      const [video] = await db
+        .select()
+        .from(videos)
+        .where(and(eq(videos.id, input.id), eq(videos.userId, userId)));
+
+      if (!video) throw new TRPCError({ code: "NOT_FOUND" });
+
+      // 1. Lấy Transcript
+      let transcript = "";
+      if (video.muxPlaybackId && video.muxTrackId) {
+        try {
+          const res = await fetch(`https://stream.mux.com/${video.muxPlaybackId}/text/${video.muxTrackId}.txt`);
+          if (res.ok) transcript = await res.text();
+        } catch (e) {
+          console.error("Transcript fetch error", e);
+        }
+      }
+
+      // 2. Gọi AI
+      const SYSTEM_PROMPT = `Write ONLY a YouTube video description. Rules: Max 200 characters, no explanation, no hashtags, match actual content.`;
+      const inputText = transcript.length > 200 ? `Transcript: ${transcript}` : `Title: ${video.title}. Generate description.`;
+
+      const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY!}`,
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-oss-120b:free",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: inputText.slice(0, 8000) },
+          ],
+        }),
       });
 
-      return workflowRunId;
+      if (!aiResponse.ok) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "AI failed" });
+      const aiData = await aiResponse.json();
+      let description = aiData.choices?.[0]?.message?.content?.trim().replace(/[*"]/g, "");
+
+      if (!description) description = "Amazing video content.";
+
+      // 3. Cập nhật DB
+      await db.update(videos).set({ description }).where(eq(videos.id, video.id));
+
+      return { description };
     }),
   incrementView: baseProcedure
     .input(z.object({ videoId: z.string().uuid() }))
@@ -546,20 +587,55 @@ export const videosRouter = createTRPCRouter({
   generateTitle: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
-      console.log("📥 TRPC generateTitle called", input);
-
       const { id: userId } = ctx.user;
 
-      console.log("👤 User ID:", userId);
+      const [video] = await db
+        .select()
+        .from(videos)
+        .where(and(eq(videos.id, input.id), eq(videos.userId, userId)));
 
-      const { workflowRunId } = await workflow.trigger({
-        url: `${process.env.UPSTASH_WORKFLOW_URL}/api/videos/workflows/title`,
-        body: { userId, videoId: input.id },
+      if (!video) throw new TRPCError({ code: "NOT_FOUND" });
+
+      // 1. Lấy Transcript
+      let transcript = "";
+      if (video.muxPlaybackId && video.muxTrackId) {
+        try {
+          const res = await fetch(`https://stream.mux.com/${video.muxPlaybackId}/text/${video.muxTrackId}.txt`);
+          if (res.ok) transcript = await res.text();
+        } catch (e) {
+          console.error("Transcript fetch error", e);
+        }
+      }
+
+      // 2. Gọi AI
+      const SYSTEM_PROMPT = `Generate ONLY a YouTube title. Max 10 words, no quotes, match content.`;
+      const inputText = transcript.length > 200 ? `Transcript: ${transcript}` : `Video info: ${video.thumbnailUrl}. Generate title.`;
+
+      const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY!}`,
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-oss-120b:free",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: inputText.slice(0, 8000) },
+          ],
+        }),
       });
 
-      console.log("🧠 Workflow triggered:", workflowRunId);
+      if (!aiResponse.ok) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "AI failed" });
+      const aiData = await aiResponse.json();
+      let title = aiData.choices?.[0]?.message?.content?.trim().replace(/[*"]/g, "");
 
-      return { workflowRunId };
+      if (!title) title = "Amazing Video";
+
+      // 3. Cập nhật DB
+      await db.update(videos).set({ title }).where(eq(videos.id, video.id));
+
+      return { title };
     }),
   generateThumbnail: protectedProcedure
     .input(z.object({ id: z.string().uuid(), prompt: z.string().min(10) }))

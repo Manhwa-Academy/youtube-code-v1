@@ -41,8 +41,13 @@ export async function POST(req: NextRequest) {
         throw new Error("Video chưa có Mux playback ID");
       const width = 1280;
       const height = 720;
+      
+      // Tính toán giây thực tế thay vì dùng phần trăm trực tiếp
+      const durationInSeconds = (video.duration || 0) / 1000;
       const randomPercent = Math.floor(Math.random() * 90) + 5;
-      tempThumbnailUrl = `https://image.mux.com/${video.muxPlaybackId}/thumbnail.png?width=${width}&height=${height}&time=${randomPercent}`;
+      const startSeconds = Math.floor(durationInSeconds * (randomPercent / 100));
+
+      tempThumbnailUrl = `https://image.mux.com/${video.muxPlaybackId}/thumbnail.png?width=${width}&height=${height}&time=${startSeconds}`;
     } else {
       throw new Error("Chưa có nguồn thumbnail hợp lệ");
     }
