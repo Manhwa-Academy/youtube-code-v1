@@ -970,4 +970,56 @@ export const playlistsRouter = createTRPCRouter({
 
       return { items, nextCursor };
     }),
+
+  addManyVideos: protectedProcedure
+    .input(
+      z.object({
+        playlistId: z.string().uuid(),
+        videoIds: z.array(z.string().uuid()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { playlistId, videoIds } = input;
+      const { id: userId } = ctx.user;
+
+      const [existingPlaylist] = await db
+        .select()
+        .from(playlists)
+        .where(and(eq(playlists.id, playlistId), eq(playlists.userId, userId)));
+
+      if (!existingPlaylist) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const existingPlaylistVideos = await db
+        .select({ videoId: playlistVideos.videoId })
+        .from(playlistVideos)
+        .where(
+          and(
+            eq(playlistVideos.playlistId, playlistId),
+            inArray(playlistVideos.videoId, videoIds),
+          ),
+        );
+
+      const existingIds = new Set(existingPlaylistVideos.map((v) => v.videoId));
+      const newVideoIds = videoIds.filter((id) => !existingIds.has(id));
+
+      if (newVideoIds.length === 0) {
+        return { count: 0 };
+      }
+
+      await db.insert(playlistVideos).values(
+        newVideoIds.map((videoId) => ({
+          playlistId,
+          videoId,
+        })),
+      );
+
+      await db
+        .update(playlists)
+        .set({ updatedAt: new Date() })
+        .where(eq(playlists.id, playlistId));
+
+      return { count: newVideoIds.length };
+    }),
 });

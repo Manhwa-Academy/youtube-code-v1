@@ -23,6 +23,10 @@ import {
 
 import { VideoThumbnail } from "@/modules/videos/ui/components/video-thumbnail";
 
+import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { BulkActions } from "@/modules/studio/ui/components/bulk-actions";
+
 interface VideosSectionProps {
   limit: number;
   isShorts?: boolean;
@@ -45,7 +49,10 @@ const VideosSectionSkeleton = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="pl-6 w-[510px]">Video</TableHead>
+              <TableHead className="pl-6 w-[40px]">
+                <Checkbox disabled />
+              </TableHead>
+              <TableHead className="w-[510px]">Video</TableHead>
               <TableHead>Quyền riêng tư</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead>Ngày</TableHead>
@@ -58,6 +65,9 @@ const VideosSectionSkeleton = () => {
             {Array.from({ length: 5 }).map((_, index) => (
               <TableRow key={index}>
                 <TableCell className="pl-6">
+                  <Checkbox disabled />
+                </TableCell>
+                <TableCell>
                   <div className="flex items-center gap-4">
                     <Skeleton className="h-20 w-36" />
                     <div className="flex flex-col gap-2">
@@ -94,6 +104,7 @@ const VideosSectionSkeleton = () => {
 };
 
 const VideosSectionSuspense = ({ limit, isShorts }: VideosSectionProps) => {
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [videos, query] = trpc.studio.getMany.useSuspenseInfiniteQuery(
     {
       limit,
@@ -104,13 +115,37 @@ const VideosSectionSuspense = ({ limit, isShorts }: VideosSectionProps) => {
     },
   );
 
+  const allItems = videos.pages.flatMap((page) => page.items);
+  const allIds = allItems.map((video) => video.id);
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedIds(selectedIds.length === allIds.length ? [] : allIds);
+  };
+
   return (
     <div>
+      <BulkActions 
+        selectedIds={selectedIds} 
+        videos={allItems}
+        onClearSelection={() => setSelectedIds([])} 
+      />
       <div className="border-y">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="pl-6 w-[510px]">Video</TableHead>
+              <TableHead className="pl-6 w-[40px]">
+                <Checkbox 
+                  checked={selectedIds.length === allIds.length && allIds.length > 0}
+                  onCheckedChange={toggleSelectAll}
+                />
+              </TableHead>
+              <TableHead className="w-[510px]">Video</TableHead>
               <TableHead>Quyền riêng tư</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead>Ngày</TableHead>
@@ -120,83 +155,88 @@ const VideosSectionSuspense = ({ limit, isShorts }: VideosSectionProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {videos.pages
-              .flatMap((page) => page.items)
-              .map((video) => (
-                <Link
-                  prefetch
-                  href={`/studio/videos/${video.id}`}
-                  key={video.id}
-                  legacyBehavior
-                >
-                  <TableRow className="cursor-pointer">
-                    <TableCell className="pl-6">
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={cn(
-                            "relative shrink-0 overflow-hidden rounded-md bg-black max-h-[180px]",
-                            video.videoHeight &&
-                              video.videoWidth &&
-                              video.videoHeight > video.videoWidth
-                              ? "w-20 aspect-[9/16]"
-                              : "w-36 aspect-video",
-                          )}
-                        >
-                          <VideoThumbnail
-                            title={video.title}
-                            duration={video.duration || 0}
-                            imageUrl={video.thumbnailUrl}
-                            previewUrl={video.previewUrl}
-                            videoWidth={video.videoWidth ?? undefined}
-                            videoHeight={video.videoHeight ?? undefined}
-                          />
-                        </div>
-                        <div className="flex flex-col overflow-hidden gap-y-1">
-                          <span className="text-sm line-clamp-1">
-                            {video.title}
-                          </span>
-                          <span className="text-xs text-muted-foreground line-clamp-1">
-                            {video.description || "Không có mô tả"}
-                          </span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        {video.visibility === "private" ? (
-                          <LockIcon className="size-4 mr-2" />
-                        ) : (
-                          <Globe2Icon className="size-4 mr-2" />
+            {allItems.map((video) => (
+              <Link
+                prefetch
+                href={`/studio/videos/${video.id}`}
+                key={video.id}
+                legacyBehavior
+              >
+                <TableRow className="cursor-pointer">
+                  <TableCell className="pl-6">
+                    <Checkbox 
+                      checked={selectedIds.includes(video.id)}
+                      onCheckedChange={() => toggleSelection(video.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-4">
+                      <div
+                        className={cn(
+                          "relative shrink-0 overflow-hidden rounded-md bg-black max-h-[180px]",
+                          video.videoHeight &&
+                            video.videoWidth &&
+                            video.videoHeight > video.videoWidth
+                            ? "w-20 aspect-[9/16]"
+                            : "w-36 aspect-video",
                         )}
-                        {
-                          VISIBILITY_MAP[
-                            video.visibility as keyof typeof VISIBILITY_MAP
-                          ]
-                        }
+                      >
+                        <VideoThumbnail
+                          title={video.title}
+                          duration={video.duration || 0}
+                          imageUrl={video.thumbnailUrl}
+                          previewUrl={video.previewUrl}
+                          videoWidth={video.videoWidth ?? undefined}
+                          videoHeight={video.videoHeight ?? undefined}
+                        />
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        {STATUS_MAP[
-                          video.muxStatus as keyof typeof STATUS_MAP
-                        ] || "Lỗi"}
+                      <div className="flex flex-col overflow-hidden gap-y-1">
+                        <span className="text-sm line-clamp-1">
+                          {video.title}
+                        </span>
+                        <span className="text-xs text-muted-foreground line-clamp-1">
+                          {video.description || "Không có mô tả"}
+                        </span>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-sm truncate">
-                      {format(new Date(video.createdAt), "dd/MM/yyyy")}
-                    </TableCell>
-                    <TableCell className="text-right text-sm">
-                      {video.viewCount}
-                    </TableCell>
-                    <TableCell className="text-right text-sm">
-                      {video.commentCount}
-                    </TableCell>
-                    <TableCell className="text-right text-sm pr-6">
-                      {video.likeCount}
-                    </TableCell>
-                  </TableRow>
-                </Link>
-              ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      {video.visibility === "private" ? (
+                        <LockIcon className="size-4 mr-2" />
+                      ) : (
+                        <Globe2Icon className="size-4 mr-2" />
+                      )}
+                      {
+                        VISIBILITY_MAP[
+                          video.visibility as keyof typeof VISIBILITY_MAP
+                        ]
+                      }
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      {STATUS_MAP[
+                        video.muxStatus as keyof typeof STATUS_MAP
+                      ] || "Lỗi"}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm truncate">
+                    {format(new Date(video.createdAt), "dd/MM/yyyy")}
+                  </TableCell>
+                  <TableCell className="text-right text-sm">
+                    {video.viewCount}
+                  </TableCell>
+                  <TableCell className="text-right text-sm">
+                    {video.commentCount}
+                  </TableCell>
+                  <TableCell className="text-right text-sm pr-6">
+                    {video.likeCount}
+                  </TableCell>
+                </TableRow>
+              </Link>
+            ))}
           </TableBody>
         </Table>
       </div>

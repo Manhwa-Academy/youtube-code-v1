@@ -87,7 +87,7 @@ export const studioRouter = createTRPCRouter({
     .input(
       z.object({
         cursor: z
-          .object({ id: z.string().uuid(), updatedAt: z.date() })
+          .object({ id: z.string().uuid(), createdAt: z.date() })
           .nullish(),
         limit: z.number().min(1).max(100),
         isShorts: z.boolean().optional(),
@@ -126,16 +126,16 @@ export const studioRouter = createTRPCRouter({
             typeFilter,
             cursor
               ? or(
-                  lt(videos.updatedAt, cursor.updatedAt),
+                  lt(videos.createdAt, cursor.createdAt),
                   and(
-                    eq(videos.updatedAt, cursor.updatedAt),
+                    eq(videos.createdAt, cursor.createdAt),
                     lt(videos.id, cursor.id),
                   ),
                 )
               : undefined,
           ),
         )
-        .orderBy(desc(videos.updatedAt), desc(videos.id))
+        .orderBy(desc(videos.createdAt), desc(videos.id))
         .limit(limit + 1);
 
       const hasMore = data.length > limit;
@@ -161,7 +161,7 @@ export const studioRouter = createTRPCRouter({
 
       const lastItem = itemsWithAvgView[itemsWithAvgView.length - 1];
       const nextCursor = hasMore
-        ? { id: lastItem.id, updatedAt: lastItem.updatedAt }
+        ? { id: lastItem.id, createdAt: lastItem.createdAt }
         : null;
 
       return { items: itemsWithAvgView, nextCursor };

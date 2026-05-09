@@ -319,7 +319,7 @@ export const videosRouter = createTRPCRouter({
         cursor: z
           .object({
             id: z.string().uuid(),
-            updatedAt: z.date(),
+            createdAt: z.date(),
           })
           .nullish(),
         limit: z.number().min(1).max(100),
@@ -378,16 +378,16 @@ export const videosRouter = createTRPCRouter({
             categoryId ? eq(videos.categoryId, categoryId) : undefined,
             cursor
               ? or(
-                  lt(videos.updatedAt, cursor.updatedAt),
+                  lt(videos.createdAt, cursor.createdAt),
                   and(
-                    eq(videos.updatedAt, cursor.updatedAt),
+                    eq(videos.createdAt, cursor.createdAt),
                     lt(videos.id, cursor.id),
                   ),
                 )
               : undefined,
           ),
         )
-        .orderBy(desc(videos.updatedAt), desc(videos.id))
+        .orderBy(desc(videos.createdAt), desc(videos.id))
         .limit(limit + 1);
 
       const hasMore = (data?.length || 0) > limit;
@@ -397,7 +397,7 @@ export const videosRouter = createTRPCRouter({
       const nextCursor = (hasMore && lastItem)
         ? {
             id: lastItem.id,
-            updatedAt: lastItem.updatedAt,
+            createdAt: lastItem.createdAt,
           }
         : null;
 
@@ -948,4 +948,41 @@ export const videosRouter = createTRPCRouter({
       url: upload.url,
     };
   }),
+  removeMany: protectedProcedure
+    .input(z.object({ ids: z.array(z.string().uuid()) }))
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+
+      const removedVideos = await db
+        .delete(videos)
+        .where(and(inArray(videos.id, input.ids), eq(videos.userId, userId)))
+        .returning();
+
+      return removedVideos;
+    }),
+  updateMany: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string().uuid()),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        visibility: z.enum(["public", "private"]).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+
+      const updatedVideos = await db
+        .update(videos)
+        .set({
+          ...(input.title !== undefined && { title: input.title }),
+          ...(input.description !== undefined && { description: input.description }),
+          ...(input.visibility !== undefined && { visibility: input.visibility }),
+          updatedAt: new Date(),
+        })
+        .where(and(inArray(videos.id, input.ids), eq(videos.userId, userId)))
+        .returning();
+
+      return updatedVideos;
+    }),
 });
