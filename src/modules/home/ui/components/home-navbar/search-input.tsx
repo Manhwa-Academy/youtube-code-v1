@@ -14,20 +14,36 @@ import {
 } from "@/components/ui/popover";
 
 import { VirtualKeyboard } from "./virtual-keyboard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-export const SearchInput = () => {
+interface SearchInputProps {
+  onExpand?: () => void;
+  onCollapse?: () => void;
+  isExpanded?: boolean;
+}
+
+export const SearchInput = (props: SearchInputProps) => {
   return (
     <Suspense fallback={<Skeleton className="h-10 w-full max-w-[600px] rounded-full" />}>
-      <SearchInputSuspense />
+      <SearchInputSuspense {...props} />
     </Suspense>
   );
 };
 
 const MAX_HISTORY = 10;
 
-const SearchInputSuspense = () => {
+const SearchInputSuspense = ({ onExpand, onCollapse, isExpanded }: SearchInputProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isMobile = useIsMobile();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto focus when expanded on mobile
+  useEffect(() => {
+    if (isExpanded && isMobile && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isExpanded, isMobile]);
   
   const query = searchParams.get("query") || "";
   const categoryId = searchParams.get("categoryId") || "";
@@ -116,6 +132,22 @@ const SearchInputSuspense = () => {
 
   const showHistory = isFocused && history.length > 0;
 
+  // On mobile, if not expanded, only show the search trigger icon
+  if (isMobile && !isExpanded) {
+    return (
+      <div className="flex justify-end w-full">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          onClick={onExpand}
+        >
+          <SearchIcon className="size-5" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div ref={wrapperRef} className="relative flex w-full max-w-[600px]">
       <form className="flex w-full" onSubmit={handleSearch}>
@@ -126,6 +158,7 @@ const SearchInputSuspense = () => {
           </div>
           
           <input
+            ref={inputRef}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onFocus={() => setIsFocused(true)}
@@ -135,25 +168,37 @@ const SearchInputSuspense = () => {
           />
           
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-800"
-                >
-                  <KeyboardIcon className="size-5 text-muted-foreground" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent side="bottom" align="center" className="p-0 border-none bg-transparent shadow-none w-auto sm:align-end">
-                <VirtualKeyboard 
-                  onInput={(char) => setValue((prev) => prev + char)}
-                  onBackspace={() => setValue((prev) => prev.slice(0, -1))}
-                  onClose={() => {}} // Popover handles closing
-                />
-              </PopoverContent>
-            </Popover>
+            {isMobile ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => inputRef.current?.focus()}
+                className="h-8 w-8 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-800"
+              >
+                <KeyboardIcon className="size-5 text-muted-foreground" />
+              </Button>
+            ) : (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-800"
+                  >
+                    <KeyboardIcon className="size-5 text-muted-foreground" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent side="bottom" align="center" className="p-0 border-none bg-transparent shadow-none w-auto sm:align-end">
+                  <VirtualKeyboard 
+                    onInput={(char) => setValue((prev) => prev + char)}
+                    onBackspace={() => setValue((prev) => prev.slice(0, -1))}
+                    onClose={() => {}} // Popover handles closing
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
 
             {value && (
               <Button
