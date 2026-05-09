@@ -32,10 +32,10 @@ export const VideosSection = (props: VideosSectionProps) => {
   );
 };
 
-export const VideosSectionSkeleton = () => (
+export const VideosSectionSkeleton = ({ hideAvatar = true }: { hideAvatar?: boolean }) => (
   <div className="gap-4 gap-y-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
     {Array.from({ length: 18 }).map((_, index) => (
-      <VideoGridCardSkeleton key={index} />
+      <VideoGridCardSkeleton key={index} hideAvatar={hideAvatar} />
     ))}
   </div>
 );
@@ -84,10 +84,10 @@ const VideosSectionSuspense = ({
   return (
     <div>
       {showCarousel ? (
-        <div className="flex overflow-x-auto gap-4 no-scrollbar">
+        <div className="flex overflow-x-auto gap-4 scrollbar-hide pb-4">
           {filteredVideos.map((video) => (
-            <div key={video.id} className="min-w-[150px] sm:min-w-[200px]">
-              <VideoGridCard data={video} />
+            <div key={video.id} className="w-[220px] sm:w-[280px] flex-shrink-0">
+              <VideoGridCard data={video} hideAvatar />
             </div>
           ))}
         </div>
@@ -99,7 +99,7 @@ const VideosSectionSuspense = ({
             : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4"
         )}>
           {filteredVideos.map((video) => (
-            <VideoGridCard key={video.id} data={video} />
+            <VideoGridCard key={video.id} data={video} hideAvatar />
           ))}
         </div>
       )}

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { eq, and, or, lt, gt, lte, isNull, desc, getTableColumns } from "drizzle-orm";
+import { eq, and, or, lt, gt, lte, isNull, desc, getTableColumns, sql } from "drizzle-orm";
 import {
   subscriptions,
   comments,
@@ -290,5 +290,30 @@ export const studioRouter = createTRPCRouter({
         images,
         poll: pollWithOptions,
       };
+    }),
+
+  getRecentVideos: protectedProcedure
+    .input(z.object({
+      query: z.string().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+      const { query } = input;
+
+      const data = await db
+        .select()
+        .from(videos)
+        .where(
+          and(
+            eq(videos.userId, userId),
+            query 
+              ? sql`LOWER(${videos.title}) LIKE LOWER(${`%${query}%`})`
+              : undefined,
+          )
+        )
+        .orderBy(desc(videos.createdAt))
+        .limit(5);
+
+      return data;
     }),
 });

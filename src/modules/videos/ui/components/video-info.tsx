@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 
+import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { UserInfo } from "@/modules/users/ui/components/user-info";
@@ -12,12 +13,13 @@ import { VideoGetManyOutput } from "../../types";
 interface VideoInfoProps {
   data: VideoGetManyOutput["items"][number];
   onRemove?: () => void;
+  hideAvatar?: boolean;
 };
 
-export const VideoInfoSkeleton = () => {
+export const VideoInfoSkeleton = ({ hideAvatar }: { hideAvatar?: boolean }) => {
   return (
     <div className="flex gap-3">
-      <Skeleton className="size-10 flex-shrink-0 rounded-full" />
+      {!hideAvatar && <Skeleton className="size-10 flex-shrink-0 rounded-full" />}
       <div className="min-w-0 flex-1 space-y-2">
         <Skeleton className="h-4 w-[90%]" />
         <Skeleton className="h-4 w-[70%]" />
@@ -26,7 +28,7 @@ export const VideoInfoSkeleton = () => {
   );
 };
 
-export const VideoInfo = ({ data, onRemove }: VideoInfoProps) => {
+export const VideoInfo = ({ data, onRemove, hideAvatar }: VideoInfoProps) => {
   const compactViews = useMemo(() => {
     return data.viewCount === 0
       ? "Chưa có"
@@ -44,20 +46,27 @@ export const VideoInfo = ({ data, onRemove }: VideoInfoProps) => {
 
   return (
     <div className="flex gap-3">
-      <Link prefetch href={`/users/${data.user.id}`}>
-        <UserAvatar imageUrl={data.user.imageUrl} name={data.user.name} />
-      </Link>
+      {!hideAvatar && (
+        <Link prefetch href={`/users/${data.user.id}`}>
+          <UserAvatar imageUrl={data.user.imageUrl} name={data.user.name} />
+        </Link>
+      )}
 
       <div className="min-w-0 flex-1">
         <Link prefetch href={`/videos/${data.id}`}>
-          <h3 className="font-medium line-clamp-1 lg:line-clamp-2 text-base break-words">
+          <h3 className={cn(
+            "font-medium line-clamp-1 lg:line-clamp-2 text-sm break-words leading-snug",
+            !hideAvatar && "text-base"
+          )}>
             {data.title}
           </h3>
         </Link>
 
-        <Link prefetch href={`/users/${data.user.id}`}>
-          <UserInfo name={data.user.name} />
-        </Link>
+        {!hideAvatar && (
+          <Link prefetch href={`/users/${data.user.id}`}>
+            <UserInfo name={data.user.name} />
+          </Link>
+        )}
 
         <Link prefetch href={`/videos/${data.id}`}>
           <p className="text-sm text-muted-foreground line-clamp-1">

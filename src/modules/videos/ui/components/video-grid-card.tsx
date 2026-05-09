@@ -18,14 +18,15 @@ interface VideoGridCardProps {
   currentIndex?: number;
   progress?: number; // 🔥 thêm prop progress
   menu?: React.ReactNode; // ✅ thêm prop menu
+  hideAvatar?: boolean;
 }
 
 // Skeleton export để SuggestionsSection sử dụng
-export const VideoGridCardSkeleton = () => {
+export const VideoGridCardSkeleton = ({ hideAvatar }: { hideAvatar?: boolean }) => {
   return (
     <div className="flex flex-col gap-2 w-full">
       <VideoThumbnailSkeleton />
-      <VideoInfoSkeleton />
+      <VideoInfoSkeleton hideAvatar={hideAvatar} />
     </div>
   );
 };
@@ -37,6 +38,7 @@ export const VideoGridCard = ({
   playlist,
   currentIndex = 0,
   menu, // nhận menu
+  hideAvatar,
 }: VideoGridCardProps) => {
   const [showPlaylist, setShowPlaylist] = useState(false);
 
@@ -62,7 +64,7 @@ export const VideoGridCard = ({
       </Link>
 
       {/* Video info */}
-      <VideoInfo data={data} onRemove={onRemove} />
+      <VideoInfo data={data} onRemove={onRemove} hideAvatar={hideAvatar} />
 
       {/* Button toggle playlist */}
       {playlist && (

@@ -9,6 +9,9 @@ import { FlameIcon } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 import { PlaylistsSection } from "../sections/playlists-section";
 import { PostsSection } from "@/modules/posts/ui/sections/posts-section";
+import { HomePostsSection } from "@/modules/posts/ui/sections/home-posts-section";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface UserViewProps {
   userId: string;
@@ -39,6 +42,7 @@ export const UserView = ({ userId }: UserViewProps) => {
   const [homeCount, setHomeCount] = useState<number | null>(null);
   const [videoCount, setVideoCount] = useState<number | null>(null);
   const [shortsCount, setShortsCount] = useState<number | null>(null);
+  const [postCount, setPostCount] = useState<number | null>(null);
 
   return (
     <div className="flex flex-col max-w-[1300px] px-4 pt-2.5 mx-auto mb-10 gap-y-6">
@@ -70,17 +74,22 @@ export const UserView = ({ userId }: UserViewProps) => {
           <h2
             className={`font-semibold text-lg mb-4 mt-6 ${videoCount === 0 ? "hidden" : ""}`}
           >
-            Video
+            Video phổ biến
           </h2>
           <VideosSection
             userId={userId}
             filterType="videos"
-            sortBy={activeVideoTab}
-            onVideosCount={setVideoCount}
+            sortBy="popular"
+          />
+
+          <HomePostsSection 
+            userId={userId} 
+            onPostsCount={setPostCount} 
+            onSeeAll={() => handleTabChange("posts")}
           />
 
           <h2
-            className={`font-semibold text-lg mb-4 mt-6 flex items-center gap-2 ${shortsCount === 0 ? "hidden" : ""}`}
+            className={`font-semibold text-lg mb-4 mt-8 flex items-center gap-2 ${shortsCount === 0 ? "hidden" : ""}`}
           >
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-500/10">
               <FlameIcon className="size-5 text-red-500" />
