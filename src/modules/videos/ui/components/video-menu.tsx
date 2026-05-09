@@ -7,7 +7,11 @@ import {
   Trash2Icon,
   PlusIcon,
   ListVideoIcon,
+  DownloadIcon,
 } from "lucide-react";
+
+import { useIsOnline } from "@/hooks/use-is-online";
+import { downloadManager } from "@/lib/download-manager";
 
 import { APP_URL } from "@/constants";
 import { Button } from "@/components/ui/button";
@@ -40,11 +44,24 @@ export const VideoMenu = ({
   variant = "ghost",
   onRemove,
 }: VideoMenuProps) => {
+  const isOnline = useIsOnline();
   const [isOpenPlaylistAddModal, setIsOpenPlaylistAddModal] = useState(false);
   const [isOpenCreateModal, setIsOpenCreateModal] = useState(false);
   const [isOpenMixAddModal, setIsOpenMixAddModal] = useState(false);
   
   const addToQueue = usePlayerStore((state) => state.addToQueue);
+
+  const onRemoveDownload = async () => {
+    if (!playbackId) return;
+    try {
+      await downloadManager.removeVideo(videoId, playbackId);
+      toast.success("Đã xóa nội dung tải xuống");
+      if (onRemove) onRemove(); // Trigger refresh if onRemove is provided
+      else window.location.reload(); // Fallback to refresh the view
+    } catch (e) {
+      toast.error("Lỗi khi xóa video");
+    }
+  };
 
   const onShare = () => {
     const fullUrl = `${APP_URL}/videos/${videoId}`;
@@ -94,34 +111,45 @@ export const VideoMenu = ({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenuItem onClick={handleAddToQueue}>
-            <ListVideoIcon className="mr-2 size-4" />
-            Thêm vào hàng chờ
-          </DropdownMenuItem>
+          {isOnline ? (
+            <>
+              <DropdownMenuItem onClick={handleAddToQueue}>
+                <ListVideoIcon className="mr-2 size-4" />
+                Thêm vào hàng chờ
+              </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={onShare}>
-            <ShareIcon className="mr-2 size-4" />
-            Chia sẻ
-          </DropdownMenuItem>
+              <DropdownMenuItem onClick={onShare}>
+                <ShareIcon className="mr-2 size-4" />
+                Chia sẻ
+              </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={() => setIsOpenPlaylistAddModal(true)}>
-            <ListPlusIcon className="mr-2 size-4" />
-            Thêm vào danh sách phát
-          </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsOpenPlaylistAddModal(true)}>
+                <ListPlusIcon className="mr-2 size-4" />
+                Thêm vào danh sách phát
+              </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={() => setIsOpenCreateModal(true)}>
-            <PlusIcon className="mr-2 size-4" />
-            Tạo danh sách kết hợp mới
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsOpenMixAddModal(true)}>
-            <ListPlusIcon className="mr-2 size-4" />
-            Thêm vào danh sách kết hợp
-          </DropdownMenuItem>
-          {onRemove && (
-            <DropdownMenuItem onClick={onRemove}>
-              <Trash2Icon className="mr-2 size-4" />
-              Xóa khỏi lịch sử
-            </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsOpenCreateModal(true)}>
+                <PlusIcon className="mr-2 size-4" />
+                Tạo danh sách kết hợp mới
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsOpenMixAddModal(true)}>
+                <ListPlusIcon className="mr-2 size-4" />
+                Thêm vào danh sách kết hợp
+              </DropdownMenuItem>
+              {onRemove && (
+                <DropdownMenuItem onClick={onRemove}>
+                  <Trash2Icon className="mr-2 size-4" />
+                  Xóa khỏi lịch sử
+                </DropdownMenuItem>
+              )}
+            </>
+          ) : (
+            <>
+              <DropdownMenuItem onClick={onRemoveDownload}>
+                <Trash2Icon className="mr-2 size-4" />
+                Xóa nội dung tải xuống
+              </DropdownMenuItem>
+            </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>

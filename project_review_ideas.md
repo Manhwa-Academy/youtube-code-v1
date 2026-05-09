@@ -129,17 +129,6 @@ const itemsWithAvgView = await Promise.all(
 );
 ```
 
-### 2. Thiếu Error Handling UI
-- Nhiều chỗ chỉ hiện `<p>Error</p>` trong ErrorBoundary
-- Không có retry mechanism cho user
-- Loading states một số nơi chỉ là text đơn giản ("Đang tải số liệu...")
-
-### 3. Security Gaps
-- `cors_origin: "*"` trong Mux upload config (comment TODO nhưng chưa fix)
-- `updateBio` dùng `baseProcedure` thay vì `protectedProcedure` (tuy có check `clerkUserId` manual)
-- Thiếu input sanitization cho comment `value` (có DOMPurify trong deps nhưng chưa rõ dùng ở đâu)
-
-
 ### 5. CSS & Styling
 - `globals.css` có `body { user-select: none }` → chặn user select text trên toàn trang
 - `font-family: Arial` override font Inter đã import từ Google Fonts
