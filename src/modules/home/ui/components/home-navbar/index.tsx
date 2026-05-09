@@ -69,7 +69,9 @@ export const HomeNavbar = () => {
 
             <div className="flex-shrink-0 items-center flex gap-4">
               <CreateButton />
-              <NotificationBell />
+              <div className="hidden md:block">
+                <NotificationBell />
+              </div>
               <AuthButton />
             </div>
           </>
