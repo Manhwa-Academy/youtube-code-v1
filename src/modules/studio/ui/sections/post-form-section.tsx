@@ -123,7 +123,12 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
   });
 
   const onSubmit = (data: z.infer<typeof postUpdateSchema>) => {
-    update.mutate(data);
+    if (data.id && data.content) {
+      update.mutate({
+        id: data.id,
+        content: data.content,
+      });
+    }
   };
 
   const fullUrl = `${APP_URL}/posts/${postId}`;
@@ -206,6 +211,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                     <FormControl>
                       <Textarea
                         {...field}
+                        value={field.value ?? ""}
                         rows={6}
                         className="bg-transparent border-none focus-visible:ring-0 p-0 resize-none"
                         placeholder="Nội dung bài đăng của bạn"
