@@ -53,6 +53,10 @@ export const posts = pgTable("posts", {
   videoId: uuid("video_id").references(() => videos.id, { onDelete: "set null" }),
   scheduledAt: timestamp("scheduled_at"),
   isEdited: boolean("is_edited").default(false).notNull(),
+  canComment: boolean("can_comment").default(true).notNull(),
+  commentModeration: text("comment_moderation").default("none").notNull(),
+  commentSort: text("comment_sort").default("top").notNull(),
+  showLikeCount: boolean("show_like_count").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

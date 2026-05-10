@@ -435,14 +435,20 @@ export const postsRouter = createTRPCRouter({
     }),
 
   update: protectedProcedure
-    .input(z.object({ id: z.string().uuid(), content: z.string() }))
+    .input(z.object({ 
+      id: z.string().uuid(), 
+      content: z.string().nullable().optional(),
+      canComment: z.boolean().optional(),
+      commentModeration: z.string().optional(),
+    }))
     .mutation(async ({ input, ctx }) => {
       const { id: userId } = ctx.user;
       const [updatedPost] = await db
         .update(posts)
         .set({ 
-          content: input.content, 
-          isEdited: true,
+          ...(input.content !== undefined && { content: input.content, isEdited: true }),
+          ...(input.canComment !== undefined && { canComment: input.canComment }),
+          ...(input.commentModeration !== undefined && { commentModeration: input.commentModeration }),
           updatedAt: new Date() 
         })
         .where(and(eq(posts.id, input.id), eq(posts.userId, userId)))

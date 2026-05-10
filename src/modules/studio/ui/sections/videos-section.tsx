@@ -4,17 +4,43 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { format } from "date-fns";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { 
   ArrowDownIcon, 
   ArrowUpIcon, 
   Globe2Icon, 
-  LockIcon 
+  LockIcon,
+  PencilIcon,
+  BarChart2Icon,
+  MessageSquareIcon,
+  YoutubeIcon,
+  MoreVerticalIcon,
+  Share2Icon,
+  MegaphoneIcon,
+  DownloadIcon,
+  SparklesIcon,
+  Trash2Icon,
+  ExternalLinkIcon
 } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { trpc } from "@/trpc/client";
 import { STATUS_MAP, VISIBILITY_MAP } from "@/lib/status-map";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,6 +57,7 @@ import {
 
 import { VideoThumbnail } from "@/modules/videos/ui/components/video-thumbnail";
 import { BulkActions } from "@/modules/studio/ui/components/bulk-actions";
+import { VideoEditModal } from "@/modules/studio/ui/components/video-edit-modal";
 
 interface VideosSectionProps {
   limit: number;
@@ -114,8 +141,26 @@ const VideosSectionSkeleton = () => {
 };
 
 const VideosSectionSuspense = ({ limit, isShorts }: VideosSectionProps) => {
+  const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingVideo, setEditingVideo] = useState<{
+    id: string;
+    title: string;
+    description: string | null;
+  } | null>(null);
+
+  const utils = trpc.useUtils();
+  const remove = trpc.videos.remove.useMutation({
+    onSuccess: () => {
+      toast.success("Video đã được xóa");
+      utils.studio.getMany.invalidate();
+    },
+    onError: () => {
+      toast.error("Đã xảy ra lỗi");
+    },
+  });
 
   const [videos, query] = trpc.studio.getMany.useSuspenseInfiniteQuery(
     {
@@ -124,12 +169,12 @@ const VideosSectionSuspense = ({ limit, isShorts }: VideosSectionProps) => {
       sortOrder,
     },
     {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      getNextPageParam: (lastPage: any) => lastPage.nextCursor,
     },
   );
 
-  const allItems = videos.pages.flatMap((page) => page.items);
-  const allIds = allItems.map((video) => video.id);
+  const allItems = videos.pages.flatMap((page: any) => page.items);
+  const allIds = allItems.map((video: any) => video.id);
 
   const toggleSelection = (id: string) => {
     setSelectedIds((prev) =>
@@ -185,21 +230,19 @@ const VideosSectionSuspense = ({ limit, isShorts }: VideosSectionProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {allItems.map((video) => (
-              <Link
-                prefetch
-                href={`/studio/videos/${video.id}`}
+            {allItems.map((video: any) => (
+              <TableRow 
                 key={video.id}
-                legacyBehavior
+                className="cursor-pointer group"
+                onClick={() => router.push(`/studio/videos/${video.id}`)}
               >
-                <TableRow className="cursor-pointer">
-                  <TableCell className="pl-6">
-                    <Checkbox 
-                      checked={selectedIds.includes(video.id)}
-                      onCheckedChange={() => toggleSelection(video.id)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </TableCell>
+                <TableCell className="pl-6">
+                  <Checkbox 
+                    checked={selectedIds.includes(video.id)}
+                    onCheckedChange={() => toggleSelection(video.id)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-4">
                       <div
@@ -221,11 +264,145 @@ const VideosSectionSuspense = ({ limit, isShorts }: VideosSectionProps) => {
                           videoHeight={video.videoHeight ?? undefined}
                         />
                       </div>
-                      <div className="flex flex-col overflow-hidden gap-y-1">
-                        <span className="text-sm line-clamp-1">
+                      <div className="flex flex-col overflow-hidden justify-center min-h-[80px]">
+                        <span className="text-sm font-medium line-clamp-1 group-hover:text-blue-500 transition-colors">
                           {video.title}
                         </span>
-                        <span className="text-xs text-muted-foreground line-clamp-1">
+                        
+                        <div className="flex items-center gap-x-2 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-8"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    router.push(`/studio/videos/${video.id}`);
+                                  }}
+                                >
+                                  <PencilIcon className="size-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Chỉnh sửa</TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-8"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <BarChart2Icon className="size-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Số liệu phân tích</TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-8"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <MessageSquareIcon className="size-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Bình luận</TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-8"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(`/videos/${video.id}`, "_blank");
+                                  }}
+                                >
+                                  <YoutubeIcon className="size-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Xem trên YouTube</TooltipContent>
+                            </Tooltip>
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-8"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <MoreVerticalIcon className="size-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="start" className="w-64">
+                                <DropdownMenuItem 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingVideo({
+                                      id: video.id,
+                                      title: video.title,
+                                      description: video.description,
+                                    });
+                                    setEditModalOpen(true);
+                                  }}
+                                >
+                                  <PencilIcon className="mr-2 size-4" />
+                                  Chỉnh sửa tiêu đề và thông tin mô tả
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(`${window.location.origin}/videos/${video.id}`);
+                                    toast.success("Đã sao chép liên kết");
+                                  }}
+                                >
+                                  <Share2Icon className="mr-2 size-4" />
+                                  Lấy đường liên kết có thể chia sẻ
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                  <MegaphoneIcon className="mr-2 size-4" />
+                                  Quảng bá
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={(e) => e.stopPropagation()} asChild>
+                                  <a 
+                                    href={video.muxPlaybackId ? `https://stream.mux.com/${video.muxPlaybackId}/highest.mp4` : "#"} 
+                                    download 
+                                    target="_blank"
+                                  >
+                                    <DownloadIcon className="mr-2 size-4" />
+                                    Tải xuống
+                                  </a>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                  <SparklesIcon className="mr-2 size-4" />
+                                  Lên ý tưởng cho video
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-red-600 focus:text-red-600"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    remove.mutate({ id: video.id });
+                                  }}
+                                >
+                                  <Trash2Icon className="mr-2 size-4" />
+                                  Xóa vĩnh viễn
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TooltipProvider>
+                        </div>
+
+                        <span className="text-xs text-muted-foreground line-clamp-1 group-hover:hidden transition-all">
                           {video.description || "Không có mô tả"}
                         </span>
                       </div>
@@ -272,7 +449,6 @@ const VideosSectionSuspense = ({ limit, isShorts }: VideosSectionProps) => {
                     {video.likeCount}
                   </TableCell>
                 </TableRow>
-              </Link>
             ))}
           </TableBody>
         </Table>
@@ -283,6 +459,15 @@ const VideosSectionSuspense = ({ limit, isShorts }: VideosSectionProps) => {
         isFetchingNextPage={query.isFetchingNextPage}
         fetchNextPage={query.fetchNextPage}
       />
+      {editingVideo && (
+        <VideoEditModal
+          videoId={editingVideo.id}
+          title={editingVideo.title}
+          description={editingVideo.description}
+          open={editModalOpen}
+          onOpenChange={setEditModalOpen}
+        />
+      )}
     </div>
   );
 };

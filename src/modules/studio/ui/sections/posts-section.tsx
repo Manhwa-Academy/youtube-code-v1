@@ -13,7 +13,8 @@ import {
   LockIcon,
   PencilIcon,
   ArrowDownIcon,
-  ArrowUpIcon
+  ArrowUpIcon,
+  CheckCircle2Icon,
 } from "lucide-react";
 
 import { ErrorFallback } from "@/components/error-fallback";
@@ -114,12 +115,12 @@ const PostsSectionSuspense = ({ limit, userId }: { limit: number; userId: string
     setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"));
   };
 
-  const getPostTypeInfo = (type: string, pollType?: string | null) => {
+  const getPostTypeInfo = (type: string, pollType?: string | null, isQuiz?: boolean) => {
     switch (type) {
       case "poll":
         return {
-          label: pollType === "image" ? "Cuộc thăm dò ý kiến bằng hình ảnh" : "Cuộc thăm dò ý kiến",
-          icon: BarChart2Icon,
+          label: isQuiz ? "Câu hỏi" : (pollType === "image" ? "Cuộc thăm dò ý kiến bằng hình ảnh" : "Cuộc thăm dò ý kiến"),
+          icon: isQuiz ? CheckCircle2Icon : BarChart2Icon,
         };
       case "image":
         return {
@@ -169,7 +170,9 @@ const PostsSectionSuspense = ({ limit, userId }: { limit: number; userId: string
           </TableHeader>
           <TableBody>
             {allItems.map((post) => {
-              const typeInfo = getPostTypeInfo(post.type, post.poll?.type);
+              const isQuiz = post.poll?.options?.some((opt: any) => opt.isCorrect);
+              const totalVotes = post.poll?.options?.reduce((acc: number, o: any) => acc + (o.voteCount || 0), 0) || 0;
+              const typeInfo = getPostTypeInfo(post.type, post.poll?.type, isQuiz);
               const Icon = typeInfo.icon;
 
               return (
@@ -241,7 +244,7 @@ const PostsSectionSuspense = ({ limit, userId }: { limit: number; userId: string
                     {post.likeCount}
                   </TableCell>
                   <TableCell className="text-right text-sm pr-6">
-                    {post.poll ? "0" : "—"}
+                    {post.poll ? totalVotes : "—"}
                   </TableCell>
                 </TableRow>
               );

@@ -9,7 +9,8 @@ import {
   TypeIcon,
   ImageIcon,
   BarChart2Icon,
-  ExternalLinkIcon
+  ExternalLinkIcon,
+  CheckCircle2Icon,
 } from "lucide-react";
 
 import {
@@ -47,9 +48,11 @@ export const PostDetailsSidebar = () => {
 
   const isCommentsPage = pathname.includes("/comments");
 
+  const isQuiz = post.poll?.options.some((opt: any) => opt.isCorrect);
+
   const getPostTypeIcon = (type: string) => {
     switch (type) {
-      case "poll": return BarChart2Icon;
+      case "poll": return isQuiz ? CheckCircle2Icon : BarChart2Icon;
       case "image": return ImageIcon;
       default: return TypeIcon;
     }
@@ -75,6 +78,12 @@ export const PostDetailsSidebar = () => {
               <img 
                 src={post.images[0].imageUrl} 
                 alt="Post" 
+                className="w-full h-full object-cover"
+              />
+            ) : post.poll?.options && post.poll.options.some((opt: any) => opt.imageUrl) ? (
+              <img 
+                src={post.poll.options.find((opt: any) => opt.imageUrl)?.imageUrl ?? undefined} 
+                alt="Poll" 
                 className="w-full h-full object-cover"
               />
             ) : (

@@ -21,13 +21,14 @@ import { CommentItem } from "@/modules/comments/ui/components/comment-item";
 
 interface PostCommentsSectionProps {
   postId: string;
+  canComment: boolean;
 }
 
-export const PostCommentsSection = ({ postId }: PostCommentsSectionProps) => {
+export const PostCommentsSection = ({ postId, canComment }: PostCommentsSectionProps) => {
   return (
     <Suspense fallback={<PostCommentsSectionSkeleton />}>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <PostCommentsSectionSuspense postId={postId} />
+        <PostCommentsSectionSuspense postId={postId} canComment={canComment} />
       </ErrorBoundary>
     </Suspense>
   );
@@ -41,7 +42,7 @@ export const PostCommentsSectionSkeleton = () => {
   );
 };
 
-const PostCommentsSectionSuspense = ({ postId }: PostCommentsSectionProps) => {
+const PostCommentsSectionSuspense = ({ postId, canComment }: PostCommentsSectionProps) => {
   const [sortBy, setSortBy] = useState<"top" | "newest">("top");
 
   const [comments, query] = trpc.comments.getMany.useSuspenseInfiniteQuery(
@@ -82,7 +83,15 @@ const PostCommentsSectionSuspense = ({ postId }: PostCommentsSectionProps) => {
           </DropdownMenu>
         </div>
 
-        <CommentForm postId={postId} />
+        {canComment ? (
+          <CommentForm postId={postId} />
+        ) : (
+          <div className="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg text-center">
+            <p className="text-sm text-muted-foreground font-medium">
+              Tính năng bình luận đã bị tắt cho bài đăng này.
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-col gap-4 mt-2">
           {comments.pages.flatMap((page) => page.items).map((comment) => (

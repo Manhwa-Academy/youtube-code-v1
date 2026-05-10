@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger
+  PopoverTrigger,
 } from "@/components/ui/popover";
 import {
   DropdownMenu,
@@ -150,12 +150,16 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   const [thumbnailGenerateModalOpen, setThumbnailGenerateModalOpen] =
     useState(false);
   const [playlistCreateModalOpen, setPlaylistCreateModalOpen] = useState(false);
-  const [mixPlaylistCreateModalOpen, setMixPlaylistCreateModalOpen] = useState(false);
+  const [mixPlaylistCreateModalOpen, setMixPlaylistCreateModalOpen] =
+    useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   const [video] = trpc.studio.getOne.useSuspenseQuery({ id: videoId });
   const [categories] = trpc.categories.getMany.useSuspenseQuery();
-  const [playlists] = trpc.playlists.getManyForVideo.useSuspenseQuery({ videoId, limit: 100 });
+  const [playlists] = trpc.playlists.getManyForVideo.useSuspenseQuery({
+    videoId,
+    limit: 100,
+  });
 
   const update = trpc.videos.update.useMutation({
     onSuccess: () => {
@@ -191,7 +195,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   });
 
   const generateDescription = trpc.videos.generateDescription.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (data: { description: string | null }) => {
       form.setValue("description", data.description);
       toast.success(t("success"));
     },
@@ -200,8 +204,8 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     },
   });
   const generateTitle = trpc.videos.generateTitle.useMutation({
-    onSuccess: (data) => {
-      form.setValue("title", data.title);
+    onSuccess: (data: { title: string | null }) => {
+      form.setValue("title", data.title ?? "");
       toast.success(t("success"));
     },
     onError: () => {
@@ -219,7 +223,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
       toast.error(t("error"));
     },
   });
-  
+
   const addVideoToPlaylist = trpc.playlists.addVideo.useMutation({
     onSuccess: () => {
       utils.playlists.getManyForVideo.invalidate({ videoId });
@@ -278,9 +282,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold">{t("title")}</h1>
-              <p className="text-xs text-muted-foreground">
-                {t("desc")}
-              </p>
+              <p className="text-xs text-muted-foreground">{t("desc")}</p>
             </div>
             <div className="flex items-center gap-x-2">
               <Button
@@ -502,7 +504,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                           ))}
                         </div>
                       )}
-                      
+
                       <div className="p-2 border-t flex items-center justify-between bg-muted/20">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -512,18 +514,24 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="start">
-                            <DropdownMenuItem onClick={() => setPlaylistCreateModalOpen(true)}>
+                            <DropdownMenuItem
+                              onClick={() => setPlaylistCreateModalOpen(true)}
+                            >
                               {t("newPlaylist")}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setMixPlaylistCreateModalOpen(true)}>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                setMixPlaylistCreateModalOpen(true)
+                              }
+                            >
                               {t("newMixPlaylist")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setPopoverOpen(false)}
                         >
                           {t("done")}
@@ -677,7 +685,9 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
 
           {/* 🔥 BÌNH LUẬN VÀ MỨC PHÂN LOẠI */}
           <div className="mt-12 pt-8 border-t border-muted">
-            <h2 className="text-xl font-bold mb-1">{t("commentsAndRatings")}</h2>
+            <h2 className="text-xl font-bold mb-1">
+              {t("commentsAndRatings")}
+            </h2>
             <p className="text-sm text-muted-foreground mb-6">
               {t("commentsDesc")}
             </p>
@@ -690,7 +700,9 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   <FormItem>
                     <FormLabel>{t("comments")}</FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(value === "true")}
+                      onValueChange={(value) =>
+                        field.onChange(value === "true")
+                      }
                       value={field.value ? "true" : "false"}
                     >
                       <FormControl>
@@ -716,7 +728,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     <FormLabel>{t("moderation")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value ?? "none"}
+                      defaultValue={(field.value as string) ?? "none"}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -742,7 +754,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     <FormLabel>{t("whoCanComment")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value ?? "anyone"}
+                      defaultValue={(field.value as string) ?? "anyone"}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -751,7 +763,9 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="anyone">{t("anyone")}</SelectItem>
-                        <SelectItem value="subscribers">{t("subscribers")}</SelectItem>
+                        <SelectItem value="subscribers">
+                          {t("subscribers")}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -767,7 +781,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     <FormLabel>{t("sortBy")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value ?? "top"}
+                      defaultValue={(field.value as string) ?? "top"}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -793,14 +807,12 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                     <FormControl>
                       <Checkbox
-                        checked={field.value}
+                        checked={!!field.value}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        {t("showLikeCount")}
-                      </FormLabel>
+                      <FormLabel>{t("showLikeCount")}</FormLabel>
                     </div>
                   </FormItem>
                 )}

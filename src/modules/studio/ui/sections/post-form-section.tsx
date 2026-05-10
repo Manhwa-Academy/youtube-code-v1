@@ -24,6 +24,7 @@ import {
   PencilIcon,
   MessageSquareIcon,
   TrashIcon,
+  CheckCircle2Icon,
 } from "lucide-react";
 
 import { trpc } from "@/trpc/client";
@@ -40,6 +41,13 @@ import {
   FormMessage,
   FormItem,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -119,14 +127,18 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
     defaultValues: {
        id: post.id,
        content: post.content || "",
+       canComment: post.canComment,
+       commentModeration: post.commentModeration,
     },
   });
 
-  const onSubmit = (data: z.infer<typeof postUpdateSchema>) => {
-    if (data.id && data.content) {
-      update.mutate({
-        id: data.id,
-        content: data.content,
+  const onSubmit = (values: z.infer<typeof postUpdateSchema>) => {
+    if (values.id) {
+      update.mutate({ 
+        id: values.id,
+        content: values.content,
+        canComment: values.canComment,
+        commentModeration: values.commentModeration,
       });
     }
   };
@@ -140,10 +152,15 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
+  const isQuiz = post.poll?.options.some((opt: any) => opt.isCorrect);
+
   const getPostTypeInfo = (type: string) => {
     switch (type) {
       case "poll":
-        return { label: "Cuộc thăm dò ý kiến", icon: BarChart2Icon };
+        return { 
+          label: isQuiz ? "Câu hỏi" : "Cuộc thăm dò ý kiến", 
+          icon: isQuiz ? CheckCircle2Icon : BarChart2Icon 
+        };
       case "image":
         return { label: "Hình ảnh", icon: ImageIcon };
       default:
@@ -153,6 +170,8 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
 
   const typeInfo = getPostTypeInfo(post.type);
   const TypeIconComponent = typeInfo.icon;
+
+  const totalVotes = post.poll?.options.reduce((acc: number, o: any) => acc + (o.voteCount || 0), 0) || 0;
 
   return (
     <Form {...form}>
@@ -227,7 +246,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
               <div className="border border-neutral-700 rounded-md p-4 bg-neutral-900/50">
                 <p className="text-xs text-neutral-400 uppercase font-bold mb-4">Hình ảnh</p>
                 <div className="grid grid-cols-1 gap-4">
-                   {post.images.map((img) => (
+                   {post.images.map((img: { id: string; imageUrl: string }) => (
                      <div key={img.id} className="relative aspect-square max-w-[400px] border border-neutral-800 rounded-md overflow-hidden">
                         <Image 
                           src={img.imageUrl} 
@@ -246,31 +265,134 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
 
             {post.type === "poll" && post.poll && (
                <div className="border border-neutral-700 rounded-md p-4 bg-neutral-900/50">
-                  <p className="text-xs text-neutral-400 uppercase font-bold mb-4">Bình chọn</p>
+                  <p className="text-xs text-neutral-400 uppercase font-bold mb-1">
+                    {isQuiz ? "Kết quả đố vui" : "Kết quả cuộc thăm dò ý kiến"}
+                  </p>
+                  <p className="text-xs text-neutral-500 mb-4">
+                    {isQuiz 
+                      ? `Câu đố vui này nhận được ${totalVotes} câu trả lời` 
+                      : `Cuộc thăm dò ý kiến này có ${totalVotes} lượt bình chọn`}
+                  </p>
                   <div className="space-y-2">
-                    {post.poll.options.map((option) => (
-                      <div key={option.id} className="p-3 bg-neutral-800 rounded border border-neutral-700 text-sm">
-                        {option.text}
-                      </div>
-                    ))}
+                    {post.poll.options.map((option: { id: string; text: string | null; imageUrl?: string | null; isCorrect: boolean; voteCount: number }) => {
+                      const percentage = totalVotes > 0 ? Math.round((option.voteCount / totalVotes) * 100) : 0;
+                      return (
+                        <div key={option.id} className="flex items-center gap-3 p-2 bg-neutral-800 rounded border border-neutral-700 hover:bg-neutral-700/50 transition-colors">
+                          {option.imageUrl && (
+                            <div className="relative size-12 flex-shrink-0 rounded overflow-hidden border border-neutral-600">
+                              <Image 
+                                src={option.imageUrl}
+                                alt={option.text ?? ""}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1 font-medium text-sm">
+                            {option.text}
+                          </div>
+                          <div className="text-xs text-neutral-400 font-bold pr-2 flex items-center gap-2">
+                            {isQuiz && option.isCorrect && <CheckCircle2Icon className="size-4 text-green-500" />}
+                            {percentage}%
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                </div>
             )}
+
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-base font-bold">Bình luận và thông tin đánh giá</h2>
+                <p className="text-xs text-neutral-400">Chọn xem bạn muốn hiển thị hay ẩn phần bình luận và chọn cách hiển thị.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="canComment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="relative group border border-neutral-700 focus-within:border-blue-500 rounded-md px-3 py-1.5 transition-colors bg-neutral-900/50">
+                        <FormLabel className="text-[10px] text-neutral-400 group-focus-within:text-blue-500 uppercase font-bold">
+                          Bình luận
+                        </FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(value === "true")}
+                          defaultValue={field.value ? "true" : "false"}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="border-none focus:ring-0 p-0 h-auto text-sm bg-transparent">
+                              <SelectValue placeholder="Chọn trạng thái" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="true">Bật</SelectItem>
+                            <SelectItem value="false">Tắt</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="commentModeration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="relative group border border-neutral-700 focus-within:border-blue-500 rounded-md px-3 py-1.5 transition-colors bg-neutral-900/50">
+                        <FormLabel className="text-[10px] text-neutral-400 group-focus-within:text-blue-500 uppercase font-bold">
+                          Kiểm duyệt
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={(field.value as string) || "none"}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="border-none focus:ring-0 p-0 h-auto text-sm bg-transparent">
+                              <SelectValue placeholder="Chọn mức độ" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">Không</SelectItem>
+                            <SelectItem value="basic">Cơ bản</SelectItem>
+                            <SelectItem value="strict">Nghiêm ngặt</SelectItem>
+                            <SelectItem value="all">Tất cả</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Right Sidebar */}
           <div className="space-y-6 lg:col-span-2">
             <div className="bg-neutral-900/50 border border-neutral-700 rounded-xl overflow-hidden">
                <div className="p-4 space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <p className="text-[10px] text-neutral-400 uppercase font-bold">Lượt thích</p>
+                      <p className="text-[10px] text-neutral-400 uppercase font-bold text-nowrap">Lượt thích</p>
                       <p className="text-xl font-medium">{post.likeCount}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-neutral-400 uppercase font-bold">Bình luận</p>
+                      <p className="text-[10px] text-neutral-400 uppercase font-bold text-nowrap">Bình luận</p>
                       <p className="text-xl font-medium">{post.commentCount}</p>
                     </div>
+                    {post.type === "poll" && (
+                      <div>
+                        <p className="text-[10px] text-neutral-400 uppercase font-bold text-nowrap">
+                          {isQuiz ? "Câu trả lời" : "Số phiếu"}
+                        </p>
+                        <p className="text-xl font-medium">{totalVotes}</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-1">

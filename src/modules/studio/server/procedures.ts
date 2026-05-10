@@ -275,7 +275,13 @@ export const studioRouter = createTRPCRouter({
       let pollWithOptions = null;
       if (poll) {
         const options = await db
-          .select()
+          .select({
+            ...getTableColumns(postPollOptions),
+            voteCount: db.$count(
+              postPollVotes,
+              eq(postPollVotes.optionId, postPollOptions.id)
+            ),
+          })
           .from(postPollOptions)
           .where(eq(postPollOptions.pollId, poll.id));
         

@@ -376,7 +376,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
       {/* Comments Section */}
       {showComments && (
         <div className="mt-4 pt-4 border-t border-gray-100 dark:border-neutral-800">
-          <PostCommentsSection postId={post.id} />
+          <PostCommentsSection postId={post.id} canComment={post.canComment} />
         </div>
       )}
     </div>
