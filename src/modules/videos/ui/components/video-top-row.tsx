@@ -79,7 +79,11 @@ export const VideoTopRow = ({
     if (!video) return toast.error("Không tìm thấy video");
 
     try {
-      // Đảm bảo video đang phát (Bắt buộc trên một số dòng điện thoại)
+      // Ưu tiên nativeEl của MuxPlayer để tránh bị chặn
+      const video: any = player.nativeEl || player.media || player.video || player.shadowRoot?.querySelector("video") || document.querySelector("video");
+      
+      if (!video) return toast.error("Không tìm thấy trình phát");
+
       if (video.paused) await video.play();
 
       if (video.requestPictureInPicture) {
@@ -87,11 +91,11 @@ export const VideoTopRow = ({
       } else if (video.webkitSetPresentationMode) {
         video.webkitSetPresentationMode("picture-in-picture");
       } else {
-        toast.error("Trình duyệt không hỗ trợ");
+        toast.error("Trình duyệt không hỗ trợ PiP");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("PiP Error:", err);
-      toast.error("Vui lòng thử lại sau khi video đã phát");
+      toast.error(`Lỗi: ${err.message || "Không thể mở Popup"}`);
     }
   };
 
