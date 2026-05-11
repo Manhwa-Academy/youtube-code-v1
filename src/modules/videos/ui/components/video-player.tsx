@@ -326,6 +326,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           className={cn("w-full h-full object-cover", isVertical && "mux-player-vertical")}
           accentColor="#FF2056"
           preferPlayback="mse"
+          playsInline
         />
 
         {autoNextEnabled && showNext && nextVideo && (

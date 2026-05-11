@@ -108,6 +108,7 @@ export const GlobalPlayer = () => {
             startTime={currentTime}
             className="w-full h-full"
             accentColor="#FF2056"
+            playsInline
             onTimeUpdate={(e) => {
               const player = playerRef.current;
               if (player) {
