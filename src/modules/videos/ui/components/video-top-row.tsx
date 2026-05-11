@@ -72,44 +72,26 @@ export const VideoTopRow = ({
     [video.createdAt],
   );
   const handlePiP = async () => {
+    const player = playerRef.current;
+    if (!player) return;
+
+    const video: any = player.media || player.video || player.shadowRoot?.querySelector("video") || document.querySelector("video");
+    if (!video) return toast.error("Không tìm thấy video");
+
     try {
-      const player = playerRef.current;
-      if (!player) return;
+      // Đảm bảo video đang phát (Bắt buộc trên một số dòng điện thoại)
+      if (video.paused) await video.play();
 
-      // Tìm video element bằng mọi cách có thể
-      const videoElement: any = 
-        player.media || // Cách chính thống của MuxPlayer
-        player.video || // Một số phiên bản khác
-        player.shadowRoot?.querySelector("video") || 
-        player.querySelector("video") ||
-        document.querySelector("video"); // Phương án cuối: quét toàn bộ trang
-
-      if (videoElement) {
-        // 1. Hỗ trợ chuẩn W3C (Chrome, Android, Desktop)
-        if (videoElement.requestPictureInPicture) {
-          if (document.pictureInPictureElement) {
-            await document.exitPictureInPicture();
-          } else {
-            await videoElement.requestPictureInPicture();
-          }
-        } 
-        // 2. Hỗ trợ chuẩn Webkit (Safari, iPhone, iPad)
-        else if (videoElement.webkitSupportsPresentationMode && videoElement.webkitSupportsPresentationMode("picture-in-picture")) {
-          videoElement.webkitSetPresentationMode(
-            videoElement.webkitPresentationMode === "picture-in-picture" 
-              ? "inline" 
-              : "picture-in-picture"
-          );
-        }
-        else {
-          toast.error("Trình duyệt này không hỗ trợ tính năng Popup");
-        }
+      if (video.requestPictureInPicture) {
+        await video.requestPictureInPicture();
+      } else if (video.webkitSetPresentationMode) {
+        video.webkitSetPresentationMode("picture-in-picture");
       } else {
-        toast.error("Không tìm thấy trình phát video");
+        toast.error("Trình duyệt không hỗ trợ");
       }
-    } catch (error) {
-      console.error("PiP ERROR:", error);
-      toast.error("Không thể mở chế độ hình trong hình");
+    } catch (err) {
+      console.error("PiP Error:", err);
+      toast.error("Vui lòng thử lại sau khi video đã phát");
     }
   };
 
