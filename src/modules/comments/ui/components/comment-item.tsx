@@ -13,6 +13,8 @@ import {
   Trash2Icon,
   PinIcon,
   HeartIcon,
+  ImageIcon,
+  TimerIcon,
 } from "lucide-react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -30,6 +32,7 @@ import {
 import { CommentForm } from "./comment-form";
 import { CommentReplies } from "./comment-replies";
 import { CommentsGetManyOutput } from "../../types";
+import { usePlayerStore } from "@/modules/videos/store/use-player-store";
 
 interface CommentItemProps {
   comment: CommentsGetManyOutput["items"][number];
@@ -152,7 +155,52 @@ export const CommentItem = ({
               </span>
             </div>
           </Link>
-          <p className="text-sm">{comment.value}</p>
+          <div className="text-sm">
+            {comment.value.split(/(@\w+| \d{1,2}:\d{2})/g).map((part, i) => {
+              if (part.startsWith("@")) {
+                return <span key={i} className="text-blue-500 font-medium cursor-pointer hover:underline">{part}</span>;
+              }
+              if (/\d{1,2}:\d{2}/.test(part)) {
+                const [m, s] = part.trim().split(":").map(Number);
+                const seconds = m * 60 + s;
+                return (
+                  <button 
+                    key={i} 
+                    onClick={() => {
+                      const player = document.querySelector("video");
+                      if (player) {
+                        player.currentTime = seconds;
+                        player.play();
+                      }
+                    }}
+                    className="text-blue-500 hover:underline inline-flex items-center gap-0.5"
+                  >
+                    {part}
+                  </button>
+                );
+              }
+              return part;
+            })}
+            {comment.timestamp !== null && comment.timestamp !== undefined && (
+               <button 
+                onClick={() => {
+                  const player = document.querySelector("video");
+                  if (player) {
+                    player.currentTime = comment.timestamp!;
+                    player.play();
+                  }
+                }}
+                className="text-blue-500 hover:underline block mt-1 font-medium"
+              >
+                {Math.floor(comment.timestamp / 60)}:{(comment.timestamp % 60).toString().padStart(2, '0')}
+              </button>
+            )}
+          </div>
+          {comment.imageUrl && (
+            <div className="mt-2 rounded-lg overflow-hidden border max-w-[300px]">
+              <img src={comment.imageUrl} alt="Comment image" className="w-full h-auto object-cover" />
+            </div>
+          )}
           <div className="flex items-center gap-2 mt-1">
             <div className="flex items-center">
               <Button

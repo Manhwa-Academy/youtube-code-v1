@@ -153,10 +153,12 @@ export const commentsRouter = createTRPCRouter({
         videoId: z.string().uuid().nullish(),
         postId: z.string().uuid().nullish(),
         value: z.string(),
+        imageUrl: z.string().url().nullish(),
+        timestamp: z.number().nullish(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { parentId, videoId, postId, value } = input;
+      const { parentId, videoId, postId, value, imageUrl, timestamp } = input;
       const { id: userId } = ctx.user;
 
       if (!videoId && !postId) {
@@ -178,7 +180,7 @@ export const commentsRouter = createTRPCRouter({
 
       const [createdComment] = await db
         .insert(comments)
-        .values({ userId, videoId, postId, parentId, value })
+        .values({ userId, videoId, postId, parentId, value, imageUrl, timestamp })
         .returning();
 
       if (createdComment) {

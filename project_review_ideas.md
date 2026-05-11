@@ -68,12 +68,6 @@ const itemsWithAvgView = await Promise.all(
 - Share clip với timestamp range
 - Embed clip
 
-#### 25. Advanced Comment Features
-- Comment với timestamp (click để nhảy đến thời điểm)
-- Comment với hình ảnh/GIF
-- @mention user trong comment
-- Comment moderation tools
-
 #### 29. Embed Player
 - Embeddable video player cho website khác
 - Custom embed options (autoplay, start time)

@@ -388,6 +388,8 @@ export const comments = pgTable(
     postId: uuid("post_id")
       .references(() => posts.id, { onDelete: "cascade" }),
     value: text("value").notNull(),
+    imageUrl: text("image_url"),
+    timestamp: integer("timestamp"),
     isPinned: boolean("is_pinned").default(false).notNull(),
     creatorHearted: boolean("creator_hearted").default(false).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
