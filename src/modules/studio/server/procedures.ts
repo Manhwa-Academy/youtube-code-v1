@@ -524,8 +524,8 @@ export const studioRouter = createTRPCRouter({
             .orderBy(desc(videos.viewsCount))
             .limit(3),
         },
-        postsBreakdown: {
-          topPosts: await db
+        postsBreakdown: await (async () => {
+          const topPostsRaw = await db
             .select({
               id: posts.id,
               content: posts.content,
@@ -537,11 +537,35 @@ export const studioRouter = createTRPCRouter({
             .from(posts)
             .where(eq(posts.userId, userId))
             .orderBy(desc(posts.createdAt))
-            .limit(10),
-          impressions: 4, // Mock or from a views table if exists
-          likes: await db.$count(postReactions, and(inArray(postReactions.postId, db.select({ id: posts.id }).from(posts).where(eq(posts.userId, userId))), eq(postReactions.type, 'like'))),
-          subscribers: 0,
-        }
+            .limit(10);
+
+          const postIds = topPostsRaw.map(p => p.id);
+          
+          let quizPostIds: string[] = [];
+          if (postIds.length > 0) {
+            const quizzes = await db
+              .select({ postId: postPolls.postId })
+              .from(postPolls)
+              .innerJoin(postPollOptions, eq(postPolls.id, postPollOptions.pollId))
+              .where(and(
+                inArray(postPolls.postId, postIds),
+                eq(postPollOptions.isCorrect, true)
+              ));
+            quizPostIds = quizzes.map((q: any) => q.postId);
+          }
+
+          const topPosts = topPostsRaw.map(p => ({
+            ...p,
+            type: (p.type === 'poll' && quizPostIds.includes(p.id)) ? 'question' : p.type
+          }));
+
+          return {
+            topPosts,
+            impressions: 4, // Mock or from a views table if exists
+            likes: await db.$count(postReactions, and(inArray(postReactions.postId, db.select({ id: posts.id }).from(posts).where(eq(posts.userId, userId))), eq(postReactions.type, 'like'))),
+            subscribers: 0,
+          };
+        })()
       }
     };
   }),
