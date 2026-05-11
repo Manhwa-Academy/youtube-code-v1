@@ -10,6 +10,9 @@ import { VideoMenu } from "./video-menu";
 import { VideoDescription } from "./video-description";
 import { VideoGetOneOutput } from "../../types";
 import { VideoPlaybackMenu } from "./video-playback-menu";
+import { Button } from "@/components/ui/button";
+import { ExternalLinkIcon } from "lucide-react";
+import { toast } from "sonner";
 
 interface VideoTopRowProps {
   video: VideoGetOneOutput;
@@ -68,6 +71,29 @@ export const VideoTopRow = ({
     () => new Date(video.createdAt).toLocaleDateString("vi-VN"),
     [video.createdAt],
   );
+  const handlePiP = async () => {
+    try {
+      const player = playerRef.current;
+      if (!player) return;
+
+      // MuxPlayer is a web component, we need to find the video element
+      // It might be in shadowRoot or directly in the element depending on version/config
+      const videoElement = player.shadowRoot?.querySelector("video") || player.querySelector("video");
+
+      if (videoElement) {
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+        } else {
+          await videoElement.requestPictureInPicture();
+        }
+      } else {
+        toast.error("Trình duyệt của bạn không hỗ trợ hoặc không tìm thấy video");
+      }
+    } catch (error) {
+      console.error("PiP ERROR:", error);
+      toast.error("Không thể mở chế độ hình trong hình");
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4 mt-4">
@@ -84,6 +110,16 @@ export const VideoTopRow = ({
             viewerReaction={video.viewerReaction}
             showLikeCount={video.showLikeCount}
           />
+
+          <Button 
+            variant="secondary" 
+            className="rounded-full px-4 font-bold text-xs flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 border-none h-9"
+            onClick={handlePiP}
+            title="Xem dạng popup"
+          >
+            <ExternalLinkIcon className="size-4" />
+            <span className="hidden md:inline">Popup</span>
+          </Button>
 
           {/* 🔹 VideoPlaybackMenu tự động lấy track từ playerRef */}
           <VideoPlaybackMenu
