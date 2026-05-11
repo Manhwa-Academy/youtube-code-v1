@@ -1407,13 +1407,13 @@ export const AnalyticsView = () => {
       <Tabs defaultValue="overview" className="w-full">
         <div className="flex items-center justify-between border-b mb-4">
           <TabsList className="bg-transparent h-auto p-0 gap-x-8">
-            {["overview", "content", "audience", "trending"].map((t) => (
+            {["overview", "content", "audience"].map((t) => (
               <TabsTrigger 
                 key={t}
                 value={t} 
                 className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary bg-transparent data-[state=active]:bg-transparent font-medium capitalize"
               >
-                {t === "overview" ? "Tổng quan" : t === "content" ? "Nội dung" : t === "audience" ? "Đối tượng người xem" : "Xu hướng"}
+                {t === "overview" ? "Tổng quan" : t === "content" ? "Nội dung" : "Đối tượng người xem"}
               </TabsTrigger>
             ))}
           </TabsList>
