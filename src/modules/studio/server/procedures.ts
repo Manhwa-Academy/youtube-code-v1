@@ -604,7 +604,29 @@ export const studioRouter = createTRPCRouter({
 
       // Filter by questions
       if (containsQuestions) {
-        conditions.push(sql`${comments.value} LIKE '%?%'`);
+        conditions.push(
+          or(
+            sql`${comments.value} LIKE '%?%'`,
+            sql`LOWER(${comments.value}) LIKE '% sao%'`,
+            sql`LOWER(${comments.value}) LIKE '% gì%'`,
+            sql`LOWER(${comments.value}) LIKE '% đâu%'`,
+            sql`LOWER(${comments.value}) LIKE '% không%'`,
+            sql`LOWER(${comments.value}) LIKE '% bao giờ%'`,
+            sql`LOWER(${comments.value}) LIKE '% nào%'`,
+            sql`LOWER(${comments.value}) LIKE '% thế nào%'`,
+            sql`LOWER(${comments.value}) LIKE '% tại sao%'`,
+            sql`LOWER(${comments.value}) LIKE '% vì sao%'`,
+            sql`LOWER(${comments.value}) LIKE '% khi nào%'`,
+            sql`LOWER(${comments.value}) LIKE '% ai%'`,
+            sql`LOWER(${comments.value}) LIKE '% chưa%'`,
+            sql`LOWER(${comments.value}) LIKE '% hả%'`,
+            sql`LOWER(${comments.value}) LIKE '% à%'`,
+            sql`LOWER(${comments.value}) LIKE '% chứ%'`,
+            sql`LOWER(${comments.value}) LIKE '% nhỉ%'`,
+            sql`LOWER(${comments.value}) LIKE '% nhể%'`,
+            sql`LOWER(${comments.value}) LIKE '% vậy%'`
+          )
+        );
       }
 
       // Filter by content types
