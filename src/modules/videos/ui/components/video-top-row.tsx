@@ -79,23 +79,34 @@ export const VideoTopRow = ({
     if (!video) return toast.error("Không tìm thấy video");
 
     try {
-      // Ưu tiên nativeEl của MuxPlayer để tránh bị chặn
       const video: any = player.nativeEl || player.media || player.video || player.shadowRoot?.querySelector("video") || document.querySelector("video");
       
       if (!video) return toast.error("Không tìm thấy trình phát");
 
+      // Ép mở khóa nếu bị chặn
+      video.disablePictureInPicture = false;
+
       if (video.paused) await video.play();
 
+      // Thử dùng chuẩn W3C trước
       if (video.requestPictureInPicture) {
-        await video.requestPictureInPicture();
-      } else if (video.webkitSetPresentationMode) {
+        try {
+          await video.requestPictureInPicture();
+          return; // Thành công
+        } catch (innerErr) {
+          console.warn("W3C PiP failed, trying fallbacks...", innerErr);
+        }
+      }
+
+      // Thử dùng chuẩn Webkit (Safari/iPhone)
+      if (video.webkitSetPresentationMode) {
         video.webkitSetPresentationMode("picture-in-picture");
       } else {
-        toast.error("Trình duyệt không hỗ trợ PiP");
+        toast.error("Trình duyệt này (hoặc ứng dụng bạn đang dùng) đã khóa tính năng Popup.");
       }
     } catch (err: any) {
       console.error("PiP Error:", err);
-      toast.error(`Lỗi: ${err.message || "Không thể mở Popup"}`);
+      toast.error("Không thể mở Popup. Bạn hãy thử tắt Chế độ tiết kiệm pin hoặc dùng Chrome/Safari gốc.");
     }
   };
 
