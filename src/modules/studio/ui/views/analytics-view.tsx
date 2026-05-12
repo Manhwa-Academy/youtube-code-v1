@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useTransition } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -31,7 +31,9 @@ import {
   BarChart2Icon,
   MessageCircleIcon,
   TypeIcon,
-  PlayIcon
+  PlayIcon,
+  MinusIcon,
+  TrendingDownIcon
 } from "lucide-react";
 
 import { trpc } from "@/trpc/client";
@@ -48,6 +50,8 @@ import {
 } from "@/components/ui/popover";
 import { CheckIcon } from "lucide-react";
 import { AdvancedAnalyticsModal } from "../components/advanced-analytics-modal";
+import { Calendar } from "@/components/ui/calendar";
+import { DateRange } from "react-day-picker";
 
 // --- SUB-COMPONENTS (SECTIONS) ---
 
@@ -931,11 +935,19 @@ const AnalyticsContent = ({ days }: { days: number }) => {
              <p className="text-[11px] text-muted-foreground uppercase font-bold mb-1">Số lượt xem ({days === 3650 ? "Toàn thời gian" : `${days} ngày`})</p>
              <div className="flex items-center gap-x-2">
                 <span className="text-2xl font-bold">{data.totalViews}</span>
-                <div className="size-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                  <TrendingUpIcon className="size-3 text-emerald-600" />
-                </div>
+                {data.totalViews > 0 ? (
+                  <div className="size-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                    <TrendingUpIcon className="size-3 text-emerald-600" />
+                  </div>
+                ) : (
+                  <div className="size-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <MinusIcon className="size-3 text-gray-500" />
+                  </div>
+                )}
              </div>
-             <p className="text-[10px] text-muted-foreground mt-1">Như bình thường</p>
+             <p className="text-[10px] text-muted-foreground mt-1">
+               {data.totalViews > 0 ? "Tiến triển tốt trong chu kỳ" : "Khoảng thời gian này khá im ắng"}
+             </p>
           </div>
 
           <div 
@@ -948,9 +960,19 @@ const AnalyticsContent = ({ days }: { days: number }) => {
              <p className="text-[11px] text-muted-foreground uppercase font-bold mb-1">Thời gian xem (giờ)</p>
              <div className="flex items-center gap-x-2">
                 <span className="text-2xl font-bold">{data.totalWatchTimeHours}</span>
-                <InfoIcon className="size-3 text-muted-foreground" />
+                {Number(data.totalWatchTimeHours) > 0 ? (
+                  <div className="size-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                    <TrendingUpIcon className="size-3 text-emerald-600" />
+                  </div>
+                ) : (
+                  <div className="size-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <MinusIcon className="size-3 text-gray-500" />
+                  </div>
+                )}
              </div>
-             <p className="text-[10px] text-muted-foreground mt-1">Dựa trên tiến trình xem</p>
+             <p className="text-[10px] text-muted-foreground mt-1">
+               {Number(data.totalWatchTimeHours) > 0 ? "Tiến triển tốt trong chu kỳ" : "Dựa trên tiến trình xem"}
+             </p>
           </div>
 
           <div 
@@ -962,8 +984,26 @@ const AnalyticsContent = ({ days }: { days: number }) => {
           >
              <p className="text-[11px] text-muted-foreground uppercase font-bold mb-1">Số người đăng ký</p>
              <div className="flex items-center gap-x-2">
-                <span className="text-2xl font-bold">—</span>
+                <span className="text-2xl font-bold">
+                  {data.audience.subscribersGained > 0 ? `+${data.audience.subscribersGained}` : data.audience.subscribersGained}
+                </span>
+                {data.audience.subscribersGained !== 0 ? (
+                  <div className={cn("size-4 rounded-full flex items-center justify-center", data.audience.subscribersGained > 0 ? "bg-emerald-100 dark:bg-emerald-900/30" : "bg-red-100 dark:bg-red-900/30")}>
+                    {data.audience.subscribersGained > 0 ? (
+                      <TrendingUpIcon className="size-3 text-emerald-600" />
+                    ) : (
+                      <TrendingDownIcon className="size-3 text-red-600" />
+                    )}
+                  </div>
+                ) : (
+                  <div className="size-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <MinusIcon className="size-3 text-gray-500" />
+                  </div>
+                )}
              </div>
+             <p className="text-[10px] text-muted-foreground mt-1">
+               {data.audience.subscribersGained !== 0 ? "Biến động trong chu kỳ" : "Không có thay đổi mới"}
+             </p>
           </div>
         </div>
 
@@ -1347,9 +1387,19 @@ const AudienceTab = ({ days }: { days: number }) => {
 export const AnalyticsView = () => {
   const [dateRange, setDateRange] = useState("28 ngày qua");
   const [isAdvancedModalOpen, setIsAdvancedModalOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const [showCustomPicker, setShowCustomPicker] = useState(false);
+  const [customRange, setCustomRange] = useState<DateRange | undefined>();
 
   const getDaysFromRange = (range: string) => {
     const now = new Date();
+
+    if (range.startsWith("Tùy chỉnh (")) {
+      const match = range.match(/\d+/);
+      return match ? parseInt(match[0]) : 28;
+    }
+
     if (range === "7 ngày qua") return 7;
     if (range === "28 ngày qua") return 28;
     if (range === "90 ngày qua") return 90;
@@ -1430,32 +1480,84 @@ export const AnalyticsView = () => {
             ))}
           </TabsList>
 
-          <Popover>
+          <Popover onOpenChange={(open) => !open && setShowCustomPicker(false)}>
             <PopoverTrigger asChild>
               <div className="flex items-center gap-x-2 text-sm text-muted-foreground cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 p-2 rounded-md transition-colors">
-                 <span>{formatDateRange(days)}</span>
-                 <span className="font-bold">{dateRange}</span>
+                 {isPending ? (
+                   <span className="opacity-50">Đang tải...</span>
+                 ) : (
+                   <span>{formatDateRange(days)}</span>
+                 )}
+                 <span className="font-bold">{dateRange.startsWith("Tùy chỉnh") ? "Tùy chỉnh" : dateRange}</span>
                  <ChevronDownIcon className="size-4" />
               </div>
             </PopoverTrigger>
-            <PopoverContent className="w-56 p-0 bg-[#282828] border-white/10 text-white shadow-2xl" align="end">
-               <div className="py-1">
-                  {menuSections.map((section, sIdx) => (
-                    <div key={sIdx}>
-                       {section.items.map((range) => (
-                        <div 
-                          key={range}
-                          className="px-4 py-2 hover:bg-white/10 cursor-pointer text-sm flex items-center justify-between transition-colors"
-                          onClick={() => setDateRange(range)}
-                        >
-                          <span>{range}</span>
-                          {dateRange === range && <CheckIcon className="size-4 text-[#3ea6ff]" />}
-                        </div>
-                       ))}
-                       {sIdx < menuSections.length - 1 && <div className="h-px bg-white/10 my-1" />}
+            <PopoverContent className={cn("p-0 bg-[#282828] border-white/10 text-white shadow-2xl", showCustomPicker ? "w-auto" : "w-56")} align="end">
+               {!showCustomPicker ? (
+                 <div className="py-1">
+                    {menuSections.map((section, sIdx) => (
+                      <div key={sIdx}>
+                         {section.items.map((range) => (
+                          <div 
+                            key={range}
+                            className={cn(
+                              "px-4 py-2 hover:bg-white/10 cursor-pointer text-sm flex items-center justify-between transition-colors",
+                              isPending && "opacity-50 pointer-events-none"
+                            )}
+                            onClick={() => {
+                              if (range === "Tùy chỉnh") {
+                                setShowCustomPicker(true);
+                                return;
+                              }
+                              startTransition(() => {
+                                setDateRange(range);
+                              });
+                            }}
+                          >
+                            <span>{range}</span>
+                            {dateRange === range && <CheckIcon className="size-4 text-[#3ea6ff]" />}
+                          </div>
+                         ))}
+                         {sIdx < menuSections.length - 1 && <div className="h-px bg-white/10 my-1" />}
+                      </div>
+                    ))}
+                 </div>
+               ) : (
+                 <div className="p-4 flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                       <span className="font-bold text-sm">Tùy chỉnh</span>
+                       <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-white/10 text-muted-foreground" onClick={() => setShowCustomPicker(false)}>X</Button>
                     </div>
-                  ))}
-               </div>
+                    <Calendar
+                      mode="range"
+                      selected={customRange}
+                      onSelect={setCustomRange}
+                      numberOfMonths={1}
+                      className="bg-transparent text-white"
+                    />
+                    <div className="flex justify-end gap-2 mt-2">
+                       <Button variant="ghost" size="sm" onClick={() => setShowCustomPicker(false)} className="hover:bg-white/10">Hủy</Button>
+                       <Button 
+                         size="sm" 
+                         disabled={!customRange?.from || !customRange?.to || isPending}
+                         className="bg-[#3ea6ff] hover:bg-[#3ea6ff]/90 text-black"
+                         onClick={() => {
+                           if (customRange?.from && customRange?.to) {
+                             const diff = Math.ceil(Math.abs(customRange.to.getTime() - customRange.from.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                             startTransition(() => {
+                               setDateRange(`Tùy chỉnh (${diff} ngày)`);
+                             });
+                             // Note: Popover doesn't auto-close because we don't have a direct ref to close it, 
+                             // but setting showCustomPicker(false) resets the state for next time
+                             setShowCustomPicker(false);
+                           }
+                         }}
+                       >
+                         Áp dụng
+                       </Button>
+                    </div>
+                 </div>
+               )}
             </PopoverContent>
           </Popover>
         </div>
