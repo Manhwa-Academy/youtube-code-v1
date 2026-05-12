@@ -36,6 +36,7 @@ export const InfiniteScroll = ({
       {hasNextPage ? (
         <Button
           variant="secondary"
+          className="rounded-full bg-neutral-200 dark:bg-white/10 hover:bg-neutral-300 dark:hover:bg-white/20 text-black dark:text-white font-bold px-6"
           disabled={!hasNextPage || isFetchingNextPage}
           onClick={() => fetchNextPage()}
         >
@@ -44,7 +45,7 @@ export const InfiniteScroll = ({
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               Đang tải...
             </>
-          ) : "Tải thêm"}
+          ) : "Xem thêm"}
         </Button>
       ) : (
         <p className="text-xs text-muted-foreground">

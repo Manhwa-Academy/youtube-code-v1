@@ -42,6 +42,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { CommentReplies } from "@/modules/comments/ui/components/comment-replies";
+import { InfiniteScroll } from "@/components/infinite-scroll";
 
 export const CommunityView = () => {
   const [sortBy, setSortBy] = useState<"newest" | "top">("newest");
@@ -505,7 +506,7 @@ const CommunityCommentsList = ({
     onSuccess: () => utils.studio.getCommunityComments.invalidate(),
   });
 
-  const [data] = trpc.studio.getCommunityComments.useSuspenseInfiniteQuery({
+  const [data, query] = trpc.studio.getCommunityComments.useSuspenseInfiniteQuery({
     limit: 20,
     sortBy,
     status: statusFilter,
@@ -764,6 +765,12 @@ const CommunityCommentsList = ({
           </div>
         ))
       )}
+      <InfiniteScroll 
+        hasNextPage={query.hasNextPage}
+        isFetchingNextPage={query.isFetchingNextPage}
+        fetchNextPage={query.fetchNextPage}
+        isManual
+      />
     </div>
   );
 };

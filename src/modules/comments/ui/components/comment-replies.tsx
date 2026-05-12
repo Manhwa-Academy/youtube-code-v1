@@ -45,13 +45,14 @@ export const CommentReplies = ({ parentId, videoId, postId }: CommentRepliesProp
       </div>
       {hasNextPage && (
         <Button
-          variant="tertiary"
+          variant="secondary"
           size="sm"
+          className="rounded-full bg-neutral-200 dark:bg-white/10 hover:bg-neutral-300 dark:hover:bg-white/20 text-black dark:text-white font-bold"
           onClick={() => fetchNextPage()}
           disabled={isFetchingNextPage}
         >
-          <CornerDownRightIcon />
-          Show more replies
+          <CornerDownRightIcon className="size-4 mr-1" />
+          Xem thêm
         </Button>
       )}
     </div>

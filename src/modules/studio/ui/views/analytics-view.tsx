@@ -180,7 +180,7 @@ const AllContentSection = ({ data, days }: { data: any, days: number }) => {
                      </div>
                   </div>
                </div>
-               <Button variant="link" className="text-blue-500 font-bold p-0 uppercase text-xs">Xem thêm</Button>
+               <Button variant="secondary" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4">Xem thêm</Button>
             </CardContent>
          </Card>
 
@@ -294,7 +294,7 @@ const AllContentSection = ({ data, days }: { data: any, days: number }) => {
                     </div>
                   ))}
                </div>
-               <Button variant="link" className="text-blue-500 font-bold p-0 uppercase text-xs">Xem thêm</Button>
+               <Button variant="secondary" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4">Xem thêm</Button>
             </CardContent>
          </Card>
       </div>
@@ -518,7 +518,7 @@ const VideoContentSection = ({ data, days }: { data: any, days: number }) => {
                      </div>
                   </div>
                </div>
-               <Button variant="link" size="sm" className="text-blue-500 font-bold p-0 uppercase text-xs mt-2">Xem thêm</Button>
+               <Button variant="secondary" size="sm" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 mt-2">Xem thêm</Button>
             </CardContent>
          </Card>
 
@@ -542,7 +542,7 @@ const VideoContentSection = ({ data, days }: { data: any, days: number }) => {
                      </div>
                   </div>
                ))}
-               <Button variant="link" size="sm" className="text-blue-500 font-bold p-0 uppercase text-xs mt-2">Xem thêm</Button>
+               <Button variant="secondary" size="sm" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 mt-2">Xem thêm</Button>
             </CardContent>
          </Card>
       </div>
@@ -1040,7 +1040,7 @@ const AnalyticsContent = ({ days }: { days: number }) => {
               </ResponsiveContainer>
             </div>
             <div className="p-4 border-t flex justify-start">
-               <Button variant="link" size="sm" className="text-blue-500 font-bold p-0 uppercase text-xs">
+               <Button variant="secondary" size="sm" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4">
                   Xem thêm
                </Button>
             </div>
@@ -1159,7 +1159,7 @@ const AnalyticsContent = ({ days }: { days: number }) => {
                ))}
             </div>
 
-            <Button variant="link" size="sm" className="w-full text-blue-500 font-bold p-0 uppercase text-xs mt-2">
+            <Button variant="secondary" size="sm" className="w-full text-xs font-bold h-9 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none mt-2">
                 Xem thêm
             </Button>
           </CardContent>
