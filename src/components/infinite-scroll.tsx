@@ -47,11 +47,7 @@ export const InfiniteScroll = ({
             </>
           ) : "Xem thêm"}
         </Button>
-      ) : (
-        <p className="text-xs text-muted-foreground">
-          Bạn đã xem hết rồi
-        </p>
-      )}
+      ) : null}
     </div>
   );
 };
