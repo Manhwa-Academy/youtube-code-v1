@@ -5,7 +5,7 @@ import { eq, sql } from "drizzle-orm";
 
 async function check() {
   const allViews = await db.select({
-    id: videoViews.id,
+    userId: videoViews.userId,
     videoId: videoViews.videoId,
     title: videos.title,
     createdAt: videoViews.createdAt
