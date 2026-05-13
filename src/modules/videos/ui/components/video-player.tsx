@@ -61,7 +61,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     const internalRef = useRef<any>(null);
     const playerRef = (ref as React.RefObject<any>) || internalRef;
     const utils = trpc.useContext();
-    const { setVideo, setCurrentTime, currentTime: globalCurrentTime } = usePlayerStore();
+    const { setVideo, setCurrentTime, currentTime: globalCurrentTime, hasCountedView, setHasCountedView } = usePlayerStore();
 
     // Sync with global store when playbackId is available (only for watch page)
     useEffect(() => {
@@ -97,7 +97,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     const [countdown, setCountdown] = useState(6);
     const [hasRedirected, setHasRedirected] = useState(false);
 
-    const hasCountedView = useRef(false);
+    // const hasCountedView = useRef(false); // Removed, using store now
     const hasSeeked = useRef(false);
 
     const lastKnownProgress = useRef(0);
@@ -111,7 +111,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     useEffect(() => {
       console.log("[VIDEO_PLAYER] Resetting refs for videoId:", videoId, "savedProgress:", savedProgress);
       hasSeeked.current = false;
-      hasCountedView.current = false;
+      // hasCountedView = false; // Using store action now if needed, but usually setVideo handles it
       isInitialSeekingRef.current = true;
       isVideoCompletedRef.current = false;
       isSwitchingVideoRef.current = false;
@@ -128,10 +128,10 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       if (!player) return;
 
       const handlePlay = async () => {
-        if (hasCountedView.current) return;
+        if (hasCountedView) return;
         try {
           await incrementViewMutation.mutateAsync({ videoId });
-          hasCountedView.current = true;
+          setHasCountedView(true);
         } catch (err) {
           console.log("PLAY EVENT ERROR:", err);
         }
@@ -140,7 +140,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
 
       player.addEventListener("play", handlePlay);
       return () => player.removeEventListener("play", handlePlay);
-    }, [videoId, onPlay]);
+    }, [videoId, onPlay, hasCountedView, setHasCountedView]);
 
     useEffect(() => {
       const player = playerRef.current;
@@ -231,26 +231,20 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           isVideoCompletedRef.current = false;
           // Cho phép đếm view lại nếu họ quay về đầu video
           if (current < 2) {
-            hasCountedView.current = false;
+            setHasCountedView(false);
           }
         }
         
-        if (isInitialSeekingRef.current || isVideoCompletedRef.current || isSwitchingVideoRef.current) {
-          // Log only occasionally or on state change
-          if (current % 5 === 0) {
-            console.log("[VIDEO_PLAYER] timeupdate blocked", {
-              isInitialSeeking: isInitialSeekingRef.current,
-              isVideoCompleted: isVideoCompletedRef.current,
-              isSwitchingVideo: isSwitchingVideoRef.current,
-              current
-            });
-          }
-          return;
-        }
-        
+        // Always update refs and local state for smooth transitions
         lastKnownProgress.current = current;
         localResumeRef.current = current;
-        setCurrentTime(current); // Sync to global store
+        
+        // Sync to global store more aggressively
+        setCurrentTime(current);
+
+        if (isInitialSeekingRef.current || isVideoCompletedRef.current || isSwitchingVideoRef.current) {
+          return;
+        }
 
         if (typeof window !== "undefined") {
           localStorage.setItem(`video-${videoId}-progress`, String(current));
@@ -320,7 +314,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         }
 
         // Cho phép đếm view lại nếu người dùng xem lại video
-        hasCountedView.current = false;
+        setHasCountedView(false);
 
         if (loopEnabled) {
           isVideoCompletedRef.current = false;

@@ -14,9 +14,11 @@ interface PlayerState {
   isOpen: boolean;
   queue: PlayerVideo[];
   currentTime: number;
+  hasCountedView: boolean;
   
   // Actions
   setVideo: (video: PlayerVideo) => void;
+  setHasCountedView: (val: boolean) => void;
   close: () => void;
   minimize: () => void;
   maximize: () => void;
@@ -35,14 +37,18 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   isOpen: false,
   queue: [],
   currentTime: 0,
+  hasCountedView: false,
 
   setVideo: (video) => set((state) => ({ 
     activeVideo: video, 
     activeVideoId: video.id,
     isOpen: true,
     isMinimized: false,
-    currentTime: state.activeVideoId === video.id ? state.currentTime : 0
+    currentTime: state.activeVideoId === video.id ? state.currentTime : 0,
+    hasCountedView: state.activeVideoId === video.id ? state.hasCountedView : false
   })),
+
+  setHasCountedView: (val) => set({ hasCountedView: val }),
   
   close: () => set({ 
     isOpen: false, 
