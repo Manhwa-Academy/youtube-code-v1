@@ -91,9 +91,26 @@ const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp 
         )
       : 0;
 
-  // Nếu có tracking (đã đăng nhập + bật lịch sử) -> Ưu tiên tuyệt đối Server
-  // Nếu không có tracking (khách hoặc tắt lịch sử) -> Dùng localStorage
-  const finalProgress = trackingEnabled ? (video.progress || 0) : localProgress;
+  // Nếu video đã xem đến 2 giây cuối, coi như đã xem hết để xem lại từ đầu
+  // LƯU Ý: video.duration trong DB đang là miliseconds (ms), cần chia 1000 để so với giây (s)
+  const durationInSeconds = (video.duration || 0) / 1000;
+  const isVideoFinished = (video.progress || 0) >= Math.max(durationInSeconds - 2, 0);
+  const isLocalFinished = localProgress >= Math.max(durationInSeconds - 2, 0);
+
+  const finalProgress = trackingEnabled 
+    ? (isVideoFinished ? 0 : (video.progress || 0)) 
+    : (isLocalFinished ? 0 : localProgress);
+
+  console.log("[VIDEO_SECTION]", {
+    videoId: video.id,
+    videoProgress: video.progress,
+    videoDurationMs: video.duration,
+    videoDurationSec: durationInSeconds,
+    localProgress,
+    isVideoFinished,
+    finalProgress,
+    trackingEnabled
+  });
   // 🔹 playlist public
   const { data: playlists } =
     trpc.playlists.getPublicMixPlaylists.useQuery() as {

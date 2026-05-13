@@ -99,12 +99,12 @@ const HistoryVideosSectionSuspense = () => {
       toast.success("Đã xóa tất cả nhật ký xem");
       clearCurrentTime(); // Reset progress cho video đang phát
 
-      // Xóa tất cả progress trong localStorage
+      // Xóa tất cả progress trong localStorage (kể cả cache ngầm của Mux Player)
       if (typeof window !== "undefined") {
         const keysToRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
-          if (key?.startsWith("video-") && key?.endsWith("-progress")) {
+          if ((key?.startsWith("video-") && key?.endsWith("-progress")) || key?.includes("mux")) {
             keysToRemove.push(key);
           }
         }
@@ -130,6 +130,16 @@ const HistoryVideosSectionSuspense = () => {
 
         if (typeof window !== "undefined") {
           localStorage.removeItem(`video-${variables.videoId}-progress`);
+          
+          // Clear Mux internal cache for this specific playbackId (we clear all mux keys to be safe since we don't have playbackId here)
+          const keysToRemove = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key?.includes("mux")) {
+              keysToRemove.push(key);
+            }
+          }
+          keysToRemove.forEach((k) => localStorage.removeItem(k));
         }
 
         await Promise.all([

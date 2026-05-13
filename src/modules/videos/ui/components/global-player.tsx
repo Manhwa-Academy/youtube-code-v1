@@ -107,6 +107,7 @@ export const GlobalPlayer = () => {
         {/* Video Player */}
         <div className="flex-1 bg-black">
           <MuxPlayer
+            key={activeVideo.id}
             ref={playerRef}
             playbackId={activeVideo.playbackId || ""}
             streamType="on-demand"
@@ -123,6 +124,24 @@ export const GlobalPlayer = () => {
                 if (newTime > 0) {
                   setCurrentTime(newTime);
                 }
+              }
+            }}
+            onCanPlay={() => {
+              const player = playerRef.current;
+              // Chỉ thực hiện ép seek 1 lần khi bắt đầu để tránh treo buffer
+              if (player && isSeekingRef.current) {
+                const duration = player.duration;
+                const targetTime = currentTime;
+                
+                let finalTime = 0;
+                if (duration > 0 && targetTime >= duration - 0.5) {
+                  finalTime = 0;
+                } else if (targetTime > 0) {
+                  finalTime = targetTime;
+                }
+                
+                console.log("[GLOBAL_PLAYER] syncing time:", { finalTime, targetTime, duration });
+                player.currentTime = finalTime;
               }
             }}
             onPlaying={() => {

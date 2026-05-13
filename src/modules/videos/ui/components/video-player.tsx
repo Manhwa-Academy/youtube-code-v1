@@ -107,6 +107,22 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     const isInitialSeekingRef = useRef(true);
     const localResumeRef = useRef(savedProgress);
 
+    // Reset tracking refs when videoId changes
+    useEffect(() => {
+      console.log("[VIDEO_PLAYER] Resetting refs for videoId:", videoId, "savedProgress:", savedProgress);
+      hasSeeked.current = false;
+      hasCountedView.current = false;
+      isInitialSeekingRef.current = true;
+      isVideoCompletedRef.current = false;
+      isSwitchingVideoRef.current = false;
+      lastKnownProgress.current = 0;
+      localResumeRef.current = savedProgress;
+      savingRef.current = false;
+      setShowNext(false);
+      setCountdown(6);
+      setHasRedirected(false);
+    }, [videoId, savedProgress]);
+
     useEffect(() => {
       const player = playerRef.current;
       if (!player) return;
@@ -142,17 +158,27 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         }
 
         const duration = player.duration || 0;
-        if (duration <= 0) return;
+        if (duration <= 0) {
+          console.log("[VIDEO_PLAYER] handleCanPlay: duration is 0, waiting...");
+          return;
+        }
 
         // Ưu tiên thời gian đang xem trong session hiện tại, nếu không có mới dùng savedProgress
         let resumeAt = 0;
-        if (globalCurrentTime > 0 && globalCurrentTime < duration * 0.99) {
+        let source = "none";
+
+        if (globalCurrentTime > 0 && globalCurrentTime < duration - 2) {
           resumeAt = globalCurrentTime;
-        } else if (localResumeRef.current > 0 && localResumeRef.current < duration * 0.99) {
+          source = "globalStore";
+        } else if (localResumeRef.current > 0 && localResumeRef.current < duration - 2) {
           resumeAt = localResumeRef.current;
-        } else if (savedProgress > 0 && savedProgress < duration * 0.99) {
+          source = "localResumeRef";
+        } else if (savedProgress > 0 && savedProgress < duration - 2) {
           resumeAt = savedProgress;
+          source = "savedProgress";
         }
+
+        console.log("[VIDEO_PLAYER] calculated resumeAt:", { resumeAt, source, duration, savedProgress, globalCurrentTime });
 
         if (resumeAt > 1) {
           player.currentTime = resumeAt;
@@ -164,13 +190,29 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           localResumeRef.current = 0;
         }
 
+        console.log("[VIDEO_PLAYER] handleCanPlay", {
+          videoId,
+          duration,
+          resumeAt,
+          savedProgress,
+          globalCurrentTime,
+          localResume: localResumeRef.current
+        });
+        
+        // Cập nhật store ngay lập tức để đồng bộ với popup
+        setCurrentTime(resumeAt);
+
         hasSeeked.current = true;
         setTimeout(() => { isInitialSeekingRef.current = false; }, 800);
         if (autoPlay) player.play().catch(() => {});
       };
 
       player.addEventListener("canplay", handleCanPlay);
-      return () => player.removeEventListener("canplay", handleCanPlay);
+      player.addEventListener("loadedmetadata", handleCanPlay);
+      return () => {
+        player.removeEventListener("canplay", handleCanPlay);
+        player.removeEventListener("loadedmetadata", handleCanPlay);
+      };
     }, [videoId, trackingEnabled, savedProgress, autoPlay]);
 
     useEffect(() => {
@@ -180,8 +222,32 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
 
       let lastSaved = 0;
       const handleTimeUpdate = () => {
-        if (isInitialSeekingRef.current || isVideoCompletedRef.current || isSwitchingVideoRef.current) return;
+        if (!player) return;
         const current = Math.floor(player.currentTime || 0);
+        const duration = Math.floor(player.duration || 0);
+        
+        // If user restarts or seeks backwards after completing, unblock progress tracking
+        if (isVideoCompletedRef.current && current < duration - 2) {
+          isVideoCompletedRef.current = false;
+          // Cho phép đếm view lại nếu họ quay về đầu video
+          if (current < 2) {
+            hasCountedView.current = false;
+          }
+        }
+        
+        if (isInitialSeekingRef.current || isVideoCompletedRef.current || isSwitchingVideoRef.current) {
+          // Log only occasionally or on state change
+          if (current % 5 === 0) {
+            console.log("[VIDEO_PLAYER] timeupdate blocked", {
+              isInitialSeeking: isInitialSeekingRef.current,
+              isVideoCompleted: isVideoCompletedRef.current,
+              isSwitchingVideo: isSwitchingVideoRef.current,
+              current
+            });
+          }
+          return;
+        }
+        
         lastKnownProgress.current = current;
         localResumeRef.current = current;
         setCurrentTime(current); // Sync to global store
@@ -220,7 +286,9 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       };
       window.addEventListener("beforeunload", saveOnExit);
       return () => {
-        if (lastKnownProgress.current > 0) {
+        if (isVideoCompletedRef.current) {
+          usePlayerStore.getState().close();
+        } else if (lastKnownProgress.current > 0) {
           setCurrentTime(lastKnownProgress.current);
         }
         saveOnExit();
@@ -251,9 +319,11 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           await updateProgressMutation.mutateAsync({ videoId, progress: duration });
         }
 
+        // Cho phép đếm view lại nếu người dùng xem lại video
+        hasCountedView.current = false;
+
         if (loopEnabled) {
           isVideoCompletedRef.current = false;
-          hasCountedView.current = false;
           lastKnownProgress.current = 0;
           localResumeRef.current = 0;
           if (typeof window !== "undefined") localStorage.setItem(`video-${videoId}-progress`, "0");
@@ -263,6 +333,11 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           return;
         }
 
+        if (!loopEnabled && !autoNextEnabled) {
+          usePlayerStore.getState().close();
+          return;
+        }
+        
         if (!autoNextEnabled) return;
         if (isVertical) {
           setCountdown(0);
@@ -278,19 +353,6 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       player.addEventListener("ended", handleEnded);
       return () => player.removeEventListener("ended", handleEnded);
     }, [autoNextEnabled, loopEnabled, videoId, trackingEnabled, updateProgressMutation, isVertical]);
-
-    useEffect(() => {
-      setShowNext(false);
-      setCountdown(6);
-      setHasRedirected(false);
-      hasCountedView.current = false;
-      hasSeeked.current = false;
-      lastKnownProgress.current = 0;
-      isVideoCompletedRef.current = false;
-      isSwitchingVideoRef.current = false;
-      localResumeRef.current = savedProgress;
-      isInitialSeekingRef.current = true;
-    }, [videoId]);
 
     useEffect(() => {
       if (!showNext) return;
@@ -339,6 +401,19 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           accentColor="#FF2056"
           preferPlayback="mse"
           playsInline
+          startTime={savedProgress}
+          onCanPlay={() => {
+            const player = playerRef.current;
+            if (player && isInitialSeekingRef.current) {
+              player.currentTime = localResumeRef.current;
+            }
+          }}
+          onPlaying={() => {
+            const player = playerRef.current;
+            if (player && isInitialSeekingRef.current) {
+              player.currentTime = localResumeRef.current;
+            }
+          }}
         />
 
         {autoNextEnabled && showNext && nextVideo && (

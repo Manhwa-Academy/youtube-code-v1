@@ -30,6 +30,7 @@ import {
   videos,
   videoUpdateSchema,
   videoViews,
+  viewEvents,
   comments,
 } from "@/db/schema";
 
@@ -591,26 +592,21 @@ export const videosRouter = createTRPCRouter({
         })
         .where(eq(videos.id, input.videoId));
 
-      if (userId && trackingEnabled) {
-        const [existingView] = await db
-          .select()
-          .from(videoViews)
-          .where(
-            and(
-              eq(videoViews.userId, userId),
-              eq(videoViews.videoId, input.videoId),
-            ),
-          );
+      // 🔹 Ghi nhận sự kiện xem (Event) - Luôn thêm mới để tính analytics theo ngày/giờ
+      await db.insert(viewEvents).values({
+        userId,
+        videoId: input.videoId,
+      });
 
-        if (!existingView) {
-          await db
-            .insert(videoViews)
-            .values({
-              userId,
-              videoId: input.videoId,
-              progress: 0,
-            });
-        }
+      if (userId && trackingEnabled) {
+        await db
+          .insert(videoViews)
+          .values({
+            userId,
+            videoId: input.videoId,
+            progress: 0,
+          })
+          .onConflictDoNothing();
       }
 
       return { success: true };

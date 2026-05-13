@@ -545,6 +545,19 @@ export const videoViews = pgTable(
   ],
 );
 
+export const viewEvents = pgTable(
+  "view_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" }),
+    videoId: uuid("video_id")
+      .references(() => videos.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  }
+);
+
 export const videoViewRelations = relations(videoViews, ({ one }) => ({
   user: one(users, { fields: [videoViews.userId], references: [users.id] }),
   video: one(videos, { fields: [videoViews.videoId], references: [videos.id] }),

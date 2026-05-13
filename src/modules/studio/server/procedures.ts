@@ -12,6 +12,7 @@ import {
   videoReactions,
   videos,
   videoViews,
+  viewEvents,
   posts,
   postImages,
   postPolls,
@@ -356,12 +357,12 @@ export const studioRouter = createTRPCRouter({
     ] = await Promise.all([
       db.select({ totalViews: sql<number>`CAST(SUM(${videos.viewsCount}) AS INTEGER)` }).from(videos).where(eq(videos.userId, userId)),
       db.select({ count: sql<number>`CAST(COUNT(*) AS INTEGER)` }).from(subscriptions).where(eq(subscriptions.creatorId, userId)),
-      db.select({ date: sql<string>`DATE_TRUNC('day', ${videoViews.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`, views: sql<number>`CAST(COUNT(*) AS INTEGER)` }).from(videoViews).innerJoin(videos, eq(videoViews.videoId, videos.id)).where(and(eq(videos.userId, userId), gte(videoViews.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))).groupBy(sql`DATE_TRUNC('day', ${videoViews.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`).orderBy(sql`DATE_TRUNC('day', ${videoViews.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`),
+      db.select({ date: sql<string>`DATE_TRUNC('day', ${viewEvents.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`, views: sql<number>`CAST(COUNT(*) AS INTEGER)` }).from(viewEvents).innerJoin(videos, eq(viewEvents.videoId, videos.id)).where(and(eq(videos.userId, userId), gte(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))).groupBy(sql`DATE_TRUNC('day', ${viewEvents.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`).orderBy(sql`DATE_TRUNC('day', ${viewEvents.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`),
       db.select({ progress: videoViews.progress, duration: videos.duration }).from(videoViews).innerJoin(videos, eq(videoViews.videoId, videos.id)).where(and(eq(videos.userId, userId), gte(videoViews.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))),
       db.select({ id: videos.id, title: videos.title, thumbnailUrl: videos.thumbnailUrl, viewsCount: videos.viewsCount, duration: videos.duration, createdAt: videos.createdAt, muxPlaybackId: videos.muxPlaybackId }).from(videos).where(eq(videos.userId, userId)).orderBy(desc(videos.viewsCount)).limit(5),
       db.select({ date: sql<string>`DATE_TRUNC('day', ${subscriptions.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`, count: sql<number>`CAST(COUNT(*) AS INTEGER)` }).from(subscriptions).where(and(eq(subscriptions.creatorId, userId), gte(subscriptions.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))).groupBy(sql`DATE_TRUNC('day', ${subscriptions.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`).orderBy(sql`DATE_TRUNC('day', ${subscriptions.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`),
-      db.select({ count: sql<number>`COUNT(DISTINCT ${videoViews.userId})` }).from(videoViews).innerJoin(videos, eq(videoViews.videoId, videos.id)).where(and(eq(videos.userId, userId), gte(videoViews.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`), isNotNull(videoViews.userId))),
-      db.select({ isSubscribed: sql<boolean>`CASE WHEN ${subscriptions.viewerId} IS NOT NULL THEN true ELSE false END`, count: sql<number>`CAST(COUNT(*) AS INTEGER)` }).from(videoViews).innerJoin(videos, eq(videoViews.videoId, videos.id)).leftJoin(subscriptions, and(eq(subscriptions.creatorId, videos.userId), eq(subscriptions.viewerId, videoViews.userId))).where(and(eq(videos.userId, userId), gte(videoViews.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))).groupBy(sql`CASE WHEN ${subscriptions.viewerId} IS NOT NULL THEN true ELSE false END`),
+      db.select({ count: sql<number>`COUNT(DISTINCT ${viewEvents.userId})` }).from(viewEvents).innerJoin(videos, eq(viewEvents.videoId, videos.id)).where(and(eq(videos.userId, userId), gte(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`), isNotNull(viewEvents.userId))),
+      db.select({ isSubscribed: sql<boolean>`CASE WHEN ${subscriptions.viewerId} IS NOT NULL THEN true ELSE false END`, count: sql<number>`CAST(COUNT(*) AS INTEGER)` }).from(viewEvents).innerJoin(videos, eq(viewEvents.videoId, videos.id)).leftJoin(subscriptions, and(eq(subscriptions.creatorId, videos.userId), eq(subscriptions.viewerId, viewEvents.userId))).where(and(eq(videos.userId, userId), gte(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))).groupBy(sql`CASE WHEN ${subscriptions.viewerId} IS NOT NULL THEN true ELSE false END`),
     ]);
 
     // 2. Tính toán Watch time
@@ -395,9 +396,9 @@ export const studioRouter = createTRPCRouter({
 
     // 5. Realtime data (song song)
     const realtime = await (async () => {
-      const totalViews = await db.$count(videoViews, and(inArray(videoViews.videoId, db.select({ id: videos.id }).from(videos).where(eq(videos.userId, userId))), gte(videoViews.createdAt, sql`NOW() - INTERVAL '48 hours'`)));
-      const topVideosInRange = await db.select({ id: videos.id, title: videos.title, thumbnailUrl: videos.thumbnailUrl, viewsCount: sql<number>`CAST(COUNT(${videoViews.videoId}) AS INTEGER)` }).from(videoViews).innerJoin(videos, eq(videoViews.videoId, videos.id)).where(and(eq(videos.userId, userId), gte(videoViews.createdAt, sql`NOW() - INTERVAL '48 hours'`))).groupBy(videos.id).orderBy(desc(sql`COUNT(${videoViews.videoId})`)).limit(3);
-      const viewsByHourRaw = await db.select({ hour: sql<string>`TO_CHAR(${videoViews.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD HH24:00')`, count: sql<number>`CAST(COUNT(*) AS INTEGER)` }).from(videoViews).innerJoin(videos, eq(videoViews.videoId, videos.id)).where(and(eq(videos.userId, userId), gte(videoViews.createdAt, sql`NOW() - INTERVAL '48 hours'`))).groupBy(sql`TO_CHAR(${videoViews.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD HH24:00')`).orderBy(sql`TO_CHAR(${videoViews.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD HH24:00')`);
+      const totalViews = await db.$count(viewEvents, and(inArray(viewEvents.videoId, db.select({ id: videos.id }).from(videos).where(eq(videos.userId, userId))), gte(viewEvents.createdAt, sql`NOW() - INTERVAL '48 hours'`)));
+      const topVideosInRange = await db.select({ id: videos.id, title: videos.title, thumbnailUrl: videos.thumbnailUrl, viewsCount: sql<number>`CAST(COUNT(${viewEvents.videoId}) AS INTEGER)` }).from(viewEvents).innerJoin(videos, eq(viewEvents.videoId, videos.id)).where(and(eq(videos.userId, userId), gte(viewEvents.createdAt, sql`NOW() - INTERVAL '48 hours'`))).groupBy(videos.id).orderBy(desc(sql`COUNT(${viewEvents.videoId})`)).limit(3);
+      const viewsByHourRaw = await db.select({ hour: sql<string>`TO_CHAR(${viewEvents.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD HH24:00')`, count: sql<number>`CAST(COUNT(*) AS INTEGER)` }).from(viewEvents).innerJoin(videos, eq(viewEvents.videoId, videos.id)).where(and(eq(videos.userId, userId), gte(viewEvents.createdAt, sql`NOW() - INTERVAL '48 hours'`))).groupBy(sql`TO_CHAR(${viewEvents.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD HH24:00')`).orderBy(sql`TO_CHAR(${viewEvents.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD HH24:00')`);
 
       const viewsByHour = [];
       const now = new Date();
@@ -469,13 +470,13 @@ export const studioRouter = createTRPCRouter({
       })),
       contentBreakdown: {
         views: {
-          shorts: await db.$count(videoViews, and(inArray(videoViews.videoId, db.select({ id: videos.id }).from(videos).where(and(eq(videos.userId, userId), gt(videos.videoHeight, videos.videoWidth)))), gte(videoViews.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))),
-          video: await db.$count(videoViews, and(inArray(videoViews.videoId, db.select({ id: videos.id }).from(videos).where(and(eq(videos.userId, userId), or(lte(videos.videoHeight, videos.videoWidth), isNull(videos.videoHeight), isNull(videos.videoWidth))))), gte(videoViews.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))),
+          shorts: await db.$count(viewEvents, and(inArray(viewEvents.videoId, db.select({ id: videos.id }).from(videos).where(and(eq(videos.userId, userId), gt(videos.videoHeight, videos.videoWidth)))), gte(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))),
+          video: await db.$count(viewEvents, and(inArray(viewEvents.videoId, db.select({ id: videos.id }).from(videos).where(and(eq(videos.userId, userId), or(lte(videos.videoHeight, videos.videoWidth), isNull(videos.videoHeight), isNull(videos.videoWidth))))), gte(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))),
           posts: await db.$count(postReactions, and(inArray(postReactions.postId, db.select({ id: posts.id }).from(posts).where(eq(posts.userId, userId))), gte(postReactions.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))),
         },
         newViewers: {
-          shorts: await db.$count(videoViews, and(inArray(videoViews.videoId, db.select({ id: videos.id }).from(videos).where(and(eq(videos.userId, userId), gt(videos.videoHeight, videos.videoWidth)))), gte(videoViews.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))),
-          video: await db.$count(videoViews, and(inArray(videoViews.videoId, db.select({ id: videos.id }).from(videos).where(and(eq(videos.userId, userId), or(lte(videos.videoHeight, videos.videoWidth), isNull(videos.videoHeight), isNull(videos.videoWidth))))), gte(videoViews.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))),
+          shorts: await db.$count(viewEvents, and(inArray(viewEvents.videoId, db.select({ id: videos.id }).from(videos).where(and(eq(videos.userId, userId), gt(videos.videoHeight, videos.videoWidth)))), gte(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))),
+          video: await db.$count(viewEvents, and(inArray(viewEvents.videoId, db.select({ id: videos.id }).from(videos).where(and(eq(videos.userId, userId), or(lte(videos.videoHeight, videos.videoWidth), isNull(videos.videoHeight), isNull(videos.videoWidth))))), gte(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))),
           posts: await db.$count(postReactions, and(inArray(postReactions.postId, db.select({ id: posts.id }).from(posts).where(eq(posts.userId, userId))), gte(postReactions.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))),
         },
         returningViewers: {
@@ -506,7 +507,7 @@ export const studioRouter = createTRPCRouter({
           posts: await db.$count(posts, and(eq(posts.userId, userId), gte(posts.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`))),
         },
         shorts: {
-          intentionalViews: Math.floor(await db.$count(videoViews, and(inArray(videoViews.videoId, db.select({ id: videos.id }).from(videos).where(and(eq(videos.userId, userId), gt(videos.videoHeight, videos.videoWidth)))))) * 0.8),
+          intentionalViews: Math.floor(await db.$count(viewEvents, and(inArray(viewEvents.videoId, db.select({ id: videos.id }).from(videos).where(and(eq(videos.userId, userId), gt(videos.videoHeight, videos.videoWidth)))))) * 0.8),
           likes: 2, // Mock for now or count videoReactions
           stayPercent: 83.3,
           swipePercent: 16.7,
