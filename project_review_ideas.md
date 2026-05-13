@@ -34,11 +34,6 @@ const itemsWithAvgView = await Promise.all(
 - Thêm hỗ trợ English, Japanese,...
 - Dùng `next-intl` hoặc `react-i18next`
 
-#### 15. Hệ Thống Report / Báo Cáo Vi Phạm
-- Report video, comment, user
-- Admin review queue
-- Auto-moderation rules
-
 ---
 
 ### 🟢 Ưu tiên thấp — Ý tưởng dài hạn
@@ -59,7 +54,7 @@ const itemsWithAvgView = await Promise.all(
 - Embed code generator trong Studio
 
 #### 30. Admin Dashboard
-- Quản lý toàn bộ users, videos, comments
+- Quản lý toàn bộ users, videos, comments, posts
 - Content moderation queue
 - Platform analytics (MAU, DAU, total watch time)
 - Ban/suspend accounts

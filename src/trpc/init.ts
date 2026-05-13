@@ -76,12 +76,28 @@ export const protectedProcedure = t.procedure.use(async function isAuthed(opts) 
     throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
   }
 
+  const email = clerkUser.emailAddresses[0].emailAddress;
+
   return opts.next({
     ctx: {
       ...ctx,
-      user,
+      user: {
+        ...user,
+        email,
+      },
     },
   });
+});
+
+// ✅ Admin procedure
+export const adminProcedure = protectedProcedure.use(async function isAdmin(opts) {
+  const { ctx } = opts;
+
+  if (ctx.user.email !== "vuliztva1@gmail.com") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Bạn không có quyền quản trị" });
+  }
+
+  return opts.next(opts);
 });
 
 // ✅ Tạo publicProcedure để mọi người có thể gọi mà không cần login

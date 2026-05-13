@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth, useClerk } from "@clerk/nextjs";
+import { useAuth, useClerk, useUser } from "@clerk/nextjs";
 import {
   HistoryIcon,
   ListVideoIcon,
@@ -11,6 +11,7 @@ import {
   DownloadIcon,
   PlaySquareIcon,
   BellIcon,
+  ShieldAlertIcon,
 } from "lucide-react";
 
 import { useIsOnline } from "@/hooks/use-is-online";
@@ -71,13 +72,28 @@ const items = [
 
 export const PersonalSection = () => {
   const clerk = useClerk();
+  const { user } = useUser();
   const { isSignedIn } = useAuth();
   const pathname = usePathname();
   const isOnline = useIsOnline();
 
-  const filteredItems = isOnline 
+  let filteredItems = isOnline 
     ? items 
     : items.filter(item => item.title === "Nội dung tải xuống");
+
+  const isAdmin = user?.emailAddresses.some(e => e.emailAddress === "vuliztva1@gmail.com");
+  
+  if (isAdmin && isOnline) {
+    filteredItems = [
+      ...filteredItems,
+      {
+        title: "Quản lý báo cáo",
+        url: "/admin/reports",
+        icon: ShieldAlertIcon,
+        auth: true,
+      }
+    ];
+  }
 
   return (
     <SidebarGroup>

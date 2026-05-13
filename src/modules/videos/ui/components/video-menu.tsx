@@ -7,7 +7,7 @@ import {
   Trash2Icon,
   PlusIcon,
   ListVideoIcon,
-  DownloadIcon,
+  FlagIcon,
 } from "lucide-react";
 
 import { useIsOnline } from "@/hooks/use-is-online";
@@ -25,6 +25,7 @@ import {
 import { PlaylistAddModal } from "@/modules/playlists/ui/components/playlist-add-modal";
 import { MixPlaylistCreateModal } from "@/modules/playlists/ui/components/mix-playlist-create-modal";
 import { MixPlaylistAddModal } from "@/modules/playlists/ui/components/mix-playlist-add-modal";
+import { ReportModal } from "@/modules/reports/ui/components/report-modal";
 import { usePlayerStore } from "@/modules/videos/store/use-player-store";
 
 interface VideoMenuProps {
@@ -48,6 +49,7 @@ export const VideoMenu = ({
   const [isOpenPlaylistAddModal, setIsOpenPlaylistAddModal] = useState(false);
   const [isOpenCreateModal, setIsOpenCreateModal] = useState(false);
   const [isOpenMixAddModal, setIsOpenMixAddModal] = useState(false);
+  const [isOpenReportModal, setIsOpenReportModal] = useState(false);
   
   const addToQueue = usePlayerStore((state) => state.addToQueue);
 
@@ -103,6 +105,12 @@ export const VideoMenu = ({
         open={isOpenMixAddModal}
         onOpenChange={setIsOpenMixAddModal}
       />
+      <ReportModal
+        targetId={videoId}
+        targetType="video"
+        isOpen={isOpenReportModal}
+        onClose={() => setIsOpenReportModal(false)}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant={variant} size="icon" className="rounded-full">
@@ -135,6 +143,10 @@ export const VideoMenu = ({
               <DropdownMenuItem onClick={() => setIsOpenMixAddModal(true)}>
                 <ListPlusIcon className="mr-2 size-4" />
                 Thêm vào danh sách kết hợp
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsOpenReportModal(true)}>
+                <FlagIcon className="mr-2 size-4" />
+                Báo cáo vi phạm
               </DropdownMenuItem>
               {onRemove && (
                 <DropdownMenuItem onClick={onRemove}>

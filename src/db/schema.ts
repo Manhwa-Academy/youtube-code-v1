@@ -610,3 +610,29 @@ export const notificationRelations = relations(notifications, ({ one }) => ({
 export const notificationSelectSchema = createSelectSchema(notifications);
 export const notificationInsertSchema = createInsertSchema(notifications);
 export const notificationUpdateSchema = createUpdateSchema(notifications);
+// ====================== REPORTS & MODERATION ======================
+export const reportType = pgEnum("report_type", ["video", "comment", "user", "post"]);
+export const reportStatus = pgEnum("report_status", [
+  "pending",
+  "reviewed",
+  "resolved",
+  "dismissed",
+]);
+
+export const reports = pgTable("reports", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  targetId: uuid("target_id").notNull(),
+  targetType: reportType("target_type").notNull(),
+  reason: text("reason").notNull(),
+  description: text("description"),
+  status: reportStatus("status").default("pending").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const reportRelations = relations(reports, ({ one }) => ({
+  user: one(users, { fields: [reports.userId], references: [users.id] }),
+}));

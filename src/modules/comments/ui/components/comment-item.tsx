@@ -17,6 +17,7 @@ import {
   TimerIcon,
   ShieldCheckIcon,
   ShieldAlertIcon,
+  FlagIcon,
 } from "lucide-react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -34,6 +35,7 @@ import {
 import { CommentForm } from "./comment-form";
 import { CommentReplies } from "./comment-replies";
 import { CommentsGetManyOutput } from "../../types";
+import { ReportModal } from "@/modules/reports/ui/components/report-modal";
 import { usePlayerStore } from "@/modules/videos/store/use-player-store";
 
 interface CommentItemProps {
@@ -50,6 +52,7 @@ export const CommentItem = ({
 
   const [isReplyOpen, setIsReplyOpen] = useState(false);
   const [isRepliesOpen, setIsRepliesOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const utils = trpc.useUtils();
 
@@ -303,9 +306,19 @@ export const CommentItem = ({
                 Xóa
               </DropdownMenuItem>
             )}
+            <DropdownMenuItem onClick={() => setIsReportModalOpen(true)}>
+              <FlagIcon className="size-4 mr-2" />
+              Báo cáo vi phạm
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      <ReportModal
+        targetId={comment.id}
+        targetType="comment"
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+      />
       {isReplyOpen && variant === "comment" && (
         <div className="mt-4 pl-14">
           <CommentForm

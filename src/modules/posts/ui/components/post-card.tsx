@@ -8,7 +8,7 @@ import { UserAvatar } from "@/components/user-avatar";
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { ThumbsUp, ThumbsDown, MessageSquare, MoreVertical, Trash2, CheckCircle2, Pencil, Share2 } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageSquare, MoreVertical, Trash2, CheckCircle2, Pencil, Share2, Flag } from "lucide-react";
 import Image from "next/image";
 import { trpc } from "@/trpc/client";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PostCommentsSection } from "../sections/post-comments-section";
+import { ReportModal } from "@/modules/reports/ui/components/report-modal";
 
 interface PostCardProps {
   post: any; 
@@ -35,6 +36,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
   const utils = trpc.useUtils();
   const [showComments, setShowComments] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [editContent, setEditContent] = useState(post.content || "");
   
   const react = trpc.posts.react.useMutation({
@@ -111,27 +113,34 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
                 )}
               </span>
               
-              {isOwner && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="ml-auto size-8 text-muted-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full">
-                      <MoreVertical className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {post.type === "image" && (
-                      <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                        <Pencil className="size-4 mr-2" />
-                        Chỉnh sửa
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="ml-auto size-8 text-muted-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full">
+                    <MoreVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {isOwner ? (
+                    <>
+                      {post.type === "image" && (
+                        <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                          <Pencil className="size-4 mr-2" />
+                          Chỉnh sửa
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem className="text-red-500" onClick={() => remove.mutate({ id: post.id })}>
+                        <Trash2 className="size-4 mr-2" />
+                        Xóa bài viết
                       </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem className="text-red-500" onClick={() => remove.mutate({ id: post.id })}>
-                      <Trash2 className="size-4 mr-2" />
-                      Xóa bài viết
+                    </>
+                  ) : (
+                    <DropdownMenuItem onClick={() => setIsReportModalOpen(true)}>
+                      <Flag className="size-4 mr-2" />
+                      Báo cáo vi phạm
                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             
             {/* Main Content Area */}
@@ -381,6 +390,12 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
           <PostCommentsSection postId={post.id} canComment={post.canComment} />
         </div>
       )}
+      <ReportModal 
+        targetId={post.id}
+        targetType="post"
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+      />
     </div>
   );
 };

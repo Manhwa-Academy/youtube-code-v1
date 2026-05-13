@@ -10,6 +10,7 @@ import {
   UsersIcon, 
   VideoIcon,
   ChevronRightIcon,
+  FlagIcon,
 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -33,6 +34,8 @@ import { UserGetOneOutput } from "../../types";
 
 import { useSubscription } from "@/modules/subscriptions/hooks/use-subscription";
 import { SubscriptionButton } from "@/modules/subscriptions/ui/components/subscription-button";
+import { ReportModal } from "@/modules/reports/ui/components/report-modal";
+import { useState } from "react";
 
 interface UserPageInfoProps {
   user: UserGetOneOutput & { viewCount?: number };
@@ -57,6 +60,7 @@ export const UserPageInfoSkeleton = () => {
 export const UserPageInfo = ({ user }: UserPageInfoProps) => {
   const { userId, isLoaded } = useAuth();
   const clerk = useClerk();
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const { isPending, onClick } = useSubscription({
     userId: user.id,
@@ -199,9 +203,26 @@ export const UserPageInfo = ({ user }: UserPageInfoProps) => {
                 className="rounded-full px-6"
               />
             )}
+            {!isOwner && (
+              <Button 
+                variant="secondary" 
+                size="icon" 
+                className="rounded-full"
+                onClick={() => setIsReportModalOpen(true)}
+                title="Báo cáo người dùng"
+              >
+                <FlagIcon className="size-5" />
+              </Button>
+            )}
           </div>
         </div>
       </div>
+      <ReportModal
+        targetId={user.id}
+        targetType="user"
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+      />
     </div>
   );
 };

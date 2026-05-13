@@ -11,7 +11,8 @@ import {
   UserCircleIcon, 
   UserIcon,
   ChevronRightIcon,
-  CheckIcon
+  CheckIcon,
+  ShieldAlertIcon,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { SignInButton, SignedIn, SignedOut, useClerk, useUser } from "@clerk/nextjs";
@@ -131,6 +132,12 @@ export const AuthButton = () => {
               <ClapperboardIcon className="mr-3 size-4" />
               <span>{t("studio")}</span>
             </DropdownMenuItem>
+            {user?.primaryEmailAddress?.emailAddress === "vuliztva1@gmail.com" && (
+              <DropdownMenuItem onClick={() => router.push("/admin/reports")}>
+                <ShieldAlertIcon className="mr-3 size-4 text-red-500" />
+                <span className="font-bold text-red-500">Quản lý báo cáo</span>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => {
               const isDark = document.documentElement.classList.contains("dark");
