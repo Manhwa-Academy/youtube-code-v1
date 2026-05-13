@@ -22,7 +22,14 @@ import {
   InfoIcon,
   ArrowUpRightIcon,
   Trash2Icon,
-  FlagIcon
+  FlagIcon,
+  BanIcon,
+  CheckCheckIcon,
+  UserPlusIcon,
+  ShieldAlertIcon,
+  ShieldCheckIcon,
+  UserMinusIcon,
+  ShieldMinusIcon
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -798,6 +805,22 @@ const CommunityCommentsList = ({
     onSuccess: () => utils.studio.getCommunityComments.invalidate(),
   });
 
+  const removeMutation = trpc.comments.remove.useMutation({
+    onSuccess: () => {
+      toast.success("Đã loại bỏ bình luận");
+      utils.studio.getCommunityComments.invalidate();
+    },
+    onError: () => toast.error("Đã xảy ra lỗi khi loại bỏ bình luận"),
+  });
+
+  const moderateMutation = trpc.studio.setModerationStatus.useMutation({
+    onSuccess: () => {
+      toast.success("Đã cập nhật trạng thái người dùng");
+      utils.studio.getCommunityComments.invalidate();
+    },
+    onError: () => toast.error("Đã xảy ra lỗi khi cập nhật"),
+  });
+
   const [data, query] = trpc.studio.getCommunityComments.useSuspenseInfiniteQuery({
     limit: 20,
     sortBy,
@@ -1051,9 +1074,99 @@ const CommunityCommentsList = ({
                           <HeartIcon className="size-4" />
                         )}
                       </button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-neutral-200 dark:hover:bg-white/10 rounded-full">
-                        <MoreVerticalIcon className="size-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-neutral-200 dark:hover:bg-white/10 rounded-full">
+                            <MoreVerticalIcon className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-80 bg-[#282828] border-white/10 text-white rounded-xl shadow-2xl p-2">
+                          <DropdownMenuItem 
+                            className="cursor-pointer focus:bg-white/10 focus:text-white py-3 text-sm flex items-center" 
+                            onClick={() => removeMutation.mutate({ id: comment.id })}
+                            disabled={removeMutation.isPending}
+                          >
+                            <Trash2Icon className="size-5 mr-4 opacity-70" />
+                            Loại bỏ
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white py-3 text-sm flex items-center">
+                            <FlagIcon className="size-5 mr-4 opacity-70" />
+                            Báo vi phạm
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-white/10 my-1" />
+                          {comment.moderationType === "hidden" ? (
+                            <DropdownMenuItem 
+                              className="cursor-pointer focus:bg-white/10 focus:text-white py-3 text-sm flex items-center" 
+                              onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: null })}
+                            >
+                              <BanIcon className="size-5 mr-4 opacity-70" />
+                              Bỏ ẩn người dùng khỏi kênh
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem 
+                              className="cursor-pointer focus:bg-white/10 focus:text-white py-3 text-sm flex items-center" 
+                              onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: "hidden" })}
+                            >
+                              <BanIcon className="size-5 mr-4 opacity-70" />
+                              Ẩn người dùng khỏi kênh
+                            </DropdownMenuItem>
+                          )}
+
+                          {comment.moderationType === "approved" ? (
+                            <DropdownMenuItem 
+                              className="cursor-pointer focus:bg-white/10 focus:text-white py-3 text-sm flex items-center" 
+                              onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: null })}
+                            >
+                              <UserMinusIcon className="size-5 mr-4 opacity-70" />
+                              Xóa người dùng này với tư cách là người dùng được phê duyệt
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem 
+                              className="cursor-pointer focus:bg-white/10 focus:text-white py-3 text-sm flex items-center" 
+                              onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: "approved" })}
+                            >
+                              <CheckCheckIcon className="size-5 mr-4 opacity-70" />
+                              Luôn phê duyệt bình luận của người dùng này
+                            </DropdownMenuItem>
+                          )}
+
+                          {comment.moderationType === "manager_mod" ? (
+                            <DropdownMenuItem 
+                              className="cursor-pointer focus:bg-white/10 focus:text-white py-3 text-sm flex items-center" 
+                              onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: null })}
+                            >
+                              <ShieldMinusIcon className="size-5 mr-4 opacity-70" />
+                              Xoá vai trò người kiểm duyệt cấp quản lý của người dùng
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem 
+                              className="cursor-pointer focus:bg-white/10 focus:text-white py-3 text-sm flex items-center" 
+                              onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: "manager_mod" })}
+                            >
+                              <ShieldAlertIcon className="size-5 mr-4 opacity-70" />
+                              Thêm người dùng làm người kiểm duyệt cấp quản lý
+                            </DropdownMenuItem>
+                          )}
+
+                          {comment.moderationType === "standard_mod" ? (
+                            <DropdownMenuItem 
+                              className="cursor-pointer focus:bg-white/10 focus:text-white py-3 text-sm flex items-center" 
+                              onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: null })}
+                            >
+                              <ShieldMinusIcon className="size-5 mr-4 opacity-70" />
+                              Xoá vai trò người kiểm duyệt tiêu chuẩn của người dùng
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem 
+                              className="cursor-pointer focus:bg-white/10 focus:text-white py-3 text-sm flex items-center" 
+                              onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: "standard_mod" })}
+                            >
+                              <ShieldCheckIcon className="size-5 mr-4 opacity-70" />
+                              Thêm người dùng làm người kiểm duyệt tiêu chuẩn
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                 </div>
                 

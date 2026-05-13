@@ -1,9 +1,10 @@
 "use client";
 
-import { BellIcon, Trash2Icon, CheckCheckIcon } from "lucide-react";
+import { BellIcon, Trash2Icon, CheckCheckIcon, ImageIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { trpc } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
@@ -147,10 +148,23 @@ const NotificationsSectionSuspense = () => {
                       Video: {notification.video.title}
                     </p>
                   )}
-                  {notification.comment && (
-                    <p className="text-sm text-muted-foreground mt-1 bg-muted/50 p-2 rounded-lg italic border-l-4 border-blue-500">
-                      "{notification.comment.value}"
-                    </p>
+                  {notification.comment && (notification.comment.value || notification.comment.imageUrl) && (
+                    <div className="mt-1 bg-muted/50 p-2 rounded-lg border-l-4 border-blue-500 flex flex-col gap-1.5">
+                      {notification.comment.value && (
+                        <p className="text-sm text-muted-foreground italic">
+                          "{notification.comment.value}"
+                        </p>
+                      )}
+                      {notification.comment.imageUrl && (
+                         <div className="mt-1 relative h-32 w-48 rounded-lg overflow-hidden border border-border">
+                           <img 
+                             src={notification.comment.imageUrl} 
+                             alt="Comment image" 
+                             className="object-cover w-full h-full"
+                           />
+                         </div>
+                      )}
+                    </div>
                   )}
                   <p className="text-xs text-muted-foreground mt-2">
                     {formatDistanceToNow(notification.createdAt, { addSuffix: true, locale: vi })}

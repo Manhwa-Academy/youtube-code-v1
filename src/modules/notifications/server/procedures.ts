@@ -37,6 +37,7 @@ export const notificationsRouter = createTRPCRouter({
           comment: {
             id: comments.id,
             value: comments.value,
+            imageUrl: comments.imageUrl,
           },
         })
         .from(notifications)

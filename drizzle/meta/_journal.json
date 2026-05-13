@@ -15,6 +15,13 @@
       "when": 1778412362008,
       "tag": "0001_fantastic_jane_foster",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778645986706,
+      "tag": "0002_wakeful_nehzno",
+      "breakpoints": true
     }
   ]
 }

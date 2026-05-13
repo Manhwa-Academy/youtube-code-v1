@@ -33,6 +33,13 @@ export const playlistVisibility = pgEnum("playlist_visibility", [
 ]);
 
 export const postType = pgEnum("post_type", ["text", "image", "poll", "video"]);
+export const moderationType = pgEnum("moderation_type", [
+  "hidden",
+  "approved",
+  "manager_mod",
+  "standard_mod"
+]);
+
 export const notificationType = pgEnum("notification_type", [
   "video_like",
   "video_comment",
@@ -371,6 +378,41 @@ export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
     fields: [subscriptions.creatorId],
     references: [users.id],
     relationName: "subscriptions_creator_id_fkey",
+  }),
+}));
+
+// ====================== CHANNEL MODERATIONS ======================
+export const channelModerations = pgTable(
+  "channel_moderations",
+  {
+    creatorId: uuid("creator_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    viewerId: uuid("viewer_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    type: moderationType("type").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({
+      name: "channel_moderations_pk",
+      columns: [t.creatorId, t.viewerId],
+    }),
+  ],
+);
+
+export const channelModerationRelations = relations(channelModerations, ({ one }) => ({
+  creator: one(users, {
+    fields: [channelModerations.creatorId],
+    references: [users.id],
+    relationName: "channel_moderations_creator_id_fkey",
+  }),
+  viewer: one(users, {
+    fields: [channelModerations.viewerId],
+    references: [users.id],
+    relationName: "channel_moderations_viewer_id_fkey",
   }),
 }));
 

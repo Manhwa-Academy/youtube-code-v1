@@ -18,6 +18,7 @@ import {
   postPollOptions,
   postPollVotes,
   postReactions,
+  channelModerations,
 } from "@/db/schema";
 import { db } from "@/db";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
@@ -747,12 +748,14 @@ export const studioRouter = createTRPCRouter({
             videoTitle: videos.title,
             videoThumbnail: videos.thumbnailUrl,
             postContent: posts.content,
+            moderationType: channelModerations.type,
           })
           .from(comments)
           .where(whereClause)
           .innerJoin(users, eq(comments.userId, users.id))
           .leftJoin(videos, eq(comments.videoId, videos.id))
           .leftJoin(posts, eq(comments.postId, posts.id))
+          .leftJoin(channelModerations, and(eq(channelModerations.viewerId, comments.userId), eq(channelModerations.creatorId, userId)))
           .leftJoin(repliesCount, eq(comments.id, repliesCount.parentId))
           .leftJoin(viewerReactions, eq(comments.id, viewerReactions.commentId))
           .orderBy(
@@ -772,5 +775,41 @@ export const studioRouter = createTRPCRouter({
         items,
         nextCursor: hasMore ? { id: lastItem.id, createdAt: lastItem.createdAt } : null,
       };
+    }),
+
+  setModerationStatus: protectedProcedure
+    .input(z.object({
+      viewerId: z.string().uuid(),
+      type: z.enum(["hidden", "approved", "manager_mod", "standard_mod"]).nullable(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { id: creatorId } = ctx.user;
+      const { viewerId, type } = input;
+
+      if (creatorId === viewerId) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Cannot moderate yourself" });
+      }
+
+      if (type === null) {
+        // Remove moderation status
+        await db.delete(channelModerations).where(
+          and(
+            eq(channelModerations.creatorId, creatorId),
+            eq(channelModerations.viewerId, viewerId)
+          )
+        );
+      } else {
+        // Upsert moderation status
+        await db.insert(channelModerations).values({
+          creatorId,
+          viewerId,
+          type,
+        }).onConflictDoUpdate({
+          target: [channelModerations.creatorId, channelModerations.viewerId],
+          set: { type, updatedAt: new Date() }
+        });
+      }
+
+      return { success: true };
     }),
 });
