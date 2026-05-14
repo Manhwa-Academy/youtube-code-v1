@@ -76,7 +76,11 @@ import {
 import { CommentReplies } from "@/modules/comments/ui/components/comment-replies";
 import { InfiniteScroll } from "@/components/infinite-scroll";
 
-export const CommunityView = () => {
+interface CommunityViewProps {
+  videoId?: string;
+}
+
+export const CommunityView = ({ videoId }: CommunityViewProps) => {
   const [sortBy, setSortBy] = useState<"newest" | "top">("newest");
   const [statusFilter, setStatusFilter] = useState<"published" | "held">("published");
   const [keyword, setKeyword] = useState<string>("");
@@ -104,10 +108,13 @@ export const CommunityView = () => {
 
   return (
     <div className="flex flex-col gap-y-4 p-4 lg:p-8 bg-neutral-50 dark:bg-[#0f0f0f] min-h-screen text-black dark:text-white">
-      <h1 className="text-2xl font-bold mb-4">Cộng đồng</h1>
+      <h1 className="text-2xl font-bold mb-4">{videoId ? "Bình luận về video" : "Cộng đồng"}</h1>
 
       <Tabs defaultValue="comments" className="w-full">
-        <TabsList className="bg-transparent h-auto p-0 gap-x-6 border-b border-neutral-200 dark:border-white/10 w-full justify-start rounded-none overflow-x-auto scrollbar-hide flex-nowrap">
+        <TabsList className={cn(
+          "bg-transparent h-auto p-0 gap-x-6 border-b border-neutral-200 dark:border-white/10 w-full justify-start rounded-none overflow-x-auto scrollbar-hide flex-nowrap",
+          videoId && "hidden"
+        )}>
           <TabsTrigger 
             value="comments" 
             className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-black dark:data-[state=active]:border-white bg-transparent data-[state=active]:bg-transparent font-medium capitalize"
@@ -693,6 +700,7 @@ export const CommunityView = () => {
                    minSubscribers={minSubscribers}
                    setMinSubscribers={setMinSubscribers}
                    setTempMinSubscribers={setTempMinSubscribers}
+                   videoId={videoId}
                 />
              </Suspense>
           </div>
@@ -732,6 +740,7 @@ interface CommunityCommentsListProps {
   minSubscribers: number | undefined;
   setMinSubscribers: (v: number | undefined) => void;
   setTempMinSubscribers: (v: number | undefined) => void;
+  videoId?: string;
 }
 
 const CommunityCommentsList = ({
@@ -752,6 +761,7 @@ const CommunityCommentsList = ({
   setTempResponseStatuses,
   setMinSubscribers,
   setTempMinSubscribers,
+  videoId,
 }: CommunityCommentsListProps) => {
   const { user } = useUser();
   const utils = trpc.useUtils();
@@ -830,6 +840,7 @@ const CommunityCommentsList = ({
     contentTypes: selectedContentTypes.length > 0 ? selectedContentTypes : undefined,
     responseStatuses: selectedResponseStatuses.length > 0 ? selectedResponseStatuses : undefined,
     minSubscribers,
+    videoId,
   }, {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
@@ -1233,38 +1244,40 @@ const CommunityCommentsList = ({
                 )}
               </div>
 
-              <div className="hidden md:flex w-48 shrink-0 flex-col gap-y-1 ml-4">
-                {comment.videoId ? (
-                  <Link href={`/videos/${comment.videoId}`} className="flex items-start gap-x-2 group/video cursor-pointer">
-                    <div className="relative w-24 aspect-video rounded-sm overflow-hidden bg-neutral-800 shrink-0">
-                      <Image 
-                        src={comment.videoThumbnail || "/placeholder.svg"} 
-                        alt="thumbnail" 
-                        fill 
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/video:opacity-100 transition-opacity flex items-center justify-center">
-                          <ArrowUpRightIcon className="size-5 text-white" />
-                      </div>
-                    </div>
-                    <p className="text-xs line-clamp-3 text-muted-foreground group-hover/video:text-[#3ea6ff] transition-colors relative">
-                      {comment.videoTitle}
-                      <span className="absolute -bottom-6 left-0 bg-white/10 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover/video:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg z-10">
-                        Xem bình luận trên YouTube
-                      </span>
-                    </p>
-                  </Link>
-                ) : comment.postId ? (
-                  <div className="flex items-start gap-x-2">
-                    <div className="relative w-12 h-12 rounded-sm bg-neutral-800 flex items-center justify-center shrink-0">
-                      <MessageSquareIcon className="size-5 text-muted-foreground" />
-                    </div>
-                    <p className="text-xs line-clamp-3 text-muted-foreground hover:text-blue-500 cursor-pointer">
-                      {comment.postContent}
-                    </p>
-                  </div>
-                ) : null}
-              </div>
+               {!videoId && (
+                 <div className="hidden md:flex w-48 shrink-0 flex-col gap-y-1 ml-4">
+                   {comment.videoId ? (
+                     <Link href={`/videos/${comment.videoId}`} className="flex items-start gap-x-2 group/video cursor-pointer">
+                       <div className="relative w-24 aspect-video rounded-sm overflow-hidden bg-neutral-800 shrink-0">
+                         <Image 
+                           src={comment.videoThumbnail || "/placeholder.svg"} 
+                           alt="thumbnail" 
+                           fill 
+                           className="object-cover"
+                         />
+                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/video:opacity-100 transition-opacity flex items-center justify-center">
+                             <ArrowUpRightIcon className="size-5 text-white" />
+                         </div>
+                       </div>
+                       <p className="text-xs line-clamp-3 text-muted-foreground group-hover/video:text-[#3ea6ff] transition-colors relative">
+                         {comment.videoTitle}
+                         <span className="absolute -bottom-6 left-0 bg-white/10 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover/video:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg z-10">
+                           Xem bình luận trên YouTube
+                         </span>
+                       </p>
+                     </Link>
+                   ) : comment.postId ? (
+                     <div className="flex items-start gap-x-2">
+                       <div className="relative w-12 h-12 rounded-sm bg-neutral-800 flex items-center justify-center shrink-0">
+                         <MessageSquareIcon className="size-5 text-muted-foreground" />
+                       </div>
+                       <p className="text-xs line-clamp-3 text-muted-foreground hover:text-blue-500 cursor-pointer">
+                         {comment.postContent}
+                       </p>
+                     </div>
+                   ) : null}
+                 </div>
+               )}
             </div>
           </div>
         ))

@@ -19,18 +19,19 @@ import {
   Line
 } from "recharts";
 import { Button } from "@/components/ui/button";
-import { XIcon } from "lucide-react";
 
 interface AdvancedAnalyticsModalProps {
   isOpen: boolean;
   onClose: () => void;
   dateRange: string;
+  videoId?: string;
 }
 
 export const AdvancedAnalyticsModal = ({ 
   isOpen, 
   onClose, 
-  dateRange 
+  dateRange,
+  videoId
 }: AdvancedAnalyticsModalProps) => {
   const getDaysFromRange = (range: string) => {
     if (range === "7 ngày qua") return 7;
@@ -42,7 +43,7 @@ export const AdvancedAnalyticsModal = ({
   };
 
   const days = getDaysFromRange(dateRange);
-  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days });
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -54,9 +55,6 @@ export const AdvancedAnalyticsModal = ({
                 {dateRange}
              </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
-            <XIcon className="size-5" />
-          </Button>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-8">

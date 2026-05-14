@@ -5,7 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorFallback } from "@/components/error-fallback";
@@ -248,6 +248,10 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     resolver: zodResolver(videoUpdateSchema),
     defaultValues: video,
   });
+
+  useEffect(() => {
+    form.reset(video);
+  }, [video, form]);
 
   const onSubmit = (data: z.infer<typeof videoUpdateSchema>) => {
     update.mutate(data);
@@ -561,7 +565,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     <FormLabel>{t("category")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value ?? undefined}
+                      value={field.value ?? undefined}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -654,7 +658,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     <FormLabel>{t("visibility")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value ?? undefined}
+                      value={field.value ?? undefined}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -728,7 +732,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     <FormLabel>{t("moderation")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={(field.value as string) ?? "none"}
+                      value={field.value ?? "none"}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -754,7 +758,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     <FormLabel>{t("whoCanComment")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={(field.value as string) ?? "anyone"}
+                      value={field.value ?? "anyone"}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -781,7 +785,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     <FormLabel>{t("sortBy")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={(field.value as string) ?? "top"}
+                      value={field.value ?? "top"}
                     >
                       <FormControl>
                         <SelectTrigger>

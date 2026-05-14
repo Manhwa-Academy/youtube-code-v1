@@ -59,7 +59,7 @@ const AnalyticsLoading = () => {
   return <div className="p-8">Đang tải dữ liệu...</div>;
 };
 
-const AllContentSection = ({ data, days }: { data: any, days: number }) => {
+const AllContentSection = ({ data, days, videoId }: { data: any, days: number, videoId?: string }) => {
   const viewsBreakdown = data.contentBreakdown.views;
   const totalViews = viewsBreakdown.shorts + viewsBreakdown.video + viewsBreakdown.posts;
   const getPercentage = (val: number) => totalViews > 0 ? ((val / totalViews) * 100).toFixed(1) : "0";
@@ -302,7 +302,7 @@ const AllContentSection = ({ data, days }: { data: any, days: number }) => {
   );
 };
 
-const VideoContentSection = ({ data, days }: { data: any, days: number }) => {
+const VideoContentSection = ({ data, days, videoId }: { data: any, days: number, videoId?: string }) => {
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(data.topVideos[0]?.id || null);
   const selectedVideo = data.topVideos.find((v: any) => v.id === selectedVideoId) || data.topVideos[0];
 
@@ -384,7 +384,7 @@ const VideoContentSection = ({ data, days }: { data: any, days: number }) => {
             <div className="flex-1 space-y-4">
                <div className="flex justify-between text-[11px] text-muted-foreground uppercase font-bold border-b pb-2">
                   <span>Nội dung</span>
-                  <span>Xem tiếp vào giây thứ 30</span>
+                  <span>Tỷ lệ giữ chân trung bình</span>
                </div>
                {data.topVideos.slice(0, 3).map((v: any) => (
                  <div 
@@ -550,7 +550,7 @@ const VideoContentSection = ({ data, days }: { data: any, days: number }) => {
   );
 };
 
-const ShortsContentSection = ({ data, days }: { data: any, days: number }) => {
+const ShortsContentSection = ({ data, days, videoId }: { data: any, days: number, videoId?: string }) => {
   const hasShorts = data.contentBreakdown.views.shorts > 0 || data.contentBreakdown.shorts.topShorts.length > 0;
 
   if (!hasShorts) {
@@ -746,7 +746,7 @@ const ShortsContentSection = ({ data, days }: { data: any, days: number }) => {
   );
 };
 
-const PostsContentSection = ({ data, days }: { data: any, days: number }) => {
+const PostsContentSection = ({ data, days, videoId }: { data: any, days: number, videoId?: string }) => {
   const [activePostType, setActivePostType] = useState<"image" | "poll" | "question" | "text" | "video">("image");
 
   const postTypes = [
@@ -883,8 +883,8 @@ const PostsContentSection = ({ data, days }: { data: any, days: number }) => {
   );
 };
 
-const ContentTab = ({ days }: { days: number }) => {
-  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days });
+const ContentTab = ({ days, videoId }: { days: number, videoId?: string }) => {
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
   const [activeSubTab, setActiveSubTab] = useState("all");
 
   return (
@@ -903,16 +903,16 @@ const ContentTab = ({ days }: { days: number }) => {
         ))}
       </div>
 
-      {activeSubTab === "all" && <AllContentSection data={data} days={days} />}
-      {activeSubTab === "video" && <VideoContentSection data={data} days={days} />}
-      {activeSubTab === "shorts" && <ShortsContentSection data={data} days={days} />}
-      {activeSubTab === "posts" && <PostsContentSection data={data} days={days} />}
+      {activeSubTab === "all" && <AllContentSection data={data} days={days} videoId={videoId} />}
+      {activeSubTab === "video" && <VideoContentSection data={data} days={days} videoId={videoId} />}
+      {activeSubTab === "shorts" && <ShortsContentSection data={data} days={days} videoId={videoId} />}
+      {activeSubTab === "posts" && <PostsContentSection data={data} days={days} videoId={videoId} />}
     </div>
   );
 };
 
-const AnalyticsContent = ({ days }: { days: number }) => {
-  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days });
+const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string }) => {
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
   const [activeStat, setActiveStat] = useState<"views" | "watchTime" | "subscribers">("views");
 
   return (
@@ -920,7 +920,9 @@ const AnalyticsContent = ({ days }: { days: number }) => {
       {/* CỘT TRÁI - CHI TIẾT */}
       <div className="flex-1 space-y-6 min-w-0">
         <div className="text-center py-6">
-          <h2 className="text-2xl font-bold">Kênh của bạn có {data.totalViews} lượt xem trong {days === 3650 ? "toàn thời gian" : `${days} ngày qua`}</h2>
+          <h2 className="text-2xl font-bold">
+            {videoId ? "Video này" : "Kênh của bạn"} có {data.totalViews} lượt xem trong {days === 3650 ? "toàn thời gian" : `${days} ngày qua`}
+          </h2>
         </div>
 
         {/* THẺ CHỈ SỐ LỚN */}
@@ -1198,8 +1200,8 @@ const AnalyticsContent = ({ days }: { days: number }) => {
 
 // --- MAIN EXPORT ---
 
-const AudienceTab = ({ days }: { days: number }) => {
-  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days });
+const AudienceTab = ({ days, videoId }: { days: number, videoId?: string }) => {
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
   const [activeStat, setActiveStat] = useState<"viewers" | "subscribers">("viewers");
 
   return (
@@ -1384,7 +1386,297 @@ const AudienceTab = ({ days }: { days: number }) => {
   );
 };
 
-export const AnalyticsView = () => {
+const ReachTab = ({ days, videoId }: { days: number, videoId?: string }) => {
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
+
+  return (
+    <div className="space-y-6">
+      {/* 4 THẺ CHỈ SỐ REACH */}
+      <div className="grid grid-cols-1 md:grid-cols-4 bg-white dark:bg-neutral-900 border rounded-xl overflow-hidden shadow-sm">
+         <div className="p-4 border-r flex flex-col items-center justify-center text-center">
+            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">Lượt hiển thị hình thu nhỏ</p>
+            <p className="text-xl font-bold">{data.contentBreakdown.discovery.impressions}</p>
+         </div>
+         <div className="p-4 border-r flex flex-col items-center justify-center text-center">
+            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">Tỷ lệ nhấp (CTR)</p>
+            <p className="text-xl font-bold">{data.contentBreakdown.discovery.ctr}%</p>
+         </div>
+         <div className="p-4 border-r flex flex-col items-center justify-center text-center">
+            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">Số lượt xem</p>
+            <p className="text-xl font-bold">{data.totalViews}</p>
+         </div>
+         <div className="p-4 flex flex-col items-center justify-center text-center">
+            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">Số người xem riêng biệt</p>
+            <p className="text-xl font-bold">{data.audience.uniqueViewers}</p>
+         </div>
+      </div>
+
+      {/* BIỂU ĐỒ REACH */}
+      <Card className="rounded-xl shadow-sm overflow-hidden bg-transparent border-neutral-200 dark:border-neutral-800">
+         <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-bold">Lượt hiển thị hình thu nhỏ</CardTitle>
+            <p className="text-[10px] text-muted-foreground">Theo thời gian trong khoảng thời gian đã chọn</p>
+         </CardHeader>
+         <CardContent className="p-0 pt-6">
+            <div className="h-[300px] w-full px-6">
+               <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={data.viewsByDay}>
+                     <CartesianGrid vertical={false} strokeDasharray="0" stroke="#e5e5e5" className="dark:stroke-neutral-800" />
+                     <XAxis 
+                       dataKey="date" 
+                       axisLine={{ stroke: '#404040' }} 
+                       tickLine={false} 
+                       tick={{ fontSize: 10, fill: '#888' }} 
+                       dy={10}
+                     />
+                     <YAxis 
+                       orientation="right" 
+                       axisLine={false} 
+                       tickLine={false} 
+                       tick={{ fontSize: 10, fill: '#888' }} 
+                       dx={10}
+                     />
+                     <Tooltip 
+                       contentStyle={{ borderRadius: '8px', border: 'none', backgroundColor: '#262626', color: '#fff' }}
+                     />
+                     <Line 
+                       type="monotone" 
+                       dataKey="impressions" 
+                       name="Lượt hiển thị"
+                       stroke="#3ea6ff" 
+                       strokeWidth={2}
+                       dot={false}
+                     />
+                  </LineChart>
+               </ResponsiveContainer>
+            </div>
+            <div className="p-4 flex justify-start px-6">
+               <Button variant="secondary" size="sm" className="text-[10px] font-bold rounded-full bg-neutral-200/50 dark:bg-neutral-800 border-none px-4 h-7">
+                  Xem thêm
+               </Button>
+            </div>
+         </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+         {/* CÁCH NGƯỜI XEM TÌM THẤY VIDEO NÀY */}
+         <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
+            <CardHeader className="pb-2">
+               <CardTitle className="text-sm font-bold">Cách người xem tìm thấy video này</CardTitle>
+               <p className="text-[10px] text-muted-foreground">Số lượt xem • Trong khoảng thời gian đã chọn</p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+               <div className="flex flex-col items-center py-4">
+                  <div className="size-48 rounded-full border-[20px] border-blue-500/20 relative flex items-center justify-center">
+                     <div className="absolute inset-0 border-[20px] border-blue-500 rounded-full clip-path-half" style={{ clipPath: 'polygon(50% 50%, 100% 0, 100% 100%, 0 100%, 0 0)' }} />
+                     <div className="text-center">
+                        <p className="text-[10px] text-muted-foreground">Nguồn lưu lượng truy cập</p>
+                        <p className="text-xs font-bold">Xem chi tiết bên dưới</p>
+                     </div>
+                  </div>
+               </div>
+               <div className="space-y-3">
+                  {data.contentBreakdown.trafficSources.map((source: any, i: number) => (
+                    <div key={i} className="flex justify-between items-center text-xs">
+                       <span className="text-muted-foreground">{source.label}</span>
+                       <div className="flex items-center gap-x-4 w-1/2 justify-end">
+                          <div className="h-2 bg-blue-500 rounded-full" style={{ width: `${source.percentage}%` }} />
+                          <span className="font-bold w-10 text-right">{source.percentage}%</span>
+                       </div>
+                    </div>
+                  ))}
+               </div>
+               <Button variant="secondary" size="sm" className="text-[10px] font-bold rounded-full bg-neutral-200/50 dark:bg-neutral-800 border-none px-4 h-7 w-full mt-4">
+                  Xem thêm
+               </Button>
+            </CardContent>
+         </Card>
+
+         {/* PHỄU DISCOVERY */}
+         <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800 overflow-hidden">
+            <CardHeader className="pb-2">
+               <CardTitle className="text-sm font-bold">Số lượt hiển thị và cách chỉ số này đã tạo ra thời gian xem</CardTitle>
+               <p className="text-[10px] text-muted-foreground">Trong khoảng thời gian đã chọn</p>
+            </CardHeader>
+            <CardContent className="p-6 bg-neutral-50/50 dark:bg-neutral-900/30">
+               <div className="relative flex flex-col items-center space-y-0.5">
+                  <div className="w-full bg-neutral-100 dark:bg-neutral-800 p-4 text-center rounded-t-lg">
+                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Lượt hiển thị hình thu nhỏ</p>
+                     <p className="text-lg font-bold">{data.contentBreakdown.discovery.impressions}</p>
+                     <p className="text-[10px] text-neutral-400">98,7% từ YouTube đề xuất nội dung của bạn</p>
+                  </div>
+                  <div className="w-[85%] bg-neutral-200 dark:bg-neutral-700/50 p-4 text-center">
+                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Tỷ lệ nhấp: {data.contentBreakdown.discovery.ctr}%</p>
+                  </div>
+                  <div className="w-[70%] bg-neutral-300 dark:bg-neutral-600/50 p-4 text-center">
+                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Lượt xem từ lượt hiển thị</p>
+                     <p className="text-lg font-bold">{data.contentBreakdown.discovery.viewsFromImpressions}</p>
+                     <p className="text-[10px] text-neutral-400">{data.contentBreakdown.discovery.avgViewDuration} thời lượng xem trung bình</p>
+                  </div>
+                  <div className="w-[55%] bg-neutral-400 dark:bg-neutral-500/50 p-4 text-center rounded-b-lg">
+                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Thời gian xem từ lượt hiển thị (giờ)</p>
+                     <p className="text-lg font-bold">{data.contentBreakdown.discovery.watchTimeFromImpressions}</p>
+                  </div>
+               </div>
+            </CardContent>
+         </Card>
+      </div>
+    </div>
+  );
+};
+
+const EngagementTab = ({ days, videoId }: { days: number, videoId?: string }) => {
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
+
+  return (
+    <div className="space-y-6">
+      {/* 2 THẺ CHỈ SỐ ENGAGEMENT */}
+      <div className="grid grid-cols-1 md:grid-cols-2 bg-white dark:bg-neutral-900 border rounded-xl overflow-hidden shadow-sm">
+         <div className="p-6 border-r flex flex-col items-center justify-center text-center">
+            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">Thời gian xem (giờ)</p>
+            <p className="text-3xl font-bold">{data.totalWatchTimeHours}</p>
+         </div>
+         <div className="p-6 flex flex-col items-center justify-center text-center">
+            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">Thời lượng xem trung bình</p>
+            <p className="text-3xl font-bold">{data.contentBreakdown.discovery.avgViewDuration}</p>
+         </div>
+      </div>
+
+      {/* BIỂU ĐỒ ENGAGEMENT */}
+      <Card className="rounded-xl shadow-sm overflow-hidden bg-transparent border-neutral-200 dark:border-neutral-800">
+         <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-bold">Thời gian xem</CardTitle>
+            <p className="text-[10px] text-muted-foreground">Theo thời gian trong khoảng thời gian đã chọn</p>
+         </CardHeader>
+         <CardContent className="p-0 pt-6">
+            <div className="h-[300px] w-full px-6">
+               <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={data.viewsByDay}>
+                     <CartesianGrid vertical={false} strokeDasharray="0" stroke="#e5e5e5" className="dark:stroke-neutral-800" />
+                     <XAxis 
+                       dataKey="date" 
+                       axisLine={{ stroke: '#404040' }} 
+                       tickLine={false} 
+                       tick={{ fontSize: 10, fill: '#888' }} 
+                       dy={10}
+                     />
+                     <YAxis 
+                       orientation="right" 
+                       axisLine={false} 
+                       tickLine={false} 
+                       tick={{ fontSize: 10, fill: '#888' }} 
+                       dx={10}
+                     />
+                     <Tooltip 
+                       contentStyle={{ borderRadius: '8px', border: 'none', backgroundColor: '#262626', color: '#fff' }}
+                     />
+                     <Area 
+                       type="monotone" 
+                       dataKey="watchTime" 
+                       name="Thời gian xem"
+                       stroke="#a855f7" 
+                       fill="#a855f7"
+                       fillOpacity={0.1}
+                       strokeWidth={2}
+                     />
+                  </AreaChart>
+               </ResponsiveContainer>
+            </div>
+            <div className="p-4 flex justify-start px-6">
+               <Button variant="secondary" size="sm" className="text-[10px] font-bold rounded-full bg-neutral-200/50 dark:bg-neutral-800 border-none px-4 h-7">
+                  Xem thêm
+               </Button>
+            </div>
+         </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+         {/* GIỮ CHÂN KHÁN GIẢ */}
+         <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
+            <CardHeader className="pb-2">
+               <CardTitle className="text-sm font-bold">Giữ chân khán giả</CardTitle>
+               <p className="text-[10px] text-muted-foreground">Video của bạn thu hút người xem như thế nào</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+               <div className="h-48 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart 
+                      data={Array.from({ length: 10 }).map((_, i) => {
+                        const target = data.engagement.avgViewPercent;
+                        // Giả lập đường cong sụt giảm: bắt đầu từ 100%, kết thúc ở mức avgViewPercent
+                        const val = 100 - (100 - target) * Math.pow(i / 9, 0.5);
+                        return { time: i, val: Number(val.toFixed(1)) };
+                      })} 
+                      margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
+                    >
+                      <CartesianGrid vertical={false} stroke="#eee" className="dark:stroke-neutral-800" strokeDasharray="3 3" />
+                      <XAxis hide />
+                      <YAxis 
+                        domain={[0, 100]} 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 10, fill: '#888' }}
+                        orientation="right"
+                        tickFormatter={(v) => `${v}%`}
+                      />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '8px', border: 'none', backgroundColor: '#262626', color: '#fff' }}
+                        itemStyle={{ color: '#a855f7' }}
+                        labelStyle={{ display: 'none' }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="val" 
+                        stroke="#a855f7" 
+                        strokeWidth={3} 
+                        dot={false}
+                        animationDuration={1500}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+               </div>
+               <div className="space-y-2">
+                  <div className="flex justify-between text-xs">
+                     <span>Tỷ lệ giữ chân trung bình</span>
+                     <span className="font-bold">{data.engagement.avgViewPercent}%</span>
+                  </div>
+                  <div className="w-full bg-neutral-200 dark:bg-neutral-800 h-1.5 rounded-full">
+                     <div className="bg-purple-500 h-full rounded-full" style={{ width: `${data.engagement.avgViewPercent}%` }} />
+                  </div>
+               </div>
+            </CardContent>
+         </Card>
+ 
+         {/* LƯỢT THÍCH VÀ XẾP HẠNG */}
+         <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
+            <CardHeader className="pb-2">
+               <CardTitle className="text-sm font-bold">Lượt thích so với trung bình của kênh</CardTitle>
+               <p className="text-[10px] text-muted-foreground">Tỷ lệ lượt thích (%) • Trong khoảng thời gian đã chọn</p>
+            </CardHeader>
+            <CardContent className="space-y-8 py-8">
+               <div className="flex flex-col items-center justify-center space-y-2">
+                  <p className="text-4xl font-bold">{data.engagement.likePercent.toString().replace(".", ",")}%</p>
+                  <p className="text-xs text-muted-foreground">So với trung bình của kênh ({data.engagement.channelLikePercent.toString().replace(".", ",")}%)</p>
+               </div>
+               {data.engagement.likePercent >= data.engagement.channelLikePercent ? (
+                 <div className="flex items-center gap-x-2 text-xs text-emerald-500 font-bold justify-center bg-emerald-500/10 py-2 rounded-lg">
+                    <TrendingUpIcon className="size-4" />
+                    Cao hơn bình thường
+                 </div>
+               ) : (
+                 <div className="flex items-center gap-x-2 text-xs text-amber-500 font-bold justify-center bg-amber-500/10 py-2 rounded-lg">
+                    <TrendingDownIcon className="size-4" />
+                    Thấp hơn bình thường
+                 </div>
+               )}
+            </CardContent>
+         </Card>
+      </div>
+    </div>
+  );
+};
+
+export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
   const [dateRange, setDateRange] = useState("28 ngày qua");
   const [isAdvancedModalOpen, setIsAdvancedModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -1426,7 +1718,7 @@ export const AnalyticsView = () => {
   };
 
   const days = getDaysFromRange(dateRange);
-  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days });
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
 
   const formatDateRange = (d: number) => {
     if (d === 3650) return "Toàn thời gian";
@@ -1447,7 +1739,7 @@ export const AnalyticsView = () => {
   return (
     <div className="flex flex-col gap-y-4 p-4 lg:p-8 bg-neutral-50 dark:bg-black min-h-screen">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Số liệu phân tích về kênh</h1>
+        <h1 className="text-xl font-bold">{videoId ? "Số liệu phân tích về video" : "Số liệu phân tích về kênh"}</h1>
         <div className="flex items-center gap-x-2">
            <Button 
              variant="outline" 
@@ -1464,18 +1756,19 @@ export const AnalyticsView = () => {
         isOpen={isAdvancedModalOpen} 
         onClose={() => setIsAdvancedModalOpen(false)} 
         dateRange={dateRange}
+        videoId={videoId}
       />
 
       <Tabs defaultValue="overview" className="w-full">
         <div className="flex items-center justify-between border-b mb-4">
           <TabsList className="bg-transparent h-auto p-0 gap-x-8">
-            {["overview", "content", "audience"].map((t) => (
+            {(videoId ? ["overview", "reach", "engagement", "audience"] : ["overview", "content", "audience"]).map((t) => (
               <TabsTrigger 
                 key={t}
                 value={t} 
                 className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary bg-transparent data-[state=active]:bg-transparent font-medium capitalize"
               >
-                {t === "overview" ? "Tổng quan" : t === "content" ? "Nội dung" : "Đối tượng người xem"}
+                {t === "overview" ? "Tổng quan" : t === "reach" ? "Phạm vi tiếp cận" : t === "engagement" ? "Mức độ tương tác" : t === "content" ? "Nội dung" : "Đối tượng người xem"}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -1565,23 +1858,45 @@ export const AnalyticsView = () => {
         <TabsContent value="overview" className="mt-0 outline-none">
           <Suspense fallback={<AnalyticsLoading />}>
             <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <AnalyticsContent days={days} />
+              <AnalyticsContent days={days} videoId={videoId} />
             </ErrorBoundary>
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="content" className="mt-0 outline-none">
-          <Suspense fallback={<AnalyticsLoading />}>
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <ContentTab days={days} />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
+        {!videoId && (
+          <TabsContent value="content" className="mt-0 outline-none">
+            <Suspense fallback={<AnalyticsLoading />}>
+              <ErrorBoundary FallbackComponent={ErrorFallback}>
+                <ContentTab days={days} videoId={videoId} />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+        )}
+
+        {videoId && (
+          <>
+            <TabsContent value="reach" className="mt-0 outline-none">
+              <Suspense fallback={<AnalyticsLoading />}>
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <ReachTab days={days} videoId={videoId} />
+                </ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+
+            <TabsContent value="engagement" className="mt-0 outline-none">
+              <Suspense fallback={<AnalyticsLoading />}>
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <EngagementTab days={days} videoId={videoId} />
+                </ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+          </>
+        )}
 
         <TabsContent value="audience" className="mt-0 outline-none">
           <Suspense fallback={<AnalyticsLoading />}>
             <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <AudienceTab days={days} />
+              <AudienceTab days={days} videoId={videoId} />
             </ErrorBoundary>
           </Suspense>
         </TabsContent>
