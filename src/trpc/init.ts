@@ -71,6 +71,10 @@ export const protectedProcedure = t.procedure.use(async function isAuthed(opts) 
     }
   }
 
+  if (user.banned) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Tài khoản của bạn đã bị cấm" });
+  }
+
   const { success } = await ratelimit.limit(user.id);
   if (!success) {
     throw new TRPCError({ code: "TOO_MANY_REQUESTS" });

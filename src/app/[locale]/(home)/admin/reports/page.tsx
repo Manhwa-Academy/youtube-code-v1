@@ -1,9 +1,16 @@
-import { AdminReportsSection } from "@/modules/reports/ui/sections/admin-reports-section";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
-  return (
-    <AdminReportsSection />
-  );
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/admin?tab=reports");
+  }, [router]);
+
+  return null;
 };
 
 export default Page;

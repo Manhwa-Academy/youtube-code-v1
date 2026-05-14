@@ -33,6 +33,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type TargetType = "video" | "comment" | "user" | "post" | "all";
@@ -122,6 +132,8 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
     },
   });
 
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string, type: 'content' | 'record' } | null>(null);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
@@ -138,20 +150,51 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
   };
 
   return (
-    <div className="rounded-md border bg-white dark:bg-neutral-900 overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-neutral-50 dark:bg-neutral-800/50">
-            <TableHead className="w-[150px]">Ngày tạo</TableHead>
-            <TableHead>Người báo cáo</TableHead>
-            <TableHead>Loại</TableHead>
-            <TableHead>Nội dung bị báo cáo</TableHead>
-            <TableHead>Lý do</TableHead>
-            <TableHead>Trạng thái</TableHead>
-            <TableHead className="text-right w-[100px]">Thao tác</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+    <>
+      <AlertDialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận thao tác?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDelete?.type === 'content' 
+                ? "Bạn có chắc chắn muốn XÓA nội dung này không? Thao tác này không thể hoàn tác."
+                : "Bạn có chắc chắn muốn xóa bản ghi báo cáo này không? (Nội dung gốc sẽ không bị ảnh hưởng)."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction 
+              className={confirmDelete?.type === 'content' ? "bg-red-600 hover:bg-red-700" : ""}
+              onClick={() => {
+                if (confirmDelete?.type === 'content') {
+                  deleteTarget.mutate({ id: confirmDelete.id });
+                } else if (confirmDelete?.type === 'record') {
+                  removeReport.mutate({ id: confirmDelete.id });
+                }
+                setConfirmDelete(null);
+              }}
+            >
+              Xác nhận
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="rounded-md border bg-white dark:bg-neutral-900 overflow-hidden">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-neutral-50 dark:bg-neutral-800/50">
+              <TableHead className="min-w-[150px]">Ngày tạo</TableHead>
+              <TableHead className="min-w-[150px]">Người báo cáo</TableHead>
+              <TableHead className="min-w-[100px]">Loại</TableHead>
+              <TableHead className="min-w-[200px]">Nội dung bị báo cáo</TableHead>
+              <TableHead className="min-w-[150px]">Lý do</TableHead>
+              <TableHead className="min-w-[120px]">Trạng thái</TableHead>
+              <TableHead className="min-w-[150px] text-center pr-32">Thao tác</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
           {reportsData.items.map((report) => (
             <TableRow key={report.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-800/20">
               <TableCell className="text-xs text-muted-foreground font-medium">
@@ -187,7 +230,7 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
                 </div>
               </TableCell>
               <TableCell>{getStatusBadge(report.status)}</TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-center pr-32">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-neutral-100 dark:hover:bg-neutral-800">
@@ -218,11 +261,7 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       className="text-red-600 font-bold"
-                      onClick={() => {
-                        if (confirm("Xác nhận xóa nội dung này và đánh dấu đã xử lý?")) {
-                          deleteTarget.mutate({ id: report.id });
-                        }
-                      }}
+                      onClick={() => setConfirmDelete({ id: report.id, type: 'content' })}
                     >
                       <Trash2Icon className="size-4 mr-2" />
                       Xóa nội dung vi phạm
@@ -230,11 +269,7 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       className="text-muted-foreground"
-                      onClick={() => {
-                        if (confirm("Xác nhận xóa bản ghi báo cáo này khỏi danh sách? (Không xóa nội dung gốc)")) {
-                          removeReport.mutate({ id: report.id });
-                        }
-                      }}
+                      onClick={() => setConfirmDelete({ id: report.id, type: 'record' })}
                     >
                       <FileXIcon className="size-4 mr-2" />
                       Xóa bản ghi báo cáo
@@ -257,5 +292,7 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
         </TableBody>
       </Table>
     </div>
+    </div>
+    </>
   );
 };

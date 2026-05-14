@@ -53,12 +53,6 @@ const itemsWithAvgView = await Promise.all(
 - Custom embed options (autoplay, start time)
 - Embed code generator trong Studio
 
-#### 30. Admin Dashboard
-- Quản lý toàn bộ users, videos, comments, posts
-- Content moderation queue
-- Platform analytics (MAU, DAU, total watch time)
-- Ban/suspend accounts
-
 ---
 
 ### Fix CSS Issues

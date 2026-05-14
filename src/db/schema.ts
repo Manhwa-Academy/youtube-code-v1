@@ -204,6 +204,7 @@ export const users = pgTable(
     handlePreviousUpdatedAt: timestamp("handle_previous_updated_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    banned: boolean("banned").default(false).notNull(),
   },
   (t) => [uniqueIndex("clerk_id_idx").on(t.clerkId)],
 );
