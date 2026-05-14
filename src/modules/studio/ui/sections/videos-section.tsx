@@ -331,7 +331,10 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                                   variant="ghost"
                                   size="icon"
                                   className="size-8"
-                                  onClick={(e) => e.stopPropagation()}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    router.push(`/studio/videos/${video.id}/analytics`);
+                                  }}
                                 >
                                   <BarChart2Icon className="size-4" />
                                 </Button>
@@ -345,7 +348,10 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                                   variant="ghost"
                                   size="icon"
                                   className="size-8"
-                                  onClick={(e) => e.stopPropagation()}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    router.push(`/studio/videos/${video.id}/comments`);
+                                  }}
                                 >
                                   <MessageSquareIcon className="size-4" />
                                 </Button>
@@ -476,10 +482,22 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right text-sm">
+                  <TableCell 
+                    className="text-right text-sm cursor-pointer hover:text-blue-500 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/studio/videos/${video.id}/analytics`);
+                    }}
+                  >
                     {video.viewCount}
                   </TableCell>
-                  <TableCell className="text-right text-sm">
+                  <TableCell 
+                    className="text-right text-sm cursor-pointer hover:text-blue-500 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/studio/videos/${video.id}/comments`);
+                    }}
+                  >
                     {video.commentCount}
                   </TableCell>
                   <TableCell className="text-right text-sm pr-6">
