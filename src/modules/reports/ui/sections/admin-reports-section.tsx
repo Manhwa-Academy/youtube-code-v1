@@ -44,18 +44,20 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTranslations } from "next-intl";
 
 type TargetType = "video" | "comment" | "user" | "post" | "all";
 
 export const AdminReportsSection = () => {
+  const t = useTranslations("Reports");
   const [currentTab, setCurrentTab] = useState<TargetType>("all");
 
   return (
     <div className="p-6">
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Quản lý báo cáo vi phạm</h1>
-          <p className="text-muted-foreground">Xem xét và kiểm duyệt các nội dung bị báo cáo vi phạm.</p>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("description")}</p>
         </div>
       </div>
 
@@ -66,17 +68,17 @@ export const AdminReportsSection = () => {
           className="w-full"
         >
           <TabsList className="bg-neutral-100 dark:bg-neutral-800 p-1">
-            <TabsTrigger value="all">Tất cả</TabsTrigger>
-            <TabsTrigger value="video">Video</TabsTrigger>
-            <TabsTrigger value="comment">Bình luận</TabsTrigger>
-            <TabsTrigger value="user">Người dùng</TabsTrigger>
-            <TabsTrigger value="post">Bài đăng</TabsTrigger>
+            <TabsTrigger value="all">{t("all")}</TabsTrigger>
+            <TabsTrigger value="video">{t("video")}</TabsTrigger>
+            <TabsTrigger value="comment">{t("comment")}</TabsTrigger>
+            <TabsTrigger value="user">{t("user")}</TabsTrigger>
+            <TabsTrigger value="post">{t("post")}</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
       <Suspense fallback={<AdminReportsSkeleton />} key={currentTab}>
-        <ErrorBoundary fallback={<p>Lỗi khi tải danh sách báo cáo</p>}>
+        <ErrorBoundary fallback={<p>{t("errorLoading")}</p>}>
           <AdminReportsSuspense targetType={currentTab === "all" ? undefined : currentTab} />
         </ErrorBoundary>
       </Suspense>
@@ -99,6 +101,7 @@ interface AdminReportsSuspenseProps {
 }
 
 const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
+  const t = useTranslations("Reports");
   const [reportsData] = trpc.reports.getMany.useSuspenseQuery({ 
     limit: 50,
     targetType,
@@ -107,14 +110,14 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
 
   const updateStatus = trpc.reports.updateStatus.useMutation({
     onSuccess: () => {
-      toast.success("Đã cập nhật trạng thái");
+      toast.success(t("statusUpdated"));
       utils.reports.getMany.invalidate();
     },
   });
 
   const deleteTarget = trpc.reports.deleteTarget.useMutation({
     onSuccess: () => {
-      toast.success("Đã xóa nội dung vi phạm");
+      toast.success(t("contentDeleted"));
       utils.reports.getMany.invalidate();
     },
     onError: (error) => {
@@ -124,7 +127,7 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
 
   const removeReport = trpc.reports.remove.useMutation({
     onSuccess: () => {
-      toast.success("Đã xóa bản ghi báo cáo");
+      toast.success(t("recordDeleted"));
       utils.reports.getMany.invalidate();
     },
     onError: (error) => {
@@ -137,13 +140,13 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
-        return <Badge variant="secondary">Đang chờ</Badge>;
+        return <Badge variant="secondary">{t("pending")}</Badge>;
       case "reviewed":
-        return <Badge variant="outline">Đã xem</Badge>;
+        return <Badge variant="outline">{t("reviewed")}</Badge>;
       case "resolved":
-        return <Badge className="bg-green-500 hover:bg-green-600">Đã xử lý</Badge>;
+        return <Badge className="bg-green-500 hover:bg-green-600">{t("resolved")}</Badge>;
       case "dismissed":
-        return <Badge variant="destructive">Đã bỏ qua</Badge>;
+        return <Badge variant="destructive">{t("dismissed")}</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -154,15 +157,15 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
       <AlertDialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận thao tác?</AlertDialogTitle>
+            <AlertDialogTitle>{t("confirmAction")}</AlertDialogTitle>
             <AlertDialogDescription>
               {confirmDelete?.type === 'content' 
-                ? "Bạn có chắc chắn muốn XÓA nội dung này không? Thao tác này không thể hoàn tác."
-                : "Bạn có chắc chắn muốn xóa bản ghi báo cáo này không? (Nội dung gốc sẽ không bị ảnh hưởng)."}
+                ? t("confirmDeleteContent")
+                : t("confirmDeleteRecord")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction 
               className={confirmDelete?.type === 'content' ? "bg-red-600 hover:bg-red-700" : ""}
               onClick={() => {
@@ -174,7 +177,7 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
                 setConfirmDelete(null);
               }}
             >
-              Xác nhận
+              {t("confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -185,13 +188,13 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
         <Table>
           <TableHeader>
             <TableRow className="bg-neutral-50 dark:bg-neutral-800/50">
-              <TableHead className="min-w-[150px]">Ngày tạo</TableHead>
-              <TableHead className="min-w-[150px]">Người báo cáo</TableHead>
-              <TableHead className="min-w-[100px]">Loại</TableHead>
-              <TableHead className="min-w-[200px]">Nội dung bị báo cáo</TableHead>
-              <TableHead className="min-w-[150px]">Lý do</TableHead>
-              <TableHead className="min-w-[120px]">Trạng thái</TableHead>
-              <TableHead className="min-w-[150px] text-center pr-32">Thao tác</TableHead>
+              <TableHead className="min-w-[150px]">{t("createdAt")}</TableHead>
+              <TableHead className="min-w-[150px]">{t("reporter")}</TableHead>
+              <TableHead className="min-w-[100px]">{t("type")}</TableHead>
+              <TableHead className="min-w-[200px]">{t("reportedContent")}</TableHead>
+              <TableHead className="min-w-[150px]">{t("reason")}</TableHead>
+              <TableHead className="min-w-[120px]">{t("status")}</TableHead>
+              <TableHead className="min-w-[150px] text-center pr-32">{t("action")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -208,7 +211,7 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
               </TableCell>
               <TableCell>
                 <Badge variant="outline" className="capitalize text-[10px] font-bold py-0 h-5">
-                  {report.targetType === "video" ? "Video" : report.targetType === "comment" ? "Bình luận" : report.targetType === "user" ? "Người dùng" : "Bài đăng"}
+                  {report.targetType === "video" ? t("video") : report.targetType === "comment" ? t("comment") : report.targetType === "user" ? t("user") : t("post")}
                 </Badge>
               </TableCell>
               <TableCell className="max-w-[200px]">
@@ -248,23 +251,23 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
                        disabled={report.targetType === 'comment'}
                     >
                       <ExternalLinkIcon className="size-4 mr-2" />
-                      Xem nội dung
+                      {t("viewContent")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => updateStatus.mutate({ id: report.id, status: "reviewed" })}>
                       <CheckCircleIcon className="size-4 mr-2 text-blue-500" />
-                      Đánh dấu đã xem
+                      {t("markAsReviewed")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => updateStatus.mutate({ id: report.id, status: "dismissed" })}>
                       <XCircleIcon className="size-4 mr-2 text-orange-500" />
-                      Bỏ qua
+                      {t("dismiss")}
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       className="text-red-600 font-bold"
                       onClick={() => setConfirmDelete({ id: report.id, type: 'content' })}
                     >
                       <Trash2Icon className="size-4 mr-2" />
-                      Xóa nội dung vi phạm
+                      {t("deleteContent")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
@@ -272,7 +275,7 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
                       onClick={() => setConfirmDelete({ id: report.id, type: 'record' })}
                     >
                       <FileXIcon className="size-4 mr-2" />
-                      Xóa bản ghi báo cáo
+                      {t("deleteRecord")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -284,7 +287,7 @@ const AdminReportsSuspense = ({ targetType }: AdminReportsSuspenseProps) => {
               <TableCell colSpan={7} className="text-center py-20 text-muted-foreground">
                 <div className="flex flex-col items-center gap-2">
                   <CheckCircleIcon className="size-10 text-neutral-200" />
-                  <p>Không có báo cáo nào trong mục này.</p>
+                  <p>{t("noReports")}</p>
                 </div>
               </TableCell>
             </TableRow>

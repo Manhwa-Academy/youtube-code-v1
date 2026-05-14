@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/trpc/client";
 import { InfiniteScroll } from "@/components/infinite-scroll";
 import { PostCard } from "./post-card";
@@ -14,6 +15,7 @@ interface PostListProps {
 }
 
 export const PostList = ({ userId }: PostListProps) => {
+  const t = useTranslations("Posts");
   const { user } = useUser();
   const [activeSubTab, setActiveSubTab] = useState<"published" | "scheduled" | "archived">("published");
 
@@ -29,10 +31,10 @@ export const PostList = ({ userId }: PostListProps) => {
   const items = posts.pages.flatMap((page) => page.items);
 
   const subTabs = [
-    { key: "published", label: "ĐÃ ĐĂNG" },
+    { key: "published", label: t("publishedStatus") },
     ...(isOwner ? [
-      { key: "scheduled", label: "ĐÃ LÊN LỊCH" },
-      { key: "archived", label: "ĐÃ LƯU TRỮ" }
+      { key: "scheduled", label: t("scheduledStatus") },
+      { key: "archived", label: t("archivedStatus") }
     ] : [])
   ];
 
@@ -66,9 +68,9 @@ export const PostList = ({ userId }: PostListProps) => {
                <div className="bg-gray-100 dark:bg-neutral-800 p-6 rounded-full mb-4">
                   <Edit3 className="size-10 text-gray-400" />
                </div>
-               <h3 className="text-xl font-bold">Xuất bản bài đăng</h3>
+               <h3 className="text-xl font-bold">{t("publishPostTitle")}</h3>
                <p className="text-sm text-muted-foreground max-w-[400px]">
-                  Bài đăng xuất hiện ở đây sau khi bạn xuất bản và sẽ được hiển thị với cộng đồng của bạn
+                  {t("publishPostDesc")}
                </p>
             </div>
           )}
@@ -78,9 +80,9 @@ export const PostList = ({ userId }: PostListProps) => {
                <div className="bg-gray-100 dark:bg-neutral-800 p-6 rounded-full mb-4">
                   <Clock className="size-10 text-gray-400" />
                </div>
-               <h3 className="text-xl font-bold">Lên lịch đăng bài</h3>
+               <h3 className="text-xl font-bold">{t("schedulePostTitle")}</h3>
                <p className="text-sm text-muted-foreground max-w-[400px]">
-                  Hãy chuẩn bị sẵn nội dung và lên lịch đăng sau
+                  {t("schedulePostDesc")}
                </p>
             </div>
           )}
@@ -90,9 +92,9 @@ export const PostList = ({ userId }: PostListProps) => {
                <div className="bg-gray-100 dark:bg-neutral-800 p-6 rounded-full mb-4">
                   <Archive className="size-10 text-gray-400" />
                </div>
-               <h3 className="text-xl font-bold">Bài đăng đã hết hạn trong kho lưu trữ</h3>
+               <h3 className="text-xl font-bold">{t("archivedPostTitle")}</h3>
                <p className="text-sm text-muted-foreground max-w-[400px]">
-                  Các bài đăng được chọn là sẽ hết hạn sau 24 giờ sẽ xuất hiện trong kho lưu trữ. Chỉ bạn mới có thể xem các bài đăng trong kho lưu trữ.
+                  {t("archivedPostDesc")}
                </p>
             </div>
           )}

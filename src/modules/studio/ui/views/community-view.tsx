@@ -5,7 +5,19 @@ import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { trpc } from "@/trpc/client";
 import { formatDistanceToNow } from "date-fns";
-import { vi } from "date-fns/locale";
+import { useTranslations, useLocale } from "next-intl";
+import { enUS, vi, ja, ko, zhCN, de, es, fr } from "date-fns/locale";
+
+const dateFnsLocales = {
+  en: enUS,
+  vi: vi,
+  ja: ja,
+  ko: ko,
+  zh: zhCN,
+  de: de,
+  es: es,
+  fr: fr,
+};
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { 
@@ -81,6 +93,8 @@ interface CommunityViewProps {
 }
 
 export const CommunityView = ({ videoId }: CommunityViewProps) => {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
   const [sortBy, setSortBy] = useState<"newest" | "top">("newest");
   const [statusFilter, setStatusFilter] = useState<"published" | "held">("published");
   const [keyword, setKeyword] = useState<string>("");
@@ -108,7 +122,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
 
   return (
     <div className="flex flex-col gap-y-4 p-4 lg:p-8 bg-neutral-50 dark:bg-[#0f0f0f] min-h-screen text-black dark:text-white">
-      <h1 className="text-2xl font-bold mb-4">{videoId ? "Bình luận về video" : "Cộng đồng"}</h1>
+      <h1 className="text-2xl font-bold mb-4">{videoId ? t("videoComments") : t("community")}</h1>
 
       <Tabs defaultValue="comments" className="w-full">
         <TabsList className={cn(
@@ -119,19 +133,19 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
             value="comments" 
             className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-black dark:data-[state=active]:border-white bg-transparent data-[state=active]:bg-transparent font-medium capitalize"
           >
-            Bình luận
+            {t("comments")}
           </TabsTrigger>
           <TabsTrigger 
             value="viewer-posts" 
             className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-black dark:data-[state=active]:border-white bg-transparent data-[state=active]:bg-transparent font-medium capitalize text-muted-foreground whitespace-nowrap"
           >
-            Bài đăng của người xem
+            {t("viewerPosts")}
           </TabsTrigger>
           <TabsTrigger 
             value="mentions" 
             className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-black dark:data-[state=active]:border-white bg-transparent data-[state=active]:bg-transparent font-medium capitalize text-muted-foreground whitespace-nowrap"
           >
-            Lượt đề cập
+            {t("mentions")}
           </TabsTrigger>
         </TabsList>
 
@@ -140,8 +154,8 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
           {statusFilter === "held" && (
             <div className="flex items-center gap-x-2 bg-neutral-100 dark:bg-white/5 px-4 py-3 rounded-md mb-4 text-sm text-muted-foreground">
                <InfoIcon className="size-4 shrink-0" />
-               <span>Các bình luận tại đây sẽ bị xóa sau 60 ngày</span>
-               <span className="ml-auto hover:text-white cursor-pointer hover:underline text-xs bg-neutral-200 dark:bg-white/10 px-3 py-1.5 rounded-full">Tìm hiểu thêm</span>
+               <span>{t("heldCommentsInfo")}</span>
+               <span className="ml-auto hover:text-white cursor-pointer hover:underline text-xs bg-neutral-200 dark:bg-white/10 px-3 py-1.5 rounded-full">{t("learnMore")}</span>
             </div>
           )}
 
@@ -154,13 +168,13 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" className="rounded-full h-8 px-3 text-xs font-medium bg-neutral-200 dark:bg-white/10 hover:bg-neutral-300 dark:hover:bg-white/20 border-0 shrink-0 whitespace-nowrap">
-                  {statusFilter === "published" ? "Đã đăng" : "Bị giữ lại"} <ChevronDownIcon className="size-3 ml-1" />
+                  {statusFilter === "published" ? t("published") : t("heldForReview")} <ChevronDownIcon className="size-3 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-48 bg-[#282828] border-white/10 text-white rounded-xl shadow-2xl p-2">
                 <DropdownMenuRadioGroup value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
-                  <DropdownMenuRadioItem value="published" className="cursor-pointer focus:bg-white/10 focus:text-white py-2">Đã đăng</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="held" className="cursor-pointer focus:bg-white/10 focus:text-white py-2">Bị giữ lại</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="published" className="cursor-pointer focus:bg-white/10 focus:text-white py-2">{t("published")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="held" className="cursor-pointer focus:bg-white/10 focus:text-white py-2">{t("heldForReview")}</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -168,13 +182,13 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" className="rounded-full h-8 px-3 text-xs font-medium bg-neutral-200 dark:bg-white/10 hover:bg-neutral-300 dark:hover:bg-white/20 border-0 shrink-0 whitespace-nowrap">
-                  Sắp xếp theo: {sortBy === "newest" ? "Mới nhất" : "Phù hợp nhất"} <ChevronDownIcon className="size-3 ml-1" />
+                  {t("sortByLabel")}: {sortBy === "newest" ? t("newest") : t("mostRelevant")} <ChevronDownIcon className="size-3 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-[#282828] border-white/10 text-white rounded-xl shadow-2xl p-2">
                 <DropdownMenuRadioGroup value={sortBy} onValueChange={(val: any) => setSortBy(val)}>
-                  <DropdownMenuRadioItem value="top" className="cursor-pointer focus:bg-white/10 focus:text-white py-2">Phù hợp nhất (mặc định)</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="newest" className="cursor-pointer focus:bg-white/10 focus:text-white py-2">Mới nhất</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="top" className="cursor-pointer focus:bg-white/10 focus:text-white py-2">{t("mostRelevantDefault")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="newest" className="cursor-pointer focus:bg-white/10 focus:text-white py-2">{t("newest")}</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -184,20 +198,20 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
               <DropdownMenu open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="secondary" className="rounded-full h-8 px-3 text-xs font-medium bg-neutral-200 dark:bg-white/10 hover:bg-neutral-300 dark:hover:bg-white/20 border-0 shrink-0 whitespace-nowrap">
-                    Lọc thêm <ChevronDownIcon className="size-3 ml-1" />
+                    {t("filterMore")} <ChevronDownIcon className="size-3 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64 bg-[#282828] border-white/10 text-white rounded-xl shadow-2xl py-2 px-0">
                   {/* Từ khoá */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="px-4 py-2 hover:bg-white/10 cursor-pointer">
-                      Từ khoá
+                      {t("keyword")}
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="w-72 bg-[#282828] border-white/10 text-white rounded-xl p-4 ml-2">
                       <div className="flex flex-col gap-y-3" onClick={(e) => e.stopPropagation()}>
-                        <p className="text-sm font-medium">Từ khoá</p>
+                        <p className="text-sm font-medium">{t("keyword")}</p>
                         <Input 
-                          placeholder="Giá trị" 
+                          placeholder={t("keywordValue")} 
                           value={tempKeyword}
                           onChange={(e) => setTempKeyword(e.target.value)}
                           className="bg-transparent border-white/20 focus-visible:ring-0 focus-visible:border-blue-500 h-9"
@@ -213,7 +227,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                             }} 
                             className="hover:bg-white/10 h-8 text-white font-bold"
                           >
-                            Hủy
+                            {t("cancel")}
                           </Button>
                           <Button 
                             variant="ghost" 
@@ -221,7 +235,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                             onClick={handleApplyKeyword} 
                             className="text-[#3ea6ff] hover:bg-[#3ea6ff]/10 h-8 font-bold"
                           >
-                            Áp dụng
+                            {t("apply")}
                           </Button>
                         </div>
                       </div>
@@ -236,7 +250,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                       setIsFilterOpen(false);
                     }}
                   >
-                    Chứa câu hỏi
+                    {t("containsQuestions")}
                     {containsQuestions && <div className="size-2 bg-blue-500 rounded-full" />}
                   </DropdownMenuItem>
 
@@ -245,18 +259,18 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                   {/* Loại nội dung */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="px-4 py-2 hover:bg-white/10 cursor-pointer">
-                      Loại nội dung
+                      {t("contentType")}
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="w-64 bg-[#282828] border-white/10 text-white rounded-xl p-0 overflow-hidden ml-2">
                       <div className="p-4 border-b border-white/10 flex justify-between items-center">
-                        <span className="text-sm font-medium">Loại nội dung</span>
+                        <span className="text-sm font-medium">{t("contentType")}</span>
                       </div>
                       <div className="p-2 flex flex-col gap-y-1">
                         {[
-                          { id: "video", label: "Video" },
+                          { id: "video", label: t("video") },
                           { id: "shorts", label: "Shorts" },
-                          { id: "my-posts", label: "Bài đăng của tôi" },
-                          { id: "viewer-posts", label: "Bài đăng của người xem" },
+                          { id: "my-posts", label: t("myPosts") },
+                          { id: "viewer-posts", label: t("viewerPosts") },
                         ].map((item) => (
                           <div 
                             key={item.id} 
@@ -291,7 +305,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                               setIsFilterOpen(false);
                             }}
                         >
-                          Hủy
+                          {t("cancel")}
                         </Button>
                         <Button 
                             variant="secondary" 
@@ -303,7 +317,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                               setIsFilterOpen(false);
                             }}
                         >
-                          Áp dụng
+                          {t("apply")}
                         </Button>
                       </div>
                     </DropdownMenuSubContent>
@@ -312,11 +326,11 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                   {/* Số người đăng ký */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="px-4 py-2 hover:bg-white/10 cursor-pointer">
-                      Số người đăng ký
+                      {t("minSubscribers")}
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="w-64 bg-[#282828] border-white/10 text-white rounded-xl p-0 overflow-hidden ml-2">
                       <div className="p-4 border-b border-white/10">
-                        <span className="text-sm font-medium">Số người đăng ký tối thiểu</span>
+                        <span className="text-sm font-medium">{t("minSubscribersLabel")}</span>
                       </div>
                       <DropdownMenuRadioGroup 
                         value={tempMinSubscribers?.toString()} 
@@ -325,11 +339,11 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                       >
                         {[
                           { id: "100", label: "100" },
-                          { id: "1000", label: "1.000" },
-                          { id: "10000", label: "10.000" },
-                          { id: "100000", label: "100.000" },
-                          { id: "1000000", label: "1.000.000" },
-                          { id: "10000000", label: "10.000.000" },
+                          { id: "1000", label: "1,000" },
+                          { id: "10000", label: "10,000" },
+                          { id: "100000", label: "100,000" },
+                          { id: "1000000", label: "1,000,000" },
+                          { id: "10000000", label: "10,000,000" },
                         ].map((item) => (
                           <DropdownMenuRadioItem 
                             key={item.id} 
@@ -351,7 +365,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                               setIsFilterOpen(false);
                             }}
                         >
-                          Hủy
+                          {t("cancel")}
                         </Button>
                         <Button 
                             variant="secondary" 
@@ -362,7 +376,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                               setIsFilterOpen(false);
                             }}
                         >
-                          Áp dụng
+                          {t("apply")}
                         </Button>
                       </div>
                     </DropdownMenuSubContent>
@@ -373,17 +387,17 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                   {/* Trạng thái phản hồi */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="px-4 py-2 hover:bg-white/10 cursor-pointer">
-                      Trạng thái phản hồi
+                      {t("responseStatus")}
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="w-72 bg-[#282828] border-white/10 text-white rounded-xl p-0 overflow-hidden ml-2">
                       <div className="p-4 border-b border-white/10 flex justify-between items-center">
-                        <span className="text-sm font-medium">Trạng thái phản hồi</span>
+                        <span className="text-sm font-medium">{t("responseStatus")}</span>
                       </div>
                       <div className="p-2 flex flex-col gap-y-1">
                         {[
-                          { id: "not-responded", label: "Chưa phản hồi" },
-                          { id: "responded", label: "Đã phản hồi" },
-                          { id: "new-reply", label: "Câu trả lời mới cho phản hồi của bạn" },
+                          { id: "not-responded", label: t("notResponded") },
+                          { id: "responded", label: t("responded") },
+                          { id: "new-reply", label: t("newReplyToYourResponse") },
                         ].map((item) => (
                           <div 
                             key={item.id} 
@@ -418,7 +432,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                               setIsFilterOpen(false);
                             }}
                         >
-                          Hủy
+                          {t("cancel")}
                         </Button>
                         <Button 
                             variant="secondary" 
@@ -430,7 +444,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                               setIsFilterOpen(false);
                             }}
                         >
-                          Áp dụng
+                          {t("apply")}
                         </Button>
                       </div>
                     </DropdownMenuSubContent>
@@ -444,22 +458,22 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="secondary" className="rounded-full h-8 px-3 text-xs font-medium bg-neutral-200 dark:bg-white/10 hover:bg-neutral-300 dark:hover:bg-white/20 border-0 shrink-0 whitespace-nowrap">
-                    Lọc thêm <ChevronDownIcon className="size-3 ml-1" />
+                    {t("filterMore")} <ChevronDownIcon className="size-3 ml-1" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="bottom" className="h-[85vh] bg-[#282828] border-white/10 text-white rounded-t-2xl p-0 overflow-hidden flex flex-col">
                   <SheetHeader className="p-4 border-b border-white/10">
-                    <SheetTitle className="text-white">Bộ lọc</SheetTitle>
+                    <SheetTitle className="text-white">{t("filters")}</SheetTitle>
                   </SheetHeader>
                   <div className="flex-1 overflow-y-auto">
                     <Accordion type="single" collapsible className="w-full">
                       {/* Từ khoá */}
                       <AccordionItem value="keyword" className="border-white/10">
-                        <AccordionTrigger className="px-4 hover:no-underline">Từ khoá</AccordionTrigger>
+                        <AccordionTrigger className="px-4 hover:no-underline">{t("keyword")}</AccordionTrigger>
                         <AccordionContent className="px-4 pb-4">
                           <div className="flex flex-col gap-y-3">
                             <Input 
-                              placeholder="Giá trị" 
+                              placeholder={t("keywordValue")} 
                               value={tempKeyword}
                               onChange={(e) => setTempKeyword(e.target.value)}
                               className="bg-transparent border-white/20 focus-visible:ring-0 focus-visible:border-blue-500 h-10"
@@ -470,7 +484,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                                 handleApplyKeyword();
                               }}
                             >
-                              Áp dụng
+                              {t("apply")}
                             </Button>
                           </div>
                         </AccordionContent>
@@ -481,7 +495,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                         className="flex items-center justify-between px-4 py-4 border-b border-white/10 cursor-pointer"
                         onClick={() => setContainsQuestions(!containsQuestions)}
                       >
-                        <span className="text-sm font-medium">Chứa câu hỏi</span>
+                        <span className="text-sm font-medium">{t("containsQuestions")}</span>
                         <Checkbox 
                           checked={containsQuestions}
                           onCheckedChange={(v) => setContainsQuestions(!!v)}
@@ -491,14 +505,14 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
 
                       {/* Loại nội dung */}
                       <AccordionItem value="content-types" className="border-white/10">
-                        <AccordionTrigger className="px-4 hover:no-underline">Loại nội dung</AccordionTrigger>
+                        <AccordionTrigger className="px-4 hover:no-underline">{t("contentType")}</AccordionTrigger>
                         <AccordionContent className="px-0 pb-0">
                           <div className="flex flex-col">
                             {[
-                              { id: "video", label: "Video" },
+                              { id: "video", label: t("video") },
                               { id: "shorts", label: "Shorts" },
-                              { id: "my-posts", label: "Bài đăng của tôi" },
-                              { id: "viewer-posts", label: "Bài đăng của người xem" },
+                              { id: "my-posts", label: t("myPosts") },
+                              { id: "viewer-posts", label: t("viewerPosts") },
                             ].map((item) => (
                               <div 
                                 key={item.id} 
@@ -521,7 +535,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                                 className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full"
                                 onClick={() => setSelectedContentTypes(tempContentTypes)}
                               >
-                                Áp dụng
+                                {t("apply")}
                               </Button>
                             </div>
                           </div>
@@ -530,7 +544,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
 
                       {/* Số người đăng ký */}
                       <AccordionItem value="min-subscribers" className="border-white/10">
-                        <AccordionTrigger className="px-4 hover:no-underline">Số người đăng ký</AccordionTrigger>
+                        <AccordionTrigger className="px-4 hover:no-underline">{t("minSubscribers")}</AccordionTrigger>
                         <AccordionContent className="px-0 pb-0">
                           <div className="flex flex-col">
                             <DropdownMenuRadioGroup 
@@ -540,11 +554,11 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                             >
                               {[
                                 { id: "100", label: "100" },
-                                { id: "1000", label: "1.000" },
-                                { id: "10000", label: "10.000" },
-                                { id: "100000", label: "100.000" },
-                                { id: "1000000", label: "1.000.000" },
-                                { id: "10000000", label: "10.000.000" },
+                                { id: "1000", label: "1,000" },
+                                { id: "10000", label: "10,000" },
+                                { id: "100000", label: "100,000" },
+                                { id: "1000000", label: "1,000,000" },
+                                { id: "10000000", label: "10,000,000" },
                               ].map((item) => (
                                 <DropdownMenuRadioItem 
                                   key={item.id} 
@@ -560,7 +574,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                                 className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full"
                                 onClick={() => setMinSubscribers(tempMinSubscribers)}
                               >
-                                Áp dụng
+                                {t("apply")}
                               </Button>
                             </div>
                           </div>
@@ -569,13 +583,13 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
 
                       {/* Trạng thái phản hồi */}
                       <AccordionItem value="response-status" className="border-white/10 border-b-0">
-                        <AccordionTrigger className="px-4 hover:no-underline">Trạng thái phản hồi</AccordionTrigger>
+                        <AccordionTrigger className="px-4 hover:no-underline">{t("responseStatus")}</AccordionTrigger>
                         <AccordionContent className="px-0 pb-0">
                           <div className="flex flex-col">
                             {[
-                              { id: "not-responded", label: "Chưa phản hồi" },
-                              { id: "responded", label: "Đã phản hồi" },
-                              { id: "new-reply", label: "Câu trả lời mới cho phản hồi của bạn" },
+                              { id: "not-responded", label: t("notResponded") },
+                              { id: "responded", label: t("responded") },
+                              { id: "new-reply", label: t("newReplyToYourResponse") },
                             ].map((item) => (
                               <div 
                                 key={item.id} 
@@ -598,7 +612,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
                                 className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full"
                                 onClick={() => setSelectedResponseStatuses(tempResponseStatuses)}
                               >
-                                Áp dụng
+                                {t("apply")}
                               </Button>
                             </div>
                           </div>
@@ -613,7 +627,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
             {/* Keyword tag */}
             {keyword && (
               <div className="flex items-center gap-x-1 bg-neutral-200 dark:bg-white/10 rounded-full h-8 px-3 text-xs font-medium shrink-0 whitespace-nowrap">
-                 Từ khoá: {keyword}
+                 {t("keyword")}: {keyword}
                  <button onClick={() => { setKeyword(""); setTempKeyword(""); }} className="ml-1 hover:bg-white/20 rounded-full p-0.5">
                     <XIcon className="size-3" />
                  </button>
@@ -622,7 +636,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
             
             {containsQuestions && (
               <div className="flex items-center gap-x-1 bg-neutral-200 dark:bg-white/10 rounded-full h-8 px-3 text-xs font-medium shrink-0 whitespace-nowrap">
-                 Chứa câu hỏi
+                 {t("containsQuestions")}
                  <button onClick={() => setContainsQuestions(false)} className="ml-1 hover:bg-white/20 rounded-full p-0.5">
                     <XIcon className="size-3" />
                  </button>
@@ -631,7 +645,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
 
             {selectedContentTypes.length > 0 && (
               <div className="flex items-center gap-x-1 bg-neutral-200 dark:bg-white/10 rounded-full h-8 px-3 text-xs font-medium shrink-0 whitespace-nowrap">
-                 Loại nội dung: {selectedContentTypes.length}
+                 {t("contentType")}: {selectedContentTypes.length}
                  <button 
                   onClick={() => {
                     setSelectedContentTypes([]);
@@ -646,7 +660,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
 
             {selectedResponseStatuses.length > 0 && (
               <div className="flex items-center gap-x-1 bg-neutral-200 dark:bg-white/10 rounded-full h-8 px-3 text-xs font-medium shrink-0 whitespace-nowrap">
-                 Trạng thái phản hồi: {selectedResponseStatuses.length}
+                 {t("responseStatus")}: {selectedResponseStatuses.length}
                  <button 
                   onClick={() => {
                     setSelectedResponseStatuses([]);
@@ -661,7 +675,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
 
             {minSubscribers !== undefined && (
               <div className="flex items-center gap-x-1 bg-neutral-200 dark:bg-white/10 rounded-full h-8 px-3 text-xs font-medium shrink-0 whitespace-nowrap">
-                 Số người đăng ký: {minSubscribers.toLocaleString("vi-VN")}
+                 {t("minSubscribers")}: {minSubscribers.toLocaleString(locale)}
                  <button 
                   onClick={() => {
                     setMinSubscribers(undefined);
@@ -679,7 +693,7 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
              <Suspense fallback={
                <div className="flex flex-col items-center justify-center py-24 gap-y-4">
                   <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-                  <p className="text-sm text-muted-foreground animate-pulse">Đang cập nhật danh sách bình luận...</p>
+                  <p className="text-sm text-muted-foreground animate-pulse">{t("updatingComments")}</p>
                </div>
              }>
                 <CommunityCommentsList 
@@ -708,13 +722,13 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
 
         <TabsContent value="viewer-posts">
            <div className="p-8 text-center text-muted-foreground">
-              Tính năng này đang được phát triển...
+              {t("featureUnderDevelopment")}
            </div>
         </TabsContent>
 
         <TabsContent value="mentions">
            <div className="p-8 text-center text-muted-foreground">
-              Tính năng này đang được phát triển...
+              {t("featureUnderDevelopment")}
            </div>
         </TabsContent>
       </Tabs>
@@ -763,6 +777,9 @@ const CommunityCommentsList = ({
   setTempMinSubscribers,
   videoId,
 }: CommunityCommentsListProps) => {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
+  const dateLocale = dateFnsLocales[locale as keyof typeof dateFnsLocales] || vi;
   const { user } = useUser();
   const utils = trpc.useUtils();
   
@@ -774,11 +791,11 @@ const CommunityCommentsList = ({
   
   const removeManyMutation = trpc.comments.removeMany.useMutation({
     onSuccess: (data) => {
-      toast.success(`Đã xóa ${data.count} bình luận`);
+      toast.success(t("deleteCommentsSuccess", { count: data.count }));
       setSelectedIds([]);
       utils.studio.getCommunityComments.invalidate();
     },
-    onError: () => toast.error("Đã xảy ra lỗi khi xóa bình luận"),
+    onError: () => toast.error(t("deleteCommentsError")),
   });
 
   const toggleReplies = (commentId: string) => {
@@ -795,12 +812,12 @@ const CommunityCommentsList = ({
 
   const replyMutation = trpc.comments.create.useMutation({
     onSuccess: () => {
-      toast.success("Đã gửi phản hồi");
+      toast.success(t("replySent"));
       setReplyingTo(null);
       setReplyText("");
       utils.studio.getCommunityComments.invalidate();
     },
-    onError: () => toast.error("Đã xảy ra lỗi khi gửi phản hồi"),
+    onError: () => toast.error(t("replyError")),
   });
 
   const likeMutation = trpc.commentReactions.like.useMutation({
@@ -817,18 +834,18 @@ const CommunityCommentsList = ({
 
   const removeMutation = trpc.comments.remove.useMutation({
     onSuccess: () => {
-      toast.success("Đã loại bỏ bình luận");
+      toast.success(t("dismissCommentSuccess"));
       utils.studio.getCommunityComments.invalidate();
     },
-    onError: () => toast.error("Đã xảy ra lỗi khi loại bỏ bình luận"),
+    onError: () => toast.error(t("dismissCommentError")),
   });
 
   const moderateMutation = trpc.studio.setModerationStatus.useMutation({
     onSuccess: () => {
-      toast.success("Đã cập nhật trạng thái người dùng");
+      toast.success(t("updateUserStatusSuccess"));
       utils.studio.getCommunityComments.invalidate();
     },
-    onError: () => toast.error("Đã xảy ra lỗi khi cập nhật"),
+    onError: () => toast.error(t("updateUserStatusError")),
   });
 
   const [data, query] = trpc.studio.getCommunityComments.useSuspenseInfiniteQuery({
@@ -878,12 +895,12 @@ const CommunityCommentsList = ({
              <div className="flex items-center justify-between flex-1">
                 <div className="flex items-center gap-x-6">
                    <div className="flex items-center gap-x-2 text-sm font-medium text-black dark:text-white">
-                      <span>Đã chọn {selectedIds.length}</span>
+                      <span>{t("selectedCount", { count: selectedIds.length })}</span>
                       <button 
                         onClick={toggleSelectAll}
                         className="text-[#3ea6ff] hover:underline"
                       >
-                        ({selectedIds.length === comments.length ? "Bỏ chọn tất cả" : "Chọn tất cả"})
+                        ({selectedIds.length === comments.length ? t("deselectAll") : t("selectAll")})
                       </button>
                    </div>
                    <div className="flex items-center gap-x-1">
@@ -899,20 +916,20 @@ const CommunityCommentsList = ({
                       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
                         <AlertDialogContent className="bg-[#282828] border-white/10 text-white rounded-2xl max-w-md">
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="text-xl font-bold">Xóa bình luận?</AlertDialogTitle>
+                            <AlertDialogTitle className="text-xl font-bold">{t("deleteCommentsTitle")}</AlertDialogTitle>
                             <AlertDialogDescription className="text-neutral-400">
-                              Bạn có chắc chắn muốn xóa {selectedIds.length} bình luận đã chọn không? Thao tác này không thể hoàn tác.
+                              {t("deleteCommentsDescription", { count: selectedIds.length })}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter className="gap-x-2">
                             <AlertDialogCancel className="rounded-full bg-transparent border-none hover:bg-white/10 text-white font-bold px-6">
-                              Hủy
+                              {t("cancel")}
                             </AlertDialogCancel>
                             <AlertDialogAction 
                               onClick={() => removeManyMutation.mutate({ ids: selectedIds })}
                               className="rounded-full bg-white text-black hover:bg-neutral-200 font-bold px-6"
                             >
-                              Xóa
+                              {t("delete")}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -933,7 +950,7 @@ const CommunityCommentsList = ({
                 </Button>
              </div>
            ) : (
-             <span className="text-sm font-medium text-muted-foreground">Chọn tất cả</span>
+             <span className="text-sm font-medium text-muted-foreground">{t("selectAll")}</span>
            )}
          </div>
        )}
@@ -956,9 +973,9 @@ const CommunityCommentsList = ({
             </div>
             
             <div className="space-y-2">
-               <h3 className="text-xl font-bold text-black dark:text-white">Không tìm thấy bình luận nào</h3>
+               <h3 className="text-xl font-bold text-black dark:text-white">{t("noCommentsFound")}</h3>
                <p className="text-sm text-muted-foreground max-w-[320px] mx-auto">
-                  Hãy thử thay đổi bộ lọc hoặc tìm kiếm với từ khoá khác để xem kết quả.
+                  {t("noCommentsFoundDescription")}
                </p>
             </div>
 
@@ -978,7 +995,7 @@ const CommunityCommentsList = ({
                 setTempMinSubscribers(undefined);
               }}
             >
-              Xoá tất cả bộ lọc
+              {t("clearAllFilters")}
             </Button>
          </div>
       ) : (
@@ -1013,7 +1030,7 @@ const CommunityCommentsList = ({
                       )}
                     </span>
                     <span>•</span>
-                    <span>{formatDistanceToNow(new Date(comment.createdAt), { locale: vi, addSuffix: true })}</span>
+                    <span>{formatDistanceToNow(new Date(comment.createdAt), { locale: dateLocale, addSuffix: true })}</span>
                 </div>
                 
                 <p className="text-sm whitespace-pre-wrap break-words mb-2">
@@ -1041,18 +1058,18 @@ const CommunityCommentsList = ({
                         setReplyText("");
                       }}
                     >
-                      Phản hồi
+                      {t("reply")}
                     </Button>
                     {comment.replyCount > 0 ? (
                       <button 
                         onClick={() => toggleReplies(comment.id)}
                         className="flex items-center gap-x-1 cursor-pointer text-[#3ea6ff] hover:underline transition-colors font-bold"
                       >
-                        {comment.replyCount} phản hồi {openReplies.has(comment.id) ? <ChevronUpIcon className="size-4" /> : <ChevronDownIcon className="size-4" />}
+                        {t("replyCount", { count: comment.replyCount })} {openReplies.has(comment.id) ? <ChevronUpIcon className="size-4" /> : <ChevronDownIcon className="size-4" />}
                       </button>
                     ) : (
                       <div className="flex items-center gap-x-1 cursor-pointer hover:text-[#3ea6ff] transition-colors">
-                        0 phản hồi <ChevronDownIcon className="size-4" />
+                        {t("noReplies")} <ChevronDownIcon className="size-4" />
                       </div>
                     )}
                     
@@ -1104,11 +1121,11 @@ const CommunityCommentsList = ({
                             disabled={removeMutation.isPending}
                           >
                             <Trash2Icon className="size-5 mr-4 opacity-70" />
-                            Loại bỏ
+                            {t("remove")}
                           </DropdownMenuItem>
                           <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white py-3 text-sm flex items-center">
                             <FlagIcon className="size-5 mr-4 opacity-70" />
-                            Báo vi phạm
+                            {t("report")}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="bg-white/10 my-1" />
                           {comment.moderationType === "hidden" ? (
@@ -1117,7 +1134,7 @@ const CommunityCommentsList = ({
                               onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: null })}
                             >
                               <BanIcon className="size-5 mr-4 opacity-70" />
-                              Bỏ ẩn người dùng khỏi kênh
+                              {t("unhideUser")}
                             </DropdownMenuItem>
                           ) : (
                             <DropdownMenuItem 
@@ -1125,7 +1142,7 @@ const CommunityCommentsList = ({
                               onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: "hidden" })}
                             >
                               <BanIcon className="size-5 mr-4 opacity-70" />
-                              Ẩn người dùng khỏi kênh
+                              {t("hideUser")}
                             </DropdownMenuItem>
                           )}
 
@@ -1135,7 +1152,7 @@ const CommunityCommentsList = ({
                               onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: null })}
                             >
                               <UserMinusIcon className="size-5 mr-4 opacity-70" />
-                              Xóa người dùng này với tư cách là người dùng được phê duyệt
+                              {t("removeApprovedUser")}
                             </DropdownMenuItem>
                           ) : (
                             <DropdownMenuItem 
@@ -1143,7 +1160,7 @@ const CommunityCommentsList = ({
                               onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: "approved" })}
                             >
                               <CheckCheckIcon className="size-5 mr-4 opacity-70" />
-                              Luôn phê duyệt bình luận của người dùng này
+                              {t("approveUser")}
                             </DropdownMenuItem>
                           )}
 
@@ -1153,7 +1170,7 @@ const CommunityCommentsList = ({
                               onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: null })}
                             >
                               <ShieldMinusIcon className="size-5 mr-4 opacity-70" />
-                              Xoá vai trò người kiểm duyệt cấp quản lý của người dùng
+                              {t("removeManagerMod")}
                             </DropdownMenuItem>
                           ) : (
                             <DropdownMenuItem 
@@ -1161,7 +1178,7 @@ const CommunityCommentsList = ({
                               onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: "manager_mod" })}
                             >
                               <ShieldAlertIcon className="size-5 mr-4 opacity-70" />
-                              Thêm người dùng làm người kiểm duyệt cấp quản lý
+                              {t("addManagerMod")}
                             </DropdownMenuItem>
                           )}
 
@@ -1171,7 +1188,7 @@ const CommunityCommentsList = ({
                               onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: null })}
                             >
                               <ShieldMinusIcon className="size-5 mr-4 opacity-70" />
-                              Xoá vai trò người kiểm duyệt tiêu chuẩn của người dùng
+                              {t("removeStandardMod")}
                             </DropdownMenuItem>
                           ) : (
                             <DropdownMenuItem 
@@ -1179,7 +1196,7 @@ const CommunityCommentsList = ({
                               onClick={() => moderateMutation.mutate({ viewerId: comment.userId, type: "standard_mod" })}
                             >
                               <ShieldCheckIcon className="size-5 mr-4 opacity-70" />
-                              Thêm người dùng làm người kiểm duyệt tiêu chuẩn
+                              {t("addStandardMod")}
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
@@ -1195,11 +1212,11 @@ const CommunityCommentsList = ({
                     </Avatar>
                     <div className="flex-1 flex flex-col">
                         <div className="border-b border-neutral-300 dark:border-white/20 pb-1 focus-within:border-black dark:focus-within:border-white transition-colors relative group">
-                          <p className="text-[10px] text-muted-foreground font-medium mb-1 group-focus-within:text-black dark:group-focus-within:text-white">Phản hồi</p>
+                          <p className="text-[10px] text-muted-foreground font-medium mb-1 group-focus-within:text-black dark:group-focus-within:text-white">{t("reply")}</p>
                           <textarea 
                               value={replyText}
                               onChange={(e) => setReplyText(e.target.value)}
-                              placeholder="Phản hồi..."
+                              placeholder={t("replyPlaceholder")}
                               className="w-full bg-transparent outline-none resize-none text-sm placeholder:text-muted-foreground min-h-[24px]"
                               rows={1}
                               autoFocus
@@ -1212,7 +1229,7 @@ const CommunityCommentsList = ({
                               className="rounded-full px-4 hover:bg-neutral-200 dark:hover:bg-white/10 font-bold" 
                               onClick={() => setReplyingTo(null)}
                           >
-                              Hủy
+                              {t("cancel")}
                           </Button>
                           <Button 
                               variant="secondary" 
@@ -1226,7 +1243,7 @@ const CommunityCommentsList = ({
                                 value: replyText 
                               })}
                           >
-                              Phản hồi
+                              {t("replyAction")}
                           </Button>
                         </div>
                     </div>
@@ -1262,7 +1279,7 @@ const CommunityCommentsList = ({
                        <p className="text-xs line-clamp-3 text-muted-foreground group-hover/video:text-[#3ea6ff] transition-colors relative">
                          {comment.videoTitle}
                          <span className="absolute -bottom-6 left-0 bg-white/10 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover/video:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg z-10">
-                           Xem bình luận trên YouTube
+                           {t("viewCommentOnYouTube")}
                          </span>
                        </p>
                      </Link>

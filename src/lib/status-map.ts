@@ -1,19 +1,19 @@
 export const STATUS_MAP = {
-  ready: "Sẵn sàng",
-  preparing: "Đang chuẩn bị",
-  processing: "Đang xử lý",
-  errored: "Lỗi",
+  ready: "Ready",
+  preparing: "Preparing",
+  processing: "Processing",
+  errored: "Errored",
 } as const;
 
 export const VISIBILITY_MAP = {
-  public: "Công khai",
-  private: "Riêng tư",
+  public: "Public",
+  private: "Private",
 } as const;
 
 export const TRACK_STATUS_MAP = {
-  ready: "Sẵn sàng",
-  preparing: "Đang chuẩn bị",
-  processing: "Đang xử lý",
-  errored: "Lỗi",
-  no_subtitles: "Không có phụ đề",
+  ready: "Ready",
+  preparing: "Preparing",
+  processing: "Processing",
+  errored: "Errored",
+  no_subtitles: "No subtitles",
 } as const;

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import {
   Carousel,
@@ -30,6 +31,7 @@ export const FilterCarousel = ({
   data,
   isLoading,
 }: FilterCarouselProps) => {
+  const t = useTranslations("Home");
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -76,7 +78,7 @@ export const FilterCarousel = ({
                 variant={!value ? "default" : "secondary"}
                 className="rounded-lg px-3 py-1 cursor-pointer whitespace-nowrap text-sm select-none"
               >
-                Tất cả
+                {t("all")}
               </Badge>
             </CarouselItem>
           )}

@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { VideoMenu } from "@/modules/videos/ui/components/video-menu";
 import { PauseIcon, Trash2Icon, PlayIcon } from "lucide-react";
 import { usePlayerStore } from "@/modules/videos/store/use-player-store";
+import { useTranslations } from "next-intl";
 
 export const HistoryVideosSection = () => {
   return (
@@ -47,6 +48,7 @@ const HistoryVideosSectionSkeleton = () => (
 );
 
 const HistoryVideosSectionSuspense = () => {
+  const t = useTranslations("History");
   const [searchTerm, setSearchTerm] = useState("");
   const [isTracking, setIsTracking] = useState<boolean>(true);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -65,7 +67,7 @@ const HistoryVideosSectionSuspense = () => {
     trpc.playlists.toggleHistoryTracking.useMutation({
       onSuccess: (_, variables) => {
         toast.success(
-          variables.enabled ? "Đang lưu lịch sử" : "Đã tạm dừng lưu lịch sử",
+          variables.enabled ? t("toastSaving") : t("toastPaused"),
         );
       },
     });
@@ -96,7 +98,7 @@ const HistoryVideosSectionSuspense = () => {
 
   const clearHistoryMutation = trpc.playlists.clearHistory.useMutation({
     onSuccess: async () => {
-      toast.success("Đã xóa tất cả nhật ký xem");
+      toast.success(t("toastCleared"));
       clearCurrentTime(); // Reset progress cho video đang phát
 
       // Xóa tất cả progress trong localStorage (kể cả cache ngầm của Mux Player)
@@ -125,7 +127,7 @@ const HistoryVideosSectionSuspense = () => {
   const removeFromHistoryMutation =
     trpc.playlists.removeFromHistory.useMutation({
       onSuccess: async (data, variables) => {
-        toast.success("Đã xóa video khỏi lịch sử");
+        toast.success(t("toastRemoved"));
         clearCurrentTime(variables.videoId); // Reset progress cho video cụ thể
 
         if (typeof window !== "undefined") {
@@ -192,7 +194,7 @@ const HistoryVideosSectionSuspense = () => {
 
           <input
             type="text"
-            placeholder="Tìm kiếm trong danh sách..."
+            placeholder={t("searchPlaceholder")}
             className="w-full pl-10 pr-8 border-b border-input focus:border-blue-500 focus:outline-none h-8 bg-transparent"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -217,7 +219,7 @@ const HistoryVideosSectionSuspense = () => {
             onClick={clearHistory}
           >
             <Trash2Icon className="w-4 h-4" />
-            Xóa tất cả nhật ký xem
+            {t("clearAll")}
           </Button>
 
           <Button
@@ -230,26 +232,24 @@ const HistoryVideosSectionSuspense = () => {
             ) : (
               <PlayIcon className="w-4 h-4" />
             )}
-            {isTracking ? "Tạm dừng lưu lịch sử" : "Tiếp tục lưu lịch sử"}
+            {isTracking ? t("pause") : t("resume")}
           </Button>
 
           {showConfirmDialog && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
               <div className="bg-background border border-border p-6 rounded-lg w-96 text-foreground shadow-xl">
                 <h2 className="text-lg font-semibold mb-2">
-                  Tạm dừng lưu lịch sử xem?
+                  {t("pauseTitle")}
                 </h2>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Việc tạm dừng nhật ký xem trên YouTube có thể khiến bạn khó
-                  tìm thấy những video đã xem hơn và ít được gợi ý video mới hơn
-                  trên YouTube và các sản phẩm khác của Google.
+                  {t("pauseDescription")}
                 </p>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={cancelToggleTracking}>
-                    Hủy
+                    {t("cancel")}
                   </Button>
                   <Button variant="default" onClick={confirmToggleTracking}>
-                    Tạm dừng
+                    {t("pauseAction")}
                   </Button>
                 </div>
               </div>

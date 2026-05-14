@@ -8,6 +8,7 @@ import { DEFAULT_LIMIT } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/responsive-modal";
 import { InfiniteScroll } from "@/components/infinite-scroll";
+import { useTranslations } from "next-intl";
 
 interface PlaylistAddModalProps {
   open: boolean;
@@ -20,6 +21,7 @@ export const PlaylistAddModal = ({
   onOpenChange,
   videoId,
 }: PlaylistAddModalProps) => {
+  const t = useTranslations("Playlists");
   const utils = trpc.useUtils();
 
   const {
@@ -41,7 +43,7 @@ export const PlaylistAddModal = ({
 
   const addVideo = trpc.playlists.addVideo.useMutation({
     onSuccess: async (data) => {
-      toast.success("Đã thêm video vào danh sách phát");
+      toast.success(t("toastAdded"));
 
       await Promise.all([
         utils.playlists.getMany.invalidate(),
@@ -52,13 +54,13 @@ export const PlaylistAddModal = ({
     },
     onError: (err) => {
       console.error("ADD VIDEO ERROR:", err);
-      toast.error(err.message || "Đã có lỗi xảy ra");
+      toast.error(err.message || t("errorOccurred"));
     },
   });
 
   const removeVideo = trpc.playlists.removeVideo.useMutation({
     onSuccess: async (data) => {
-      toast.success("Đã gỡ video khỏi danh sách phát");
+      toast.success(t("toastRemoved"));
 
       await Promise.all([
         utils.playlists.getMany.invalidate(),
@@ -69,13 +71,13 @@ export const PlaylistAddModal = ({
     },
     onError: (err) => {
       console.error("REMOVE VIDEO ERROR:", err);
-      toast.error(err.message || "Đã có lỗi xảy ra");
+      toast.error(err.message || t("errorOccurred"));
     },
   });
 
   return (
     <ResponsiveModal
-      title="Thêm vào danh sách phát"
+      title={t("addModalTitle")}
       open={open}
       onOpenChange={onOpenChange}
     >

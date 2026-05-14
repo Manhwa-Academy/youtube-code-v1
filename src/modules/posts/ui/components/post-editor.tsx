@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +54,7 @@ type PollOption = {
 };
 
 export const PostEditor = ({ userId }: PostEditorProps) => {
+  const t = useTranslations("Posts");
   const { user } = useUser();
   const utils = trpc.useUtils();
   
@@ -71,7 +73,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
   
   const getInitialSchedule = () => {
     const now = new Date();
-    // Mặc định là 1 giờ sau từ bây giờ, làm tròn đến 15 phút tiếp theo
+    // Default is 1 hour from now, rounded to the next 15 minutes
     const defaultTime = new Date(now.getTime() + 60 * 60 * 1000);
     const minutes = defaultTime.getMinutes();
     const roundedMinutes = Math.ceil(minutes / 15) * 15;
@@ -119,7 +121,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
 
   const createPost = trpc.posts.create.useMutation({
     onSuccess: () => {
-      toast.success(isScheduling ? "Đã lên lịch bài viết!" : "Đã đăng bài viết!");
+      toast.success(isScheduling ? t("postScheduledSuccess") : t("postPublishedSuccess"));
       setContent("");
       setSelectedImages([]);
       setActiveImageIndex(0);
@@ -135,7 +137,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
       utils.posts.getMany.invalidate({ userId });
     },
     onError: (error) => {
-      toast.error(error.message || "Có lỗi xảy ra!");
+      toast.error(error.message || t("errorOccurred"));
     }
   });
   
@@ -166,7 +168,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
        const date = getScheduledDateTime(scheduledDate, scheduledTime);
        
        if (date.getTime() <= Date.now()) {
-         toast.error("Thời gian lên lịch phải ở tương lai!");
+         toast.error(t("scheduleTimePastError"));
          return;
        }
        
@@ -191,7 +193,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
     if (!files || files.length === 0) return;
 
     if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) {
-      toast.error("Chưa cấu hình Cloudinary Cloud Name trong .env");
+      toast.error(t("cloudinaryNotConfigured"));
       return;
     }
 
@@ -211,7 +213,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
          const data = await response.json();
 
          if (!response.ok || !data.secure_url) {
-            throw new Error(data.error?.message || "Lỗi khi tải ảnh lên");
+            throw new Error(data.error?.message || t("errorUploadingImage"));
          }
          
          if (optionId) {
@@ -225,7 +227,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
          }
        }
     } catch (error: any) {
-       toast.error(error.message || "Lỗi khi tải ảnh lên!");
+       toast.error(error.message || t("errorUploadingImage"));
     } finally {
        setIsUploading(false);
        if (fileInputRef.current) fileInputRef.current.value = "";
@@ -265,11 +267,11 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
         <div className="flex-1 flex flex-col gap-3">
           <div className="flex justify-between items-center text-xs text-muted-foreground">
              <span className="font-medium text-black dark:text-white">{channelUser.name}</span>
-             <span>Trạng thái hiển thị: <span className="font-semibold text-black dark:text-white">Công khai</span></span>
+             <span>{t("visibilityStatus")}: <span className="font-semibold text-black dark:text-white">{t("public")}</span></span>
           </div>
           
           <Textarea
-            placeholder="Bạn đang nghĩ gì?"
+            placeholder={t("whatsOnYourMind")}
             className="border-none focus-visible:ring-0 resize-none min-h-[40px] p-0 text-base placeholder:text-gray-500 bg-transparent"
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -313,7 +315,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                        
                        <div className="flex-1 relative">
                           <Input
-                            placeholder={postType === "question" ? `Câu trả lời ${index + 1}` : "Thêm lựa chọn"}
+                            placeholder={postType === "question" ? `${t("answer")} ${index + 1}` : t("addOptionPlaceholder")}
                             value={option.text}
                             onChange={(e) => {
                               const limit = (postType === "poll" && pollType === "image") ? 36 : 65;
@@ -425,14 +427,14 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                        className="text-white text-sm font-semibold hover:text-red-400 transition-colors"
                        onClick={() => removeSelectedImage(activeImageIndex)}
                      >
-                        Xóa
+                        {t("delete")}
                      </button>
                      <Button 
                        variant="secondary" 
                        size="sm" 
                        className="rounded-full bg-neutral-800 hover:bg-neutral-700 text-white border-none h-8 px-4 text-xs font-semibold"
                      >
-                        Chỉnh sửa bản...
+                        {t("editingPost")}
                      </Button>
                   </div>
                </div>
@@ -462,7 +464,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                  }}
                >
                   <ImageIcon className="size-4 text-blue-500" />
-                  Hình ảnh
+                  {t("images")}
                </Button>
                
                <Button 
@@ -475,7 +477,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                  }}
                >
                   <BarChart2 className="size-4 text-blue-500" />
-                  Cuộc thăm dò ý kiến dạng hình ảnh
+                  {t("imagePoll")}
                </Button>
                
                <Button 
@@ -488,7 +490,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                  }}
                >
                   <ListTodo className="size-4 text-blue-500" />
-                  Cuộc thăm dò ý kiến dạng văn bản
+                  {t("textPoll")}
                </Button>
                
                <Button 
@@ -498,7 +500,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                  onClick={() => setPostType("video")}
                >
                   <VideoIcon className="size-4 text-blue-500" />
-                  Video
+                  {t("video")}
                </Button>
                
                <Button 
@@ -508,10 +510,10 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                  onClick={() => setPostType("question")}
                >
                   <HelpCircle className="size-4 text-blue-500" />
-                  Câu hỏi
+                  {t("question")}
                </Button>
                
-               <div className="ml-auto flex gap-2">
+                  <div className="ml-auto flex gap-2">
                   <Button variant="ghost" size="sm" className="h-8" onClick={() => {
                     setIsExpanded(false);
                     setPostType("text");
@@ -519,7 +521,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                     setIsScheduling(false);
                     setPollOptions([{ id: "1", text: "" }, { id: "2", text: "" }]);
                     setContent("");
-                  }}>Hủy</Button>
+                  }}>{t("cancel")}</Button>
                   <div className="flex items-center">
                     <Button 
                       size="sm" 
@@ -527,7 +529,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                       disabled={(!content.trim() && selectedImages.length === 0 && postType !== "poll" && postType !== "question") || isUploading || createPost.isPending || isScheduleInvalid}
                       onClick={handlePost}
                     >
-                      {createPost.isPending ? "Đang đăng..." : isScheduling ? "Lên lịch" : "Đăng"}
+                      {createPost.isPending ? t("posting") : isScheduling ? t("schedule") : t("post")}
                     </Button>
                     
                     <DropdownMenu>
@@ -546,7 +548,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                             onClick={() => setIsScheduling(true)}
                           >
                              <Clock className="size-4" />
-                             <span>Lên lịch đăng bài</span>
+                             <span>{t("schedulePost")}</span>
                           </DropdownMenuItem>
                        </DropdownMenuContent>
                     </DropdownMenu>
@@ -558,14 +560,14 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
           {isScheduling && (
              <div className="mt-4 p-4 border rounded-xl border-gray-200 dark:border-neutral-800 bg-gray-50/50 dark:bg-neutral-900/50 animate-in slide-in-from-top-2 duration-300">
                 <div className="flex items-center justify-between mb-2">
-                   <span className="text-sm font-semibold">Chọn ngày và giờ để xuất bản bài đăng này</span>
+                   <span className="text-sm font-semibold">{t("selectDateAndTime")}</span>
                    <Button variant="ghost" size="icon" className="size-8" onClick={() => setIsScheduling(false)}>
                       <X className="size-4" />
                    </Button>
                 </div>
                 
                 {isScheduleInvalid && (
-                  <p className="text-xs text-red-500 mb-3 font-medium">Thời gian lên lịch không được ở quá khứ!</p>
+                  <p className="text-xs text-red-500 mb-3 font-medium">{t("scheduleTimePastError")}</p>
                 )}
                 
                 <div className="flex flex-wrap gap-3">
@@ -585,7 +587,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                         onValueChange={setScheduledTime}
                       >
                         <SelectTrigger className="w-full bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-700 h-10">
-                          <SelectValue placeholder="Chọn thời gian" />
+                          <SelectValue placeholder={t("selectTimePlaceholder")} />
                         </SelectTrigger>
                         <SelectContent className="max-h-[300px]">
                           {timeOptions.map(t => (
@@ -598,7 +600,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                    <div className="flex-[2] min-w-[200px] relative">
                       <div className="w-full bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700 rounded-md h-10 px-3 flex items-center gap-2 text-sm text-gray-500">
                          <Globe className="size-4" />
-                         <span>(GMT+07:00) Giờ địa phương</span>
+                         <span>{t("localTime")}</span>
                       </div>
                    </div>
                 </div>

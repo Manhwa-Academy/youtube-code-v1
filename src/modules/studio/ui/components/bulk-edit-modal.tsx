@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useTranslations } from "next-intl";
 
 interface BulkEditModalProps {
   open: boolean;
@@ -32,6 +33,7 @@ export const BulkEditModal = ({
   type,
   placeholder
 }: BulkEditModalProps) => {
+  const t = useTranslations("Studio");
   const [value, setValue] = useState("");
 
   const handleConfirm = () => {
@@ -66,10 +68,10 @@ export const BulkEditModal = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Hủy
+            {t("cancel")}
           </Button>
           <Button onClick={handleConfirm} disabled={!value.trim()}>
-            Cập nhật
+            {t("update")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -8,6 +8,7 @@ import { trpc } from "@/trpc/client";
 import { DEFAULT_LIMIT } from "@/constants";
 import { InfiniteScroll } from "@/components/infinite-scroll";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import {
   VideoGridCard,
@@ -53,6 +54,7 @@ export const VideosSectionSkeleton = () => {
 };
 
 const VideosSectionSuspense = ({ playlistId }: VideosSectionProps) => {
+  const t = useTranslations("Playlists");
   const [videos, query] = trpc.playlists.getVideos.useSuspenseInfiniteQuery(
     { limit: DEFAULT_LIMIT, playlistId },
     {
@@ -64,14 +66,14 @@ const VideosSectionSuspense = ({ playlistId }: VideosSectionProps) => {
 
   const removeVideo = trpc.playlists.removeVideo.useMutation({
     onSuccess: (data) => {
-      toast.success("Video removed from playlist");
+      toast.success(t("videoRemovedFromPlaylist"));
       utils.playlists.getMany.invalidate();
       utils.playlists.getManyForVideo.invalidate({ videoId: data.videoId });
       utils.playlists.getOne.invalidate({ id: data.playlistId });
       utils.playlists.getVideos.invalidate({ playlistId: data.playlistId });
     },
     onError: () => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("errorRemovingVideo"));
     },
   });
 

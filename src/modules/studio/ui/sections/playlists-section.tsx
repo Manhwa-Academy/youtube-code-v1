@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 import { Globe2Icon, LockIcon, SearchIcon } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -28,6 +29,7 @@ interface PlaylistsSectionProps {
 }
 
 export const PlaylistsSection = ({ limit }: PlaylistsSectionProps) => {
+  const t = useTranslations("Studio");
   const [filters, setFilters] = useState<{
     name?: string;
     visibility?: "public" | "private";
@@ -46,17 +48,18 @@ export const PlaylistsSection = ({ limit }: PlaylistsSectionProps) => {
 };
 
 const PlaylistsSectionSkeleton = () => {
+  const t = useTranslations("Studio");
   return (
     <div className="border-y">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="pl-6 w-[510px]">Danh sách phát</TableHead>
-            <TableHead>Loại</TableHead>
-            <TableHead>Chế độ hiển thị</TableHead>
-            <TableHead>Ngày cập nhật</TableHead>
-            <TableHead className="text-right">Số lượng video</TableHead>
-            <TableHead className="text-right pr-6">Lượt xem</TableHead>
+            <TableHead className="pl-6 w-[510px]">{t("playlists")}</TableHead>
+            <TableHead>{t("type")}</TableHead>
+            <TableHead>{t("privacy")}</TableHead>
+            <TableHead>{t("lastUpdated")}</TableHead>
+            <TableHead className="text-right">{t("videoCount")}</TableHead>
+            <TableHead className="text-right pr-6">{t("views")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -99,6 +102,7 @@ interface PlaylistsSectionSuspenseProps extends PlaylistsSectionProps {
 }
 
 const PlaylistsSectionSuspense = ({ limit, filters }: PlaylistsSectionSuspenseProps) => {
+  const t = useTranslations("Studio");
   const [playlists, query] = trpc.playlists.getMany.useSuspenseInfiniteQuery(
     {
       limit,
@@ -117,12 +121,12 @@ const PlaylistsSectionSuspense = ({ limit, filters }: PlaylistsSectionSuspensePr
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="pl-6 w-[510px]">Danh sách phát</TableHead>
-              <TableHead>Loại</TableHead>
-              <TableHead>Chế độ hiển thị</TableHead>
-              <TableHead>Ngày cập nhật</TableHead>
-              <TableHead className="text-right">Số lượng video</TableHead>
-              <TableHead className="text-right pr-6">Lượt xem</TableHead>
+              <TableHead className="pl-6 w-[510px]">{t("playlists")}</TableHead>
+              <TableHead>{t("type")}</TableHead>
+              <TableHead>{t("privacy")}</TableHead>
+              <TableHead>{t("lastUpdated")}</TableHead>
+              <TableHead className="text-right">{t("videoCount")}</TableHead>
+              <TableHead className="text-right pr-6">{t("views")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -131,7 +135,7 @@ const PlaylistsSectionSuspense = ({ limit, filters }: PlaylistsSectionSuspensePr
                 <TableCell colSpan={6} className="h-[400px] text-center text-muted-foreground">
                    <div className="flex flex-col items-center justify-center gap-y-4">
                     <SearchIcon className="size-16 text-muted-foreground/50" />
-                    <p className="text-sm text-muted-foreground">Không có danh sách phát nào phù hợp</p>
+                    <p className="text-sm text-muted-foreground">{t("noPlaylistsMatching")}</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -155,7 +159,7 @@ const PlaylistsSectionSuspense = ({ limit, filters }: PlaylistsSectionSuspensePr
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-neutral-800 text-muted-foreground text-xs">
-                            Trống
+                            {t("empty")}
                           </div>
                         )}
                         <div className="absolute bottom-0 right-0 bg-black/80 px-2 py-1 text-[10px] text-white flex items-center gap-1">
@@ -170,7 +174,7 @@ const PlaylistsSectionSuspense = ({ limit, filters }: PlaylistsSectionSuspensePr
                     </div>
                   </TableCell>
                   <TableCell className="text-sm">
-                    {playlist.isMixPlaylist ? "Kết hợp" : "Thông thường"}
+                    {playlist.isMixPlaylist ? t("combined") : t("standard")}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center">
@@ -179,11 +183,7 @@ const PlaylistsSectionSuspense = ({ limit, filters }: PlaylistsSectionSuspensePr
                       ) : (
                         <Globe2Icon className="size-4 mr-2" />
                       )}
-                      {
-                        VISIBILITY_MAP[
-                          playlist.visibility as keyof typeof VISIBILITY_MAP
-                        ]
-                      }
+                      {t(playlist.visibility)}
                     </div>
                   </TableCell>
                   <TableCell className="text-sm">

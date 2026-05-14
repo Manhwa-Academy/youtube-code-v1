@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
+
 import { 
   Dialog, 
   DialogContent, 
@@ -13,6 +15,7 @@ export const useConfirm = (
   title: string,
   message: string,
 ): [() => React.ReactElement, () => Promise<unknown>] => {
+  const t = useTranslations("Common");
   const [promise, setPromise] = useState<{ resolve: (value: boolean) => void } | null>(null);
 
   const confirm = () => new Promise((resolve, reject) => {
@@ -45,13 +48,13 @@ export const useConfirm = (
             onClick={handleCancel}
             variant="outline"
           >
-            Hủy
+            {t("cancel")}
           </Button>
           <Button
             onClick={handleConfirm}
             variant="destructive"
           >
-            Xác nhận
+            {t("confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

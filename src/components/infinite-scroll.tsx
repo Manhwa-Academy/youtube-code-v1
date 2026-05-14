@@ -6,6 +6,8 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 
+import { useTranslations } from "next-intl";
+
 interface InfiniteScrollProps {
   isManual?: boolean;
   hasNextPage: boolean;
@@ -19,6 +21,7 @@ export const InfiniteScroll = ({
   isFetchingNextPage,
   fetchNextPage,
 }: InfiniteScrollProps) => {
+  const t = useTranslations("Common");
   const { targetRef, isIntersecting } = useIntersectionObserver({
     threshold: 0.5,
     rootMargin: "100px",
@@ -43,9 +46,9 @@ export const InfiniteScroll = ({
           {isFetchingNextPage ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Đang tải...
+              {t("loading")}
             </>
-          ) : "Xem thêm"}
+          ) : t("viewMore")}
         </Button>
       ) : null}
     </div>

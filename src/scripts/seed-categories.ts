@@ -2,20 +2,20 @@ import { db } from "@/db";
 import { categories } from "@/db/schema";
 
 const categoryNames = [
-  "Ô tô và xe cộ",
-  "Hài kịch",
-  "Giáo dục",
-  "Trò chơi",
-  "Giải trí",
-  "Phim và hoạt hình",
-  "Hướng dẫn và phong cách",
-  "Âm nhạc",
-  "Tin tức và chính trị",
-  "Mọi người và blog",
-  "Thú cưng và động vật",
-  "Khoa học và công nghệ",
-  "Thể thao",
-  "Du lịch và sự kiện",
+  "Cars & Vehicles",
+  "Comedy",
+  "Education",
+  "Gaming",
+  "Entertainment",
+  "Film & Animation",
+  "How-to & Style",
+  "Music",
+  "News & Politics",
+  "People & Blogs",
+  "Pets & Animals",
+  "Science & Technology",
+  "Sports",
+  "Travel & Events",
 ];
 
 async function main() {
@@ -24,7 +24,7 @@ async function main() {
   try {
     const values = categoryNames.map((name) => ({
       name,
-      description: `Video thuộc danh mục ${name.toLowerCase()}`,
+      description: `Videos in ${name.toLowerCase()} category`,
     }));
 
     await db.insert(categories).values(values);

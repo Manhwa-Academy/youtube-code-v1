@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import {
   Dialog,
@@ -31,11 +32,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/trpc/client";
 
-const formSchema = z.object({
-  reason: z.string().min(1, "Vui lòng chọn lý do"),
-  description: z.string().optional(),
-});
-
 interface ReportModalProps {
   targetId: string;
   targetType: "video" | "comment" | "user" | "post";
@@ -49,6 +45,13 @@ export const ReportModal = ({
   isOpen,
   onClose,
 }: ReportModalProps) => {
+  const t = useTranslations("Reports");
+
+  const formSchema = z.object({
+    reason: z.string().min(1, t("selectReason")),
+    description: z.string().optional(),
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -59,12 +62,12 @@ export const ReportModal = ({
 
   const createReport = trpc.reports.create.useMutation({
     onSuccess: () => {
-      toast.success("Báo cáo đã được gửi. Cảm ơn bạn!");
+      toast.success(t("reportSentSuccess"));
       onClose();
       form.reset();
     },
     onError: (error) => {
-      toast.error(error.message || "Không thể gửi báo cáo");
+      toast.error(error.message || t("reportSentError"));
     },
   });
 
@@ -78,22 +81,22 @@ export const ReportModal = ({
   };
 
   const reasons = [
-    { value: "spam", label: "Nội dung rác hoặc gây hiểu lầm" },
-    { value: "harassment", label: "Quấy rối hoặc bắt nạt" },
-    { value: "hate_speech", label: "Ngôn từ gây thù ghét" },
-    { value: "violence", label: "Nội dung bạo lực hoặc phản cảm" },
-    { value: "sexual_content", label: "Nội dung khiêu dâm" },
-    { value: "child_abuse", label: "Ngược đãi trẻ em" },
-    { value: "other", label: "Lý do khác" },
+    { value: "spam", label: t("reason_spam") },
+    { value: "harassment", label: t("reason_harassment") },
+    { value: "hate_speech", label: t("reason_hate_speech") },
+    { value: "violence", label: t("reason_violence") },
+    { value: "sexual_content", label: t("reason_sexual_content") },
+    { value: "child_abuse", label: t("reason_child_abuse") },
+    { value: "other", label: t("reason_other") },
   ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Báo cáo vi phạm</DialogTitle>
+          <DialogTitle>{t("reportTitle")}</DialogTitle>
           <DialogDescription>
-            Nếu bạn thấy nội dung này vi phạm tiêu chuẩn cộng đồng, hãy cho chúng tôi biết.
+            {t("reportDescription")}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -103,11 +106,11 @@ export const ReportModal = ({
               name="reason"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Lý do</FormLabel>
+                  <FormLabel>{t("reasonLabel")}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Chọn lý do báo cáo" />
+                        <SelectValue placeholder={t("selectReasonPlaceholder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -127,10 +130,10 @@ export const ReportModal = ({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Chi tiết thêm (tùy chọn)</FormLabel>
+                  <FormLabel>{t("moreDetailsLabel")}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Cung cấp thêm thông tin về vi phạm..."
+                      placeholder={t("moreDetailsPlaceholder")}
                       className="resize-none"
                       {...field}
                     />
@@ -141,10 +144,10 @@ export const ReportModal = ({
             />
             <div className="flex justify-end gap-2">
               <Button variant="ghost" type="button" onClick={onClose}>
-                Hủy
+                {t("cancel")}
               </Button>
               <Button type="submit" disabled={createReport.isPending}>
-                Gửi báo cáo
+                {t("submitReport")}
               </Button>
             </div>
           </form>

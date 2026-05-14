@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect, useRef } from "react";
 import { SearchIcon, XIcon, HistoryIcon, KeyboardIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { APP_URL } from "@/constants";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export const SearchInput = (props: SearchInputProps) => {
 const MAX_HISTORY = 10;
 
 const SearchInputSuspense = ({ onExpand, onCollapse, isExpanded, disabled }: SearchInputProps) => {
+  const t = useTranslations("Home");
   const router = useRouter();
   const searchParams = useSearchParams();
   const isMobile = useIsMobile();
@@ -167,7 +169,7 @@ const SearchInputSuspense = ({ onExpand, onCollapse, isExpanded, disabled }: Sea
             onChange={(e) => setValue(e.target.value)}
             onFocus={() => setIsFocused(true)}
             type="text"
-            placeholder={disabled ? "Đang ngoại tuyến" : "Tìm kiếm"}
+            placeholder={disabled ? t("offline") : t("search")}
             className="w-full pl-4 focus:pl-10 py-2 pr-16 rounded-l-full border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:border-blue-500 bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
           />
           

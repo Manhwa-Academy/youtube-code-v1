@@ -145,7 +145,7 @@ export const usersRouter = createTRPCRouter({
         if (user.handlePreviousUpdatedAt && user.handlePreviousUpdatedAt > fourteenDaysAgo) {
           throw new TRPCError({ 
             code: "FORBIDDEN", 
-            message: "Bạn chỉ có thể đổi tên người dùng hai lần trong vòng 14 ngày." 
+            message: "You can only change your handle twice within 14 days." 
           });
         }
 

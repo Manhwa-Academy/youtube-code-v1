@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth, useClerk } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { FlameIcon, HomeIcon, PlaySquareIcon, VideoIcon  } from "lucide-react";
 
 import {
@@ -14,33 +15,35 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-const items = [
-  {
-    title: "Trang chủ",
-    url: "/",
-    icon: HomeIcon,
-  },
-  {
-    title: "Kênh đăng ký",
-    url: "/feed/subscribed",
-    icon: PlaySquareIcon,
-    auth: true,
-  },
-  {
-    title: "Thịnh hành",
-    url: "/feed/trending",
-    icon: FlameIcon,
-  },
-  {
-    title: "Shorts", // <-- thêm mục mới
-    url: "/feed/shorts", // đường dẫn bạn muốn
-    icon: VideoIcon, // bạn có thể đổi icon khác nếu muốn
-  },
-];
 export const MainSection = () => {
+  const t = useTranslations("Sidebar");
   const clerk = useClerk();
   const { isSignedIn } = useAuth();
   const pathname = usePathname();
+
+  const items = [
+    {
+      title: t("home"),
+      url: "/",
+      icon: HomeIcon,
+    },
+    {
+      title: t("subscriptions"),
+      url: "/feed/subscribed",
+      icon: PlaySquareIcon,
+      auth: true,
+    },
+    {
+      title: t("trending"),
+      url: "/feed/trending",
+      icon: FlameIcon,
+    },
+    {
+      title: t("shorts"),
+      url: "/feed/shorts",
+      icon: VideoIcon,
+    },
+  ];
 
   return (
     <SidebarGroup>
@@ -53,7 +56,7 @@ export const MainSection = () => {
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
+            <SidebarMenuItem key={item.url}>
               <SidebarMenuButton
                 tooltip={item.title}
                 asChild

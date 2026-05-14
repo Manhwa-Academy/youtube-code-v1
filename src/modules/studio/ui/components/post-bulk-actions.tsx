@@ -8,6 +8,7 @@ import {
   PencilIcon
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,34 +32,35 @@ export const PostBulkActions = ({
   onClearSelection,
   onSuccess 
 }: PostBulkActionsProps) => {
+  const t = useTranslations("Studio");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [ConfirmDialog, confirm] = useConfirm(
-    "Xóa bài đăng?",
-    "Hành động này sẽ xóa vĩnh viễn các bài đăng đã chọn. Bạn có chắc chắn không?"
+    t("bulkDeletePostTitle"),
+    t("bulkDeletePostDescription")
   );
 
   const utils = trpc.useUtils();
   const removeMany = trpc.posts.removeMany.useMutation({
     onSuccess: () => {
-      toast.success("Đã xóa các bài đăng đã chọn");
+      toast.success(t("bulkDeletePostSuccess"));
       utils.posts.getMany.invalidate();
       onClearSelection();
       onSuccess?.();
     },
     onError: () => {
-      toast.error("Có lỗi xảy ra khi xóa bài đăng");
+      toast.error(t("bulkDeletePostError"));
     },
   });
 
   const updateMany = trpc.posts.updateMany.useMutation({
     onSuccess: () => {
-      toast.success("Đã cập nhật các bài đăng đã chọn");
+      toast.success(t("bulkUpdatePostSuccess"));
       utils.posts.getMany.invalidate();
       onClearSelection();
       onSuccess?.();
     },
     onError: () => {
-      toast.error("Có lỗi xảy ra khi cập nhật bài đăng");
+      toast.error(t("bulkUpdatePostError"));
     },
   });
 
@@ -82,17 +84,17 @@ export const PostBulkActions = ({
         open={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onConfirm={handleBulkEdit}
-        title="Chỉnh sửa nội dung"
-        label="Nội dung mới"
+        title={t("bulkEditContent")}
+        label={t("bulkEditContentLabel")}
         type="textarea"
-        placeholder="Nhập nội dung mới cho tất cả bài đăng đã chọn"
+        placeholder={t("bulkEditContentPlaceholder")}
       />
       <div className="flex items-center gap-x-4">
         <Button variant="ghost" size="icon" onClick={onClearSelection}>
           <XIcon className="size-5" />
         </Button>
         <span className="text-sm font-medium">
-          Đã chọn {selectedIds.length}
+          {t("bulkSelectedCount", { count: selectedIds.length })}
         </span>
         
         <div className="h-6 w-px bg-border mx-2" />
@@ -100,13 +102,13 @@ export const PostBulkActions = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-x-2">
-              Chỉnh sửa <ChevronDownIcon className="size-4" />
+              {t("bulkEdit")} <ChevronDownIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={() => setIsEditModalOpen(true)}>
               <PencilIcon className="size-4 mr-2" />
-              Nội dung
+              {t("contentLabel")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -114,13 +116,13 @@ export const PostBulkActions = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-x-2">
-              Thao tác khác <ChevronDownIcon className="size-4" />
+              {t("bulkMoreActions")} <ChevronDownIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={handleDelete} className="text-destructive">
               <Trash2Icon className="size-4 mr-2" />
-              Xóa vĩnh viễn
+              {t("bulkDeletePermanently")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -7,6 +7,7 @@ import MuxUploader, {
 } from "@mux/mux-uploader-react";
 
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface StudioUploaderProps {
   endpoint?: string | null;
@@ -19,6 +20,7 @@ export const StudioUploader = ({
   endpoint,
   onSuccess,
 }: StudioUploaderProps) => {
+  const t = useTranslations("Studio");
   return (
     <div>
       <MuxUploader
@@ -36,16 +38,16 @@ export const StudioUploader = ({
 
           <div className="flex flex-col gap-2 text-center">
             <p className="text-sm">
-              Kéo và thả video vào đây để tải lên
+              {t("dragAndDropVideo")}
             </p>
             <p className="text-xs text-muted-foreground">
-              Video sẽ ở chế độ riêng tư cho đến khi bạn xuất bản
+              {t("videoPrivateUntilPublished")}
             </p>
           </div>
 
           <MuxUploaderFileSelect muxUploader={UPLOADER_ID}>
             <Button type="button" className="rounded-full">
-              Chọn tệp
+              {t("selectFiles")}
             </Button>
           </MuxUploaderFileSelect>
         </div>

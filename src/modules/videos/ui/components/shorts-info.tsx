@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { MusicIcon } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 
 import { UserAvatar } from "@/components/user-avatar";
 import { VideoGetOneOutput } from "../../types";
@@ -13,6 +14,7 @@ interface ShortsInfoProps {
 }
 
 export const ShortsInfo = ({ video }: ShortsInfoProps) => {
+  const t = useTranslations("Video");
   const { userId } = useAuth();
 
   return (
@@ -27,7 +29,7 @@ export const ShortsInfo = ({ video }: ShortsInfoProps) => {
         </Link>
         {userId !== video.user.clerkId && (
           <Button variant="secondary" size="sm" className="rounded-full h-8 px-4 bg-white text-black hover:bg-neutral-200 font-medium">
-            Đăng ký
+            {t("subscribe")}
           </Button>
         )}
       </div>

@@ -45,7 +45,7 @@ export const ScrollToTopCharacter = () => {
         >
           <img
             src="/characters/char_full.png"
-            alt="Nhân vật lên đầu"
+            alt="Scroll to top"
             className="w-16 sm:w-24 md:w-32 h-auto"
           />
         </div>
@@ -54,7 +54,7 @@ export const ScrollToTopCharacter = () => {
         <div className="fixed right-0 z-0 bottom-24 sm:bottom-0 md:z-30">
           <img
             src="/characters/char_peek.png"
-            alt="Nhân vật nửa ẩn"
+            alt="Character peeking"
             className="w-12 sm:w-20 md:w-24 h-auto opacity-90"
           />
         </div>

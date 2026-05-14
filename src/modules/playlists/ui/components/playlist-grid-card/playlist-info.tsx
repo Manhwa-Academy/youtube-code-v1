@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreVerticalIcon, Trash2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface PlaylistInfoProps {
   data: PlaylistGetManyOutput["items"][number];
@@ -32,6 +33,7 @@ export const PlaylistInfoSkeleton = () => {
 };
 
 export const PlaylistInfo = ({ data }: PlaylistInfoProps) => {
+  const t = useTranslations("Playlists");
   const [visibility, setVisibility] = useState<"public" | "private">(
     data.visibility,
   );
@@ -41,13 +43,13 @@ export const PlaylistInfo = ({ data }: PlaylistInfoProps) => {
   const updateVisibility = trpc.playlists.updateVisibility.useMutation({
     onSuccess: (data) => {
       toast.success(
-        `Cập nhật quyền ${data.visibility === "public" ? "công khai" : "riêng tư"} thành công!`,
+        t("updateSuccess"),
       );
       // 🔥 refresh lại dữ liệu
       utils.playlists.getPublicMixPlaylists.invalidate();
       utils.playlists.getMany.invalidate(); // 👈 thêm luôn cho chắc
     },
-    onError: () => toast.error("Cập nhật quyền thất bại!"),
+    onError: () => toast.error(t("updateError")),
   });
 
   const handleChange = (newVisibility: "public" | "private") => {
@@ -56,14 +58,14 @@ export const PlaylistInfo = ({ data }: PlaylistInfoProps) => {
   };
   const removePlaylist = trpc.playlists.remove.useMutation({
     onSuccess: () => {
-      toast.success("Đã xóa danh sách!");
+      toast.success(t("deleteSuccess"));
       utils.playlists.getPublicMixPlaylists.invalidate();
       utils.playlists.getMany.invalidate();
     },
-    onError: () => toast.error("Xóa danh sách thất bại!"),
+    onError: () => toast.error(t("deleteError")),
   });
   const handleRemove = () => {
-    if (!confirm(`Bạn chắc chắn muốn xóa "${data.name}"?`)) return;
+    if (!confirm(t("deleteConfirm", { name: data.name }))) return;
     removePlaylist.mutate({ id: data.id });
   };
   return (
@@ -73,7 +75,7 @@ export const PlaylistInfo = ({ data }: PlaylistInfoProps) => {
           {data.name}
         </h3>
         <p className="text-sm text-muted-foreground">
-          {data.isMixPlaylist ? "Danh sách kết hợp" : "Danh sách phát"}
+          {data.isMixPlaylist ? t("mixPlaylist") : t("playlist")}
         </p>
         <p
           className="text-sm text-muted-foreground font-semibold hover:text-primary cursor-pointer"
@@ -88,7 +90,7 @@ export const PlaylistInfo = ({ data }: PlaylistInfoProps) => {
             }
           }}
         >
-          {data.isMixPlaylist ? "Phát danh sách" : "Xem tất cả video"}
+          {data.isMixPlaylist ? t("playList") : t("viewAll")}
         </p>
       </div>
 
@@ -101,17 +103,17 @@ export const PlaylistInfo = ({ data }: PlaylistInfoProps) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
           <DropdownMenuItem onClick={() => handleChange("public")}>
-            Công khai {visibility === "public" ? "✔️" : ""}
+            {t("public")} {visibility === "public" ? "✔️" : ""}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleChange("private")}>
-            Riêng tư {visibility === "private" ? "✔️" : ""}
+            {t("private")} {visibility === "private" ? "✔️" : ""}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={handleRemove}
             className="text-red-500 focus:text-red-500"
           >
             <Trash2Icon className="mr-2 size-4" />
-            Xóa danh sách
+            {t("removePlaylist")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

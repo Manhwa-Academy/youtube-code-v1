@@ -1,4 +1,5 @@
 import { HashtagResultsSection } from "../sections/hashtag-results-section";
+import { useTranslations } from "next-intl";
 
 interface HashtagViewProps {
   tag: string;
@@ -7,6 +8,7 @@ interface HashtagViewProps {
 export const HashtagView = ({
   tag,
 }: HashtagViewProps) => {
+  const t = useTranslations("Search");
   return (
     <div className="max-w-[1300px] mx-auto mb-10 flex flex-col gap-y-6 px-4 pt-8">
       <div className="flex flex-col gap-y-2">
@@ -14,7 +16,7 @@ export const HashtagView = ({
           #{tag}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Video liên quan đến hashtag #{tag}
+          {t("videosRelatedToHashtag", { tag })}
         </p>
       </div>
 

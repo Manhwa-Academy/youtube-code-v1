@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { trpc } from "@/trpc/client";
 import { THUMBNAIL_FALLBACK } from "@/modules/videos/constants";
@@ -26,6 +27,8 @@ export const PlaylistsViewSkeleton = () => {
 };
 
 export const PlaylistsView = () => {
+  const tPlaylists = useTranslations("Playlists");
+  const tVideo = useTranslations("Video");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -40,7 +43,7 @@ export const PlaylistsView = () => {
   }
 
   if (!data || data.length === 0) {
-    return <p className="p-4">Chưa có danh sách kết hợp nào</p>;
+    return <p className="p-4">{tPlaylists("noMixPlaylists")}</p>;
   }
 
   // ✅ KHÔNG CẦN FILTER NỮA
@@ -54,7 +57,7 @@ export const PlaylistsView = () => {
   return (
     <div className="px-4 mt-4">
       <h2 className="text-lg font-semibold mb-4">
-        Danh sách kết hợp
+        {tPlaylists("mixPlaylists")}
       </h2>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -87,7 +90,7 @@ export const PlaylistsView = () => {
                   }}
                 />
                 <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs font-semibold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap">
-                  ▶ {videoCount} video
+                  ▶ {videoCount} {tVideo("videos")}
                 </div>
               </div>
 
@@ -95,7 +98,7 @@ export const PlaylistsView = () => {
                 {playlist.name}
               </p>
               <p className="text-xs text-muted-foreground">
-                Danh sách kết hợp
+                {tPlaylists("mixPlaylists")}
               </p>
             </div>
           );
@@ -110,7 +113,7 @@ export const PlaylistsView = () => {
             }
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
           >
-            Xem thêm
+            {tPlaylists("loadMore")}
           </button>
         </div>
       )}

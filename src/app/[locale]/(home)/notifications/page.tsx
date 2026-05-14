@@ -1,7 +1,7 @@
 import { NotificationsSection } from "@/modules/notifications/ui/sections/notifications-section";
 
 export const metadata = {
-  title: "Thông báo",
+  title: "Notifications",
 };
 
 const NotificationsPage = () => {

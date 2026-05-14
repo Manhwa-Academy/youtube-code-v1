@@ -1,10 +1,10 @@
 "use client";
 
-import { BellIcon, Trash2Icon, CheckCheckIcon, ImageIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { BellIcon, Trash2Icon, CheckCheckIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { vi } from "date-fns/locale";
+import { vi, enUS, ja, ko, zhCN, es, fr, de } from "date-fns/locale";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 import { trpc } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,17 @@ import { InfiniteScroll } from "@/components/infinite-scroll";
 import { ErrorFallback } from "@/components/error-fallback";
 import { ErrorBoundary } from "react-error-boundary";
 import { Suspense } from "react";
+
+const locales: Record<string, any> = {
+  vi,
+  en: enUS,
+  ja,
+  ko,
+  zh: zhCN,
+  es,
+  fr,
+  de,
+};
 
 export const NotificationsSection = () => {
   return (
@@ -48,6 +59,8 @@ const NotificationsSectionSkeleton = () => {
 };
 
 const NotificationsSectionSuspense = () => {
+  const locale = useLocale();
+  const t = useTranslations("Notifications");
   const router = useRouter();
   const utils = trpc.useUtils();
   
@@ -95,7 +108,7 @@ const NotificationsSectionSuspense = () => {
           <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
             <BellIcon className="size-6 text-blue-600" />
           </div>
-          <h1 className="text-2xl font-bold">Thông báo của bạn</h1>
+          <h1 className="text-2xl font-bold">{t("yourNotifications")}</h1>
         </div>
         {notifications.length > 0 && (
           <Button 
@@ -104,7 +117,7 @@ const NotificationsSectionSuspense = () => {
             disabled={markAllAsRead.isPending}
           >
             <CheckCheckIcon className="size-4 mr-2" />
-            Đọc tất cả
+            {t("markAsRead")}
           </Button>
         )}
       </div>
@@ -114,9 +127,9 @@ const NotificationsSectionSuspense = () => {
           <div className="p-4 bg-muted rounded-full mb-4">
             <BellIcon className="size-12 text-muted-foreground/50" />
           </div>
-          <h2 className="text-xl font-semibold">Hộp thư trống</h2>
+          <h2 className="text-xl font-semibold">{t("noNotifications")}</h2>
           <p className="text-muted-foreground mt-2 max-w-[400px]">
-            Bạn hiện chưa có thông báo nào. Khi có người tương tác với kênh của bạn, thông báo sẽ hiện ở đây.
+            {t("noNotificationsDesc")}
           </p>
         </div>
       ) : (
@@ -141,7 +154,7 @@ const NotificationsSectionSuspense = () => {
                 >
                   <p className="text-lg leading-snug">
                     <span className="font-bold hover:underline">{notification.actor.name}</span>{" "}
-                    {getNotificationText(notification.type)}
+                    {t(notification.type as any) || t("default")}
                   </p>
                   {notification.video && (
                     <p className="text-sm text-muted-foreground mt-1 font-medium truncate">
@@ -167,7 +180,7 @@ const NotificationsSectionSuspense = () => {
                     </div>
                   )}
                   <p className="text-xs text-muted-foreground mt-2">
-                    {formatDistanceToNow(notification.createdAt, { addSuffix: true, locale: vi })}
+                    {formatDistanceToNow(notification.createdAt, { addSuffix: true, locale: locales[locale] || enUS })}
                   </p>
                 </div>
               </div>
@@ -202,24 +215,3 @@ const NotificationsSectionSuspense = () => {
     </div>
   );
 };
-
-function getNotificationText(type: string) {
-  switch (type) {
-    case "video_like":
-      return "đã thích video của bạn";
-    case "video_comment":
-      return "đã bình luận về video của bạn";
-    case "comment_reply":
-      return "đã trả lời bình luận của bạn";
-    case "comment_like":
-      return "đã thích bình luận của bạn";
-    case "subscription":
-      return "đã đăng ký kênh của bạn";
-    case "post_like":
-      return "đã thích bài viết của bạn";
-    case "post_comment":
-      return "đã bình luận về bài viết của bạn";
-    default:
-      return "đã tương tác với bạn";
-  }
-}

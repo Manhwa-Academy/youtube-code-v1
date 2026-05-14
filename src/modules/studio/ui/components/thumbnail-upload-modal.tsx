@@ -3,6 +3,7 @@
 import { trpc } from "@/trpc/client";
 import { UploadDropzone } from "@/lib/uploadthing";
 import { ResponsiveModal } from "@/components/responsive-modal";
+import { useTranslations } from "next-intl";
 
 // Tạo type custom cho UploadDropzone response
 interface UploadedFile {
@@ -26,6 +27,7 @@ export const ThumbnailUploadModal = ({
   onOpenChange,
   onThumbnailUpdate,
 }: ThumbnailUploadModalProps) => {
+  const t = useTranslations("Studio");
   const utils = trpc.useUtils();
 
   const onUploadComplete = (res: UploadedFile[]) => {
@@ -56,7 +58,7 @@ export const ThumbnailUploadModal = ({
 
   return (
     <ResponsiveModal
-      title="Upload a thumbnail"
+      title={t("uploadThumbnail")}
       open={open}
       onOpenChange={onOpenChange}
     >

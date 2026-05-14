@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Suspense, useEffect, useState, useMemo, useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useSearchParams } from "next/navigation";
@@ -51,6 +52,7 @@ type Playlist = {
   videos: PlaylistVideo[];
 };
 const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp }: VideoSectionProps) => {
+  const t = useTranslations("Video");
   const params = useSearchParams();
 
   const [showPlaylist, setShowPlaylist] = useState(false);
@@ -225,7 +227,7 @@ const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp 
           className="text-sm text-blue-500 hover:text-blue-600 font-medium mt-1 self-start"
           onClick={() => setShowPlaylist((prev) => !prev)}
         >
-          {showPlaylist ? "Ẩn danh sách kết hợp" : "Xem danh sách kết hợp"}
+          {showPlaylist ? t("hidePlaylist") : t("showPlaylist")}
         </button>
       )}
 

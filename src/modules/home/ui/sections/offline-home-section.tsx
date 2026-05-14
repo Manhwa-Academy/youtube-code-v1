@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DownloadIcon, PlayCircleIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 import { downloadManager, DownloadedVideo } from "@/lib/download-manager";
@@ -10,6 +11,7 @@ import { VideoMenu } from "@/modules/videos/ui/components/video-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const OfflineHomeSection = () => {
+  const t = useTranslations("Home");
   const router = useRouter();
   const [videos, setVideos] = useState<DownloadedVideo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,9 +50,9 @@ export const OfflineHomeSection = () => {
         <div className="p-4 bg-muted rounded-full mb-4">
           <DownloadIcon className="w-12 h-12 text-muted-foreground/50" />
         </div>
-        <h2 className="text-xl font-semibold">Bạn đang ngoại tuyến</h2>
+        <h2 className="text-xl font-semibold">{t("youAreOffline")}</h2>
         <p className="text-muted-foreground mt-2 max-w-[400px]">
-          Hãy tải video xuống để có thể xem chúng ở đây bất cứ khi nào không có kết nối mạng.
+          {t("downloadToWatch")}
         </p>
       </div>
     );
@@ -77,8 +79,8 @@ export const OfflineHomeSection = () => {
           <DownloadIcon className="w-5 h-5 text-blue-600" />
         </div>
         <div>
-          <h2 className="text-xl font-bold">Nội dung tải xuống</h2>
-          <p className="text-sm text-muted-foreground">Sẵn sàng để xem ngoại tuyến</p>
+          <h2 className="text-xl font-bold">{t("downloads")}</h2>
+          <p className="text-sm text-muted-foreground">{t("readyToWatchOffline")}</p>
         </div>
       </div>
 
@@ -115,10 +117,10 @@ export const OfflineHomeSection = () => {
         <>
           <div className="flex items-center gap-3 pt-4 border-t border-muted">
             <PlayCircleIcon className="w-5 h-5 text-red-600" />
-            <h2 className="text-lg font-bold">Video đã tải xuống đề xuất</h2>
+            <h2 className="text-lg font-bold">{t("suggestedDownloadedVideos")}</h2>
           </div>
           <p className="text-sm text-muted-foreground -mt-4 italic">
-            (Dựa trên nội dung bạn đã tải về máy)
+            {t("basedOnYourDownloads")}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 gap-y-10 opacity-80">

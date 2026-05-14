@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { trpc } from "@/trpc/client";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useTranslations } from "next-intl";
 
 import { BulkEditModal } from "./bulk-edit-modal";
 
@@ -41,34 +42,35 @@ export const BulkActions = ({
   onClearSelection,
   onSuccess 
 }: BulkActionsProps) => {
+  const t = useTranslations("Studio");
   const [editField, setEditField] = useState<"title" | "description" | null>(null);
   const [ConfirmDialog, confirm] = useConfirm(
-    "Xóa video?",
-    "Hành động này sẽ xóa vĩnh viễn các video đã chọn. Bạn có chắc chắn không?"
+    t("bulkDeleteTitle"),
+    t("bulkDeleteDescription")
   );
 
   const utils = trpc.useUtils();
   const removeMany = trpc.videos.removeMany.useMutation({
     onSuccess: () => {
-      toast.success("Đã xóa các video đã chọn");
+      toast.success(t("bulkDeleteSuccess"));
       utils.studio.getMany.invalidate();
       onClearSelection();
       onSuccess?.();
     },
     onError: () => {
-      toast.error("Có lỗi xảy ra khi xóa video");
+      toast.error(t("bulkDeleteError"));
     },
   });
 
   const updateMany = trpc.videos.updateMany.useMutation({
     onSuccess: () => {
-      toast.success("Đã cập nhật các video đã chọn");
+      toast.success(t("bulkUpdateSuccess"));
       utils.studio.getMany.invalidate();
       onClearSelection();
       onSuccess?.();
     },
     onError: () => {
-      toast.error("Có lỗi xảy ra khi cập nhật video");
+      toast.error(t("bulkUpdateError"));
     },
   });
 
@@ -78,12 +80,12 @@ export const BulkActions = ({
 
   const addManyVideos = trpc.playlists.addManyVideos.useMutation({
     onSuccess: (data) => {
-      toast.success(`Đã thêm ${data.count} video vào danh sách phát`);
+      toast.success(t("bulkAddPlaylistSuccess", { count: data.count }));
       onClearSelection();
       onSuccess?.();
     },
     onError: () => {
-      toast.error("Có lỗi xảy ra khi thêm vào danh sách phát");
+      toast.error(t("bulkAddPlaylistError"));
     },
   });
 
@@ -115,7 +117,7 @@ export const BulkActions = ({
     
     if (selectedVideos.length === 0) return;
 
-    toast.info(`Đang chuẩn bị tải xuống ${selectedVideos.length} video...`);
+    toast.info(t("bulkDownloadPreparing", { count: selectedVideos.length }));
 
     selectedVideos.forEach((video) => {
       if (video.muxPlaybackId) {
@@ -132,7 +134,7 @@ export const BulkActions = ({
       }
     });
 
-    toast.success("Bắt đầu tải xuống");
+    toast.success(t("bulkDownloadStarted"));
   };
 
   if (selectedIds.length === 0) return null;
@@ -144,26 +146,26 @@ export const BulkActions = ({
         open={editField === "title"}
         onClose={() => setEditField(null)}
         onConfirm={handleBulkEdit}
-        title="Chỉnh sửa tiêu đề"
-        label="Tiêu đề mới"
+        title={t("bulkEditTitle")}
+        label={t("bulkEditTitleLabel")}
         type="input"
-        placeholder="Nhập tiêu đề mới cho tất cả video đã chọn"
+        placeholder={t("bulkEditTitlePlaceholder")}
       />
       <BulkEditModal 
         open={editField === "description"}
         onClose={() => setEditField(null)}
         onConfirm={handleBulkEdit}
-        title="Chỉnh sửa mô tả"
-        label="Mô tả mới"
+        title={t("bulkEditDescription")}
+        label={t("bulkEditDescriptionLabel")}
         type="textarea"
-        placeholder="Nhập mô tả mới cho tất cả video đã chọn"
+        placeholder={t("bulkEditDescriptionPlaceholder")}
       />
       <div className="flex items-center gap-x-4">
         <Button variant="ghost" size="icon" onClick={onClearSelection}>
           <XIcon className="size-5" />
         </Button>
         <span className="text-sm font-medium">
-          Đã chọn {selectedIds.length} ({selectedIds.length === 1 ? "Chọn tất cả" : "Chọn tất cả"})
+          {t("bulkSelectedCount", { count: selectedIds.length })}
         </span>
         
         <div className="h-6 w-px bg-border mx-2" />
@@ -171,25 +173,25 @@ export const BulkActions = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-x-2">
-              Chỉnh sửa <ChevronDownIcon className="size-4" />
+              {t("bulkEdit")} <ChevronDownIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={() => setEditField("title")}>
-              Tiêu đề
+              {t("bulkEditTitle")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setEditField("description")}>
-              Mô tả
+              {t("bulkEditDescription")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger>Quyền riêng tư</DropdownMenuSubTrigger>
+              <DropdownMenuSubTrigger>{t("filterVisibility")}</DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
                 <DropdownMenuItem onClick={() => handleUpdateVisibility("public")}>
-                  Công khai
+                  {t("public")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleUpdateVisibility("private")}>
-                  Riêng tư
+                  {t("private")}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
@@ -199,7 +201,7 @@ export const BulkActions = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-x-2">
-              Thêm vào danh sách phát <ChevronDownIcon className="size-4" />
+              {t("bulkAddToPlaylist")} <ChevronDownIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="max-h-60 overflow-y-auto">
@@ -212,7 +214,7 @@ export const BulkActions = ({
               </DropdownMenuItem>
             ))}
             {playlists?.items.length === 0 && (
-              <DropdownMenuItem disabled>Không có danh sách phát</DropdownMenuItem>
+              <DropdownMenuItem disabled>{t("noPlaylistsFound")}</DropdownMenuItem>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -220,17 +222,17 @@ export const BulkActions = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-x-2">
-              Thao tác khác <ChevronDownIcon className="size-4" />
+              {t("bulkMoreActions")} <ChevronDownIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={handleDownload}>
               <DownloadIcon className="size-4 mr-2" />
-              Tải video xuống
+              {t("bulkDownload")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleDelete} className="text-destructive">
               <Trash2Icon className="size-4 mr-2" />
-              Xóa vĩnh viễn
+              {t("bulkDeletePermanently")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

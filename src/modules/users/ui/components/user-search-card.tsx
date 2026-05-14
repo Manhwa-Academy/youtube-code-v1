@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
+import { useTranslations, useLocale } from "next-intl";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 
@@ -18,6 +19,9 @@ interface UserSearchCardProps {
 export const UserSearchCard = ({ data }: UserSearchCardProps) => {
   const { userId } = useAuth();
   const isOwner = userId === data.clerkId;
+  const t = useTranslations("Profile");
+  const tVideo = useTranslations("Video");
+  const locale = useLocale();
 
   return (
     <Link prefetch href={`/users/${data.id}`} className="group w-full block mb-4">
@@ -40,9 +44,9 @@ export const UserSearchCard = ({ data }: UserSearchCardProps) => {
           <div className="flex items-center text-sm text-muted-foreground mt-1 gap-2">
             <span>{data.name}</span>
             <span className="hidden sm:inline">•</span>
-            <span>{new Intl.NumberFormat("vi-VN", { notation: "compact" }).format(data.subscriberCount)} người đăng ký</span>
+            <span>{t("subscribers", { count: new Intl.NumberFormat(locale, { notation: "compact" }).format(data.subscriberCount) })}</span>
             <span className="hidden sm:inline">•</span>
-            <span className="hidden sm:inline">{data.videoCount} video</span>
+            <span className="hidden sm:inline">{t("videos", { count: data.videoCount })}</span>
           </div>
 
           {data.bio && (
@@ -54,7 +58,7 @@ export const UserSearchCard = ({ data }: UserSearchCardProps) => {
           {/* Sub button cho mobile */}
           {!isOwner && (
             <div className="mt-4 sm:hidden">
-              <Button variant="secondary" className="rounded-full">Đăng ký</Button>
+              <Button variant="secondary" className="rounded-full">{tVideo("subscribe")}</Button>
             </div>
           )}
         </div>
@@ -62,7 +66,7 @@ export const UserSearchCard = ({ data }: UserSearchCardProps) => {
         {/* Sub button cho desktop */}
         {!isOwner && (
           <div className="hidden sm:flex flex-shrink-0 w-32 items-center justify-center self-center">
-            <Button variant="secondary" className="rounded-full">Đăng ký</Button>
+            <Button variant="secondary" className="rounded-full">{tVideo("subscribe")}</Button>
           </div>
         )}
       </div>

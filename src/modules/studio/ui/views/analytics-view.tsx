@@ -2,8 +2,21 @@
 
 import { Suspense, useState, useTransition } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { formatDistanceToNow } from "date-fns";
-import { vi } from "date-fns/locale";
+import { formatDistanceToNow, format } from "date-fns";
+import { useTranslations, useLocale } from "next-intl";
+import { useParams } from "next/navigation";
+import { enUS, vi, ja, ko, zhCN, de, es, fr } from "date-fns/locale";
+
+const dateFnsLocales = {
+  en: enUS,
+  vi: vi,
+  ja: ja,
+  ko: ko,
+  zh: zhCN,
+  de: de,
+  es: es,
+  fr: fr,
+};
 
 import { VideoPlayer } from "@/modules/videos/ui/components/video-player";
 import { 
@@ -56,10 +69,13 @@ import { DateRange } from "react-day-picker";
 // --- SUB-COMPONENTS (SECTIONS) ---
 
 const AnalyticsLoading = () => {
-  return <div className="p-8">Đang tải dữ liệu...</div>;
+  const t = useTranslations("Studio");
+  return <div className="p-8">{t("loading")}</div>;
 };
 
 const AllContentSection = ({ data, days, videoId }: { data: any, days: number, videoId?: string }) => {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
   const viewsBreakdown = data.contentBreakdown.views;
   const totalViews = viewsBreakdown.shorts + viewsBreakdown.video + viewsBreakdown.posts;
   const getPercentage = (val: number) => totalViews > 0 ? ((val / totalViews) * 100).toFixed(1) : "0";
@@ -67,11 +83,11 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-         {/* NGƯỜI XEM MỚI */}
+         {/* NEW VIEWERS */}
          <Card className="rounded-xl shadow-sm">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Người xem mới</CardTitle>
-               <p className="text-[10px] text-muted-foreground uppercase font-bold">28 ngày qua</p>
+               <CardTitle className="text-sm font-bold">{t("newViewers")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground uppercase font-bold">{t("last28Days")}</p>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex justify-between items-center text-xs">
@@ -79,24 +95,24 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
                    <span className="font-bold">{data.contentBreakdown.newViewers.shorts}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                   <span>Video</span>
+                   <span>{t("video")}</span>
                    <span className="font-bold">{data.contentBreakdown.newViewers.video}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                   <span>Bài đăng</span>
-                   <span className="font-bold">{data.contentBreakdown.newViewers.posts}</span>
-                </div>
+                    <span>{t("posts")}</span>
+                    <span className="font-bold">{data.contentBreakdown.newViewers.posts}</span>
+                 </div>
                <Button variant="secondary" className="w-full text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </CardContent>
          </Card>
 
-         {/* NGƯỜI XEM THƯỜNG XUYÊN */}
+         {/* RETURNING VIEWERS */}
          <Card className="rounded-xl shadow-sm">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Người xem thường xuyên</CardTitle>
-               <p className="text-[10px] text-muted-foreground uppercase font-bold">28 ngày qua</p>
+               <CardTitle className="text-sm font-bold">{t("returningViewers")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground uppercase font-bold">{t("last28Days")}</p>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex justify-between items-center text-xs">
@@ -104,24 +120,24 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
                    <span className="font-bold">{data.contentBreakdown.returningViewers.shorts}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                   <span>Video</span>
+                   <span>{t("video")}</span>
                    <span className="font-bold">{data.contentBreakdown.returningViewers.video}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                   <span>Bài đăng</span>
+                   <span>{t("posts")}</span>
                    <span className="font-bold">{data.contentBreakdown.returningViewers.posts}</span>
                 </div>
                <Button variant="secondary" className="w-full text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </CardContent>
          </Card>
 
-         {/* NGƯỜI ĐĂNG KÝ */}
+         {/* SUBSCRIBERS */}
          <Card className="rounded-xl shadow-sm">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Người đăng ký</CardTitle>
-               <p className="text-[10px] text-muted-foreground uppercase font-bold">28 ngày qua</p>
+               <CardTitle className="text-sm font-bold">{t("subscribers")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground uppercase font-bold">{t("last28Days")}</p>
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="flex justify-between items-center text-xs">
@@ -129,26 +145,26 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
                   <span className="font-bold">{data.contentBreakdown.subscribers.shorts}</span>
                </div>
                <div className="flex justify-between items-center text-xs">
-                  <span>Video</span>
+                  <span>{t("video")}</span>
                   <span className="font-bold">{data.contentBreakdown.subscribers.video}</span>
                </div>
                <div className="flex justify-between items-center text-xs">
-                  <span>Bài đăng</span>
+                  <span>{t("posts")}</span>
                   <span className="font-bold">{data.contentBreakdown.subscribers.posts}</span>
                </div>
                <Button variant="secondary" className="w-full text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </CardContent>
          </Card>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-         {/* LƯỢT XEM BREAKDOWN */}
+         {/* VIEWS BREAKDOWN */}
          <Card className="rounded-xl shadow-sm">
             <CardHeader>
-               <CardTitle className="text-base font-bold">Lượt xem</CardTitle>
-               <p className="text-[10px] text-muted-foreground font-bold uppercase">28 ngày qua</p>
+               <CardTitle className="text-base font-bold">{t("views")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground font-bold uppercase">{t("last28Days")}</p>
             </CardHeader>
             <CardContent className="space-y-6">
                <div className="space-y-4">
@@ -163,7 +179,7 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
                   </div>
                   <div className="space-y-1">
                      <div className="flex justify-between text-xs mb-1">
-                        <span>Video</span>
+                        <span>{t("video")}</span>
                         <span className="font-bold">{viewsBreakdown.video} ({getPercentage(viewsBreakdown.video)}%)</span>
                      </div>
                      <div className="h-2 w-full bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
@@ -172,7 +188,7 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
                   </div>
                   <div className="space-y-1">
                      <div className="flex justify-between text-xs mb-1">
-                        <span>Bài đăng</span>
+                        <span>{t("posts")}</span>
                         <span className="font-bold">{viewsBreakdown.posts} ({getPercentage(viewsBreakdown.posts)}%)</span>
                      </div>
                      <div className="h-2 w-full bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
@@ -180,17 +196,17 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
                      </div>
                   </div>
                </div>
-               <Button variant="secondary" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4">Xem thêm</Button>
+               <Button variant="secondary" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4">{t("seeMore")}</Button>
             </CardContent>
          </Card>
 
-         {/* NỘI DUNG ĐÃ XUẤT BẢN */}
+         {/* PUBLISHED CONTENT */}
          <Card className="rounded-xl shadow-sm">
             <CardHeader>
                <CardTitle className="text-base font-bold flex items-center gap-x-2">
-                  Nội dung đã xuất bản <InfoIcon className="size-3 text-muted-foreground" />
+                  {t("publishedContent")} <InfoIcon className="size-3 text-muted-foreground" />
                </CardTitle>
-               <p className="text-[10px] text-muted-foreground font-bold uppercase">28 ngày qua</p>
+               <p className="text-[10px] text-muted-foreground font-bold uppercase">{t("last28Days")}</p>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center py-10 space-y-4">
                {data.contentBreakdown.publishedCount.videos > 0 || data.contentBreakdown.publishedCount.posts > 0 ? (
@@ -198,63 +214,63 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
                     <div className="flex items-center justify-around w-full">
                        <div className="text-center">
                           <p className="text-2xl font-bold">{data.contentBreakdown.publishedCount.videos}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold">Video</p>
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold">{t("video")}</p>
                        </div>
                        <div className="text-center">
-                          <p className="text-2xl font-bold">{data.contentBreakdown.publishedCount.posts}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold">Bài đăng</p>
-                       </div>
+                           <p className="text-2xl font-bold">{data.contentBreakdown.publishedCount.posts}</p>
+                           <p className="text-[10px] text-muted-foreground uppercase font-bold">{t("posts")}</p>
+                        </div>
                     </div>
                  </div>
                ) : (
-                 <p className="text-xs text-muted-foreground">Không có dữ liệu</p>
+                 <p className="text-xs text-muted-foreground">{t("noData")}</p>
                )}
-               <Button variant="secondary" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none">Xem thêm</Button>
+               <Button variant="secondary" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none">{t("seeMore")}</Button>
             </CardContent>
          </Card>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-         {/* PHỄU HIỂN THỊ */}
+         {/* DISCOVERY FUNNEL */}
          <Card className="rounded-xl shadow-sm overflow-hidden bg-white dark:bg-neutral-900">
             <CardHeader>
-               <CardTitle className="text-base font-bold">Số lượt hiển thị và cách chỉ số này đã tạo ra thời gian xem</CardTitle>
-               <p className="text-[10px] text-muted-foreground font-bold uppercase">Dữ liệu hiện có ({days === 3650 ? "Toàn thời gian" : `${days} ngày`})</p>
+               <CardTitle className="text-base font-bold">{t("discoveryFunnelTitle")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground font-bold uppercase">{t("discoveryDataAvailable")} ({days === 3650 ? t("allTime") : t("daysCount", { days })})</p>
             </CardHeader>
             <CardContent className="p-0">
                <div className="flex flex-col items-center bg-neutral-50 dark:bg-neutral-900/50 p-6">
                   <div className="w-full max-w-[400px] flex flex-col gap-y-0.5">
                      <div className="bg-neutral-800 text-white p-4 text-center">
-                        <p className="text-[10px] text-neutral-400 uppercase font-bold">Lượt hiển thị hình thu nhỏ</p>
+                        <p className="text-[10px] text-neutral-400 uppercase font-bold">{t("impressions")}</p>
                         <p className="text-2xl font-bold">{data.contentBreakdown.discovery.impressions}</p>
                         <p className="text-[9px] text-neutral-400 mt-1 flex items-center justify-center gap-x-1">
-                           {(data.contentBreakdown.discovery.ctr).toFixed(1)}% từ YouTube đề xuất nội dung của bạn <InfoIcon className="size-2" />
+                           {t("discoveryCTRInfo", { ctr: (data.contentBreakdown.discovery.ctr).toFixed(1) })} <InfoIcon className="size-2" />
                         </p>
                      </div>
                      <div className="flex justify-center -my-1 relative z-10">
                         <div className="w-0 h-0 border-l-[200px] border-l-transparent border-r-[200px] border-r-transparent border-t-[20px] border-t-neutral-800" />
                      </div>
                      <div className="bg-neutral-800/90 text-white p-3 text-center">
-                        <p className="text-[10px] text-neutral-400 font-bold">Tỷ lệ nhấp: {(data.contentBreakdown.discovery.ctr).toFixed(1)}%</p>
+                        <p className="text-[10px] text-neutral-400 font-bold">{t("clickThroughRate")}: {(data.contentBreakdown.discovery.ctr).toFixed(1)}%</p>
                      </div>
                      <div className="flex justify-center -my-1 relative z-10">
                         <div className="w-0 h-0 border-l-[200px] border-l-transparent border-r-[200px] border-r-transparent border-t-[20px] border-t-neutral-800/90" />
                      </div>
                      <div className="bg-neutral-800/80 text-white p-4 text-center">
-                        <p className="text-[10px] text-neutral-400 uppercase font-bold">Lượt xem từ số lượt hiển thị hình thu nhỏ</p>
+                        <p className="text-[10px] text-neutral-400 uppercase font-bold">{t("viewsFromImpressions")}</p>
                         <p className="text-2xl font-bold">{data.contentBreakdown.discovery.viewsFromImpressions}</p>
                      </div>
                      <div className="flex justify-center -my-1 relative z-10">
                         <div className="w-0 h-0 border-l-[200px] border-l-transparent border-r-[200px] border-r-transparent border-t-[20px] border-t-neutral-800/80" />
                      </div>
                      <div className="bg-neutral-800/70 text-white p-3 text-center">
-                        <p className="text-[10px] text-neutral-400 font-bold">{data.contentBreakdown.discovery.avgViewDuration} thời lượng xem trung bình</p>
+                        <p className="text-[10px] text-neutral-400 font-bold">{(data.contentBreakdown.discovery.avgViewDuration)} {t("avgViewDurationLabel")}</p>
                      </div>
                      <div className="flex justify-center -my-1 relative z-10">
                         <div className="w-0 h-0 border-l-[200px] border-l-transparent border-r-[200px] border-r-transparent border-t-[20px] border-t-neutral-800/70" />
                      </div>
                      <div className="bg-neutral-800/60 text-white p-4 text-center">
-                        <p className="text-[10px] text-neutral-400 uppercase font-bold">Thời gian xem từ số lượt hiển thị (giờ)</p>
+                        <p className="text-[10px] text-neutral-400 uppercase font-bold">{t("watchTimeFromImpressionsLabel")}</p>
                         <p className="text-2xl font-bold">{data.contentBreakdown.discovery.watchTimeFromImpressions}</p>
                      </div>
                   </div>
@@ -262,17 +278,17 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
             </CardContent>
          </Card>
 
-         {/* CÁCH NGƯỜI XEM TÌM THẤY BẠN */}
+         {/* TRAFFIC SOURCES */}
          <Card className="rounded-xl shadow-sm">
             <CardHeader>
-               <CardTitle className="text-base font-bold">Cách người xem tìm thấy bạn</CardTitle>
-               <p className="text-[10px] text-muted-foreground font-bold uppercase">Số lượt xem • 28 ngày qua</p>
+               <CardTitle className="text-base font-bold">{t("trafficSourcesTitle")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground font-bold uppercase">{t("trafficSourcesSub")}</p>
             </CardHeader>
             <CardContent className="space-y-8">
                <div className="flex items-center justify-center py-4">
                   <div className="size-32 rounded-full border-[16px] border-blue-500/20 relative flex items-center justify-center">
                      <div className="absolute inset-[-16px] rounded-full border-[16px] border-blue-500 border-t-transparent border-r-transparent rotate-[-45deg]" />
-                     <p className="text-[10px] text-center font-bold max-w-[60px] leading-tight">Nguồn lưu lượng truy cập</p>
+                     <p className="text-[10px] text-center font-bold max-w-[60px] leading-tight">{t("trafficSourcesChartCenter")}</p>
                   </div>
                </div>
                <div className="space-y-4">
@@ -294,7 +310,7 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
                     </div>
                   ))}
                </div>
-               <Button variant="secondary" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4">Xem thêm</Button>
+               <Button variant="secondary" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4">{t("seeMore")}</Button>
             </CardContent>
          </Card>
       </div>
@@ -303,6 +319,8 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
 };
 
 const VideoContentSection = ({ data, days, videoId }: { data: any, days: number, videoId?: string }) => {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(data.topVideos[0]?.id || null);
   const selectedVideo = data.topVideos.find((v: any) => v.id === selectedVideoId) || data.topVideos[0];
 
@@ -311,10 +329,10 @@ const VideoContentSection = ({ data, days, videoId }: { data: any, days: number,
       <Card className="rounded-xl shadow-sm border-none bg-white dark:bg-neutral-900 overflow-hidden">
          <div className="grid grid-cols-1 md:grid-cols-4 border-b divide-x dark:divide-neutral-800">
             {[
-              { label: "Số lượt xem", val: data.contentBreakdown.views.video, sub: "" },
-              { label: "Lượt hiển thị hình thu nhỏ", val: data.contentBreakdown.discovery.impressions, sub: `Giảm 8% so với ${days} ngày trước` },
-              { label: "Tỷ lệ nhấp", val: `${data.contentBreakdown.discovery.ctr}%`, sub: "—" },
-              { label: "Thời lượng xem trung bình", val: data.contentBreakdown.discovery.avgViewDuration, sub: "" },
+              { label: t("videoViews"), val: data.contentBreakdown.views.video, sub: "" },
+              { label: t("impressions"), val: data.contentBreakdown.discovery.impressions, sub: t("vsPreviousDays", { percent: "8%", days }) },
+              { label: t("clickThroughRate"), val: `${data.contentBreakdown.discovery.ctr}%`, sub: "—" },
+              { label: t("avgViewDuration"), val: data.contentBreakdown.discovery.avgViewDuration, sub: "" },
             ].map((m, i) => (
               <div key={i} className="p-4 flex flex-col items-center justify-center text-center">
                  <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">{m.label}</p>
@@ -360,7 +378,7 @@ const VideoContentSection = ({ data, days, videoId }: { data: any, days: number,
             </div>
             <div className="p-4 flex justify-start px-6">
                <Button variant="secondary" size="sm" className="text-xs font-bold rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 h-8">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </div>
          </CardContent>
@@ -369,13 +387,13 @@ const VideoContentSection = ({ data, days, videoId }: { data: any, days: number,
       <Card className="rounded-xl shadow-sm">
          <CardHeader className="flex flex-row items-center justify-between">
             <div>
-               <CardTitle className="text-base font-bold">Những khoảnh khắc giữ chân người xem hiệu quả nhất</CardTitle>
-               <p className="text-xs text-muted-foreground">Những video mới nhất (trong vòng 365 ngày qua)</p>
+               <CardTitle className="text-base font-bold">{t("retentionMomentsTitle")}</CardTitle>
+               <p className="text-xs text-muted-foreground">{t("retentionMomentsSub")}</p>
             </div>
             <div className="flex gap-x-1">
-               {["Đoạn mở đầu", "Khoảnh khắc nổi bật", "Mốc tăng đột biến", "Mốc sụt giảm"].map((t, i) => (
+               {[t("intro"), t("topMoments"), t("spikes"), t("dips")].map((txt, i) => (
                  <Button key={i} variant={i === 0 ? "default" : "secondary"} size="sm" className="text-[10px] h-7 px-3 rounded-lg font-bold">
-                    {t}
+                    {txt}
                  </Button>
                ))}
             </div>
@@ -383,8 +401,8 @@ const VideoContentSection = ({ data, days, videoId }: { data: any, days: number,
          <CardContent className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 space-y-4">
                <div className="flex justify-between text-[11px] text-muted-foreground uppercase font-bold border-b pb-2">
-                  <span>Nội dung</span>
-                  <span>Tỷ lệ giữ chân trung bình</span>
+                  <span>{t("content")}</span>
+                  <span>{t("avgRetention")}</span>
                </div>
                {data.topVideos.slice(0, 3).map((v: any) => (
                  <div 
@@ -424,15 +442,15 @@ const VideoContentSection = ({ data, days, videoId }: { data: any, days: number,
                   <div className="flex items-center gap-x-4">
                      <div className="flex items-center gap-x-1.5">
                         <div className="size-2 rounded-full bg-indigo-500" />
-                        <span className="text-[10px] font-medium">Video này</span>
+                        <span className="text-[10px] font-medium">{t("thisVideo")}</span>
                      </div>
                      <div className="flex items-center gap-x-1.5 opacity-50">
                         <div className="size-2 rounded-full bg-neutral-400" />
-                        <span className="text-[10px]">Tỷ lệ giữ chân thông thường</span>
+                        <span className="text-[10px]">{t("typicalRetention")}</span>
                      </div>
                   </div>
                   <div className="flex items-center gap-x-1 text-muted-foreground cursor-help">
-                     <span className="text-[10px]">Hướng dẫn về biểu đồ</span>
+                     <span className="text-[10px]">{t("chartGuide")}</span>
                      <InfoIcon className="size-3" />
                   </div>
                </div>
@@ -488,7 +506,7 @@ const VideoContentSection = ({ data, days, videoId }: { data: any, days: number,
                   {/* Highlight area mock */}
                   <div className="absolute top-0 left-[20px] bottom-[40px] w-[20%] bg-indigo-500/10 border-l border-indigo-500/30 pointer-events-none" />
                </div>
-               <p className="text-[10px] text-muted-foreground text-center mt-2 italic">Biểu đồ tỷ lệ giữ chân người xem</p>
+               <p className="text-[10px] text-muted-foreground text-center mt-2 italic">{t("retentionChartTitle")}</p>
             </div>
          </CardContent>
       </Card>
@@ -496,21 +514,21 @@ const VideoContentSection = ({ data, days, videoId }: { data: any, days: number,
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
          <Card className="rounded-xl shadow-sm">
             <CardHeader>
-               <CardTitle className="text-base font-bold">Cách người xem tìm thấy video của bạn</CardTitle>
-               <p className="text-[10px] text-muted-foreground font-bold uppercase">Lượt xem • 28 ngày qua</p>
+               <CardTitle className="text-base font-bold">{t("howViewersFoundYourVideo")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground font-bold uppercase">{t("trafficSourcesSub")}</p>
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="flex gap-x-2">
-                  {["Tổng quan", "Bên ngoài", "YouTube Tìm kiếm", "Video đề xuất"].map((t, i) => (
+                  {[t("overview"), t("external"), t("youtubeSearch"), t("suggestedVideos")].map((txt, i) => (
                     <Button key={i} variant={i === 0 ? "default" : "secondary"} size="sm" className="text-[10px] h-7 px-3 rounded-lg font-bold">
-                       {t}
+                       {txt}
                     </Button>
                   ))}
                </div>
                <div className="space-y-4 pt-4">
                   <div className="space-y-1">
                      <div className="flex justify-between text-xs">
-                        <span>Các tính năng khác của YouTube</span>
+                        <span>{t("otherYoutubeFeatures")}</span>
                         <span className="font-bold">100,0%</span>
                      </div>
                      <div className="h-2 w-full bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
@@ -518,14 +536,14 @@ const VideoContentSection = ({ data, days, videoId }: { data: any, days: number,
                      </div>
                   </div>
                </div>
-               <Button variant="secondary" size="sm" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 mt-2">Xem thêm</Button>
+               <Button variant="secondary" size="sm" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 mt-2">{t("seeMore")}</Button>
             </CardContent>
          </Card>
 
          <Card className="rounded-xl shadow-sm">
             <CardHeader>
-               <CardTitle className="text-base font-bold">Video hàng đầu</CardTitle>
-               <p className="text-[10px] text-muted-foreground font-bold uppercase">Số lượt xem • 28 ngày qua</p>
+               <CardTitle className="text-base font-bold">{t("topVideos")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground font-bold uppercase">{t("trafficSourcesSub")}</p>
             </CardHeader>
             <CardContent className="space-y-4">
                {data.topVideos.map((v: any) => (
@@ -542,7 +560,7 @@ const VideoContentSection = ({ data, days, videoId }: { data: any, days: number,
                      </div>
                   </div>
                ))}
-               <Button variant="secondary" size="sm" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 mt-2">Xem thêm</Button>
+               <Button variant="secondary" size="sm" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 mt-2">{t("seeMore")}</Button>
             </CardContent>
          </Card>
       </div>
@@ -551,6 +569,8 @@ const VideoContentSection = ({ data, days, videoId }: { data: any, days: number,
 };
 
 const ShortsContentSection = ({ data, days, videoId }: { data: any, days: number, videoId?: string }) => {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
   const hasShorts = data.contentBreakdown.views.shorts > 0 || data.contentBreakdown.shorts.topShorts.length > 0;
 
   if (!hasShorts) {
@@ -560,11 +580,11 @@ const ShortsContentSection = ({ data, days, videoId }: { data: any, days: number
            <PlayCircleIcon className="size-10 text-muted-foreground opacity-20" />
         </div>
         <div className="space-y-1">
-           <p className="font-bold text-lg">Chưa có dữ liệu cho Shorts</p>
-           <p className="text-sm text-muted-foreground">Hãy đăng video ngắn để bắt đầu theo dõi hiệu suất</p>
+           <p className="font-bold text-lg">{t("noShortsDataTitle")}</p>
+           <p className="text-sm text-muted-foreground">{t("noShortsDataSub")}</p>
         </div>
         <Button variant="secondary" className="rounded-full font-bold h-9 px-6 bg-neutral-100 dark:bg-neutral-800 border-none">
-           Tạo Shorts
+           {t("createShorts")}
         </Button>
       </div>
     );
@@ -572,14 +592,13 @@ const ShortsContentSection = ({ data, days, videoId }: { data: any, days: number
 
   return (
     <div className="space-y-6">
-      {/* TỔNG QUAN SHORTS METRICS */}
       <Card className="rounded-xl shadow-sm border-none bg-white dark:bg-neutral-900 overflow-hidden">
          <div className="grid grid-cols-1 md:grid-cols-4 border-b divide-x dark:divide-neutral-800">
             {[
-              { label: "Số lượt xem", val: data.contentBreakdown.views.shorts, sub: `Giảm 74% so với ${days} ngày trước` },
-              { label: "Lượt xem có chủ đích", val: data.contentBreakdown.shorts.intentionalViews, sub: `Giảm 69% so với ${days} ngày trước` },
-              { label: "Số lượt thích", val: data.contentBreakdown.shorts.likes, sub: `Tăng 100% so với ${days} ngày trước` },
-              { label: "Số người đăng ký", val: data.contentBreakdown.subscribers.shorts, sub: "—" },
+              { label: t("videoViews"), val: data.contentBreakdown.views.shorts, sub: t("vsPreviousDays", { percent: "74%", days }) },
+              { label: t("intentionalViews"), val: data.contentBreakdown.shorts.intentionalViews, sub: t("vsPreviousDays", { percent: "69%", days }) },
+              { label: t("likes"), val: data.contentBreakdown.shorts.likes, sub: t("vsPreviousDays", { percent: "100%", days }) },
+              { label: t("subscribers"), val: data.contentBreakdown.subscribers.shorts, sub: "—" },
             ].map((m, i) => (
               <div key={i} className="p-4 flex flex-col items-center justify-center text-center">
                  <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">{m.label}</p>
@@ -623,32 +642,31 @@ const ShortsContentSection = ({ data, days, videoId }: { data: any, days: number
             </div>
             <div className="p-4 flex justify-start px-6">
                <Button variant="secondary" size="sm" className="text-xs font-bold rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 h-8">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </div>
          </CardContent>
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-         {/* CÁCH TÌM THẤY VIDEO NGẮN */}
          <Card className="rounded-xl shadow-sm">
             <CardHeader>
-               <CardTitle className="text-base font-bold">Cách người xem tìm thấy video ngắn của bạn</CardTitle>
-               <p className="text-[10px] text-muted-foreground font-bold uppercase">Lượt xem • 28 ngày qua</p>
+               <CardTitle className="text-base font-bold">{t("howViewersFoundYourVideo")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground font-bold uppercase">{t("trafficSourcesSub")}</p>
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="flex flex-wrap gap-2">
-                  {["Tổng quan", "Bên ngoài", "YouTube Tìm kiếm", "Video đề xuất"].map((t, i) => (
+                  {[t("overview"), t("external"), t("youtubeSearch"), t("suggestedVideos")].map((txt, i) => (
                     <Button key={i} variant={i === 0 ? "default" : "secondary"} size="sm" className="text-[10px] h-7 px-3 rounded-lg font-bold">
-                       {t}
+                       {txt}
                     </Button>
                   ))}
                </div>
                <div className="space-y-4 pt-4">
                   {[
-                    { label: "YouTube Tìm kiếm", percentage: 86.7 },
-                    { label: "Các tính năng khác của YouTube", percentage: 13.3 },
-                    { label: "Trực tiếp hoặc không xác định", percentage: 0.0 },
+                    { label: t("youtubeSearch"), percentage: 86.7 },
+                    { label: t("otherYoutubeFeatures"), percentage: 13.3 },
+                    { label: t("noData"), percentage: 0.0 },
                   ].map((s, idx) => (
                     <div key={idx} className="space-y-1">
                        <div className="flex justify-between text-xs">
@@ -668,17 +686,16 @@ const ShortsContentSection = ({ data, days, videoId }: { data: any, days: number
                   ))}
                </div>
                <Button variant="secondary" size="sm" className="text-xs font-bold rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 h-8 mt-4">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </CardContent>
          </Card>
 
          <div className="space-y-6">
-            {/* MỨC ĐỘ TƯƠNG TÁC */}
             <Card className="rounded-xl shadow-sm">
                <CardHeader>
-                  <CardTitle className="text-base font-bold">Mức độ tương tác của người xem</CardTitle>
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase">{days === 3650 ? "Toàn thời gian" : `${days} ngày qua`}</p>
+                  <CardTitle className="text-base font-bold">{t("engagementTitle")}</CardTitle>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase">{days === 3650 ? t("allTime") : t("daysCount", { days })}</p>
                </CardHeader>
                <CardContent className="space-y-6">
                   <div className="space-y-2">
@@ -689,25 +706,24 @@ const ShortsContentSection = ({ data, days, videoId }: { data: any, days: number
                      <div className="flex justify-between items-start text-xs">
                         <div className="space-y-1">
                            <p className="font-bold">{data.contentBreakdown.shorts.stayPercent.toFixed(1)}%</p>
-                           <p className="text-[10px] text-muted-foreground">Ở lại xem</p>
+                           <p className="text-[10px] text-muted-foreground">{t("stayedWatching")}</p>
                         </div>
                         <div className="space-y-1 text-right">
                            <p className="font-bold">{data.contentBreakdown.shorts.swipePercent.toFixed(1)}%</p>
-                           <p className="text-[10px] text-muted-foreground">Bỏ qua</p>
+                           <p className="text-[10px] text-muted-foreground">{t("swipedAway")}</p>
                         </div>
                      </div>
                   </div>
                   <Button variant="secondary" size="sm" className="text-xs font-bold rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 h-8">
-                     Xem thêm
+                     {t("seeMore")}
                   </Button>
                </CardContent>
             </Card>
 
-            {/* VIDEO SHORTS HÀNG ĐẦU */}
             <Card className="rounded-xl shadow-sm">
                <CardHeader>
-                  <CardTitle className="text-base font-bold">Video Shorts hàng đầu</CardTitle>
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase">Số lượt xem • 28 ngày qua</p>
+                  <CardTitle className="text-base font-bold">{t("topShorts")}</CardTitle>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase">{t("trafficSourcesSub")}</p>
                </CardHeader>
                <CardContent className="space-y-4">
                   {data.contentBreakdown.shorts.topShorts.map((v: any) => (
@@ -725,19 +741,18 @@ const ShortsContentSection = ({ data, days, videoId }: { data: any, days: number
                     </div>
                   ))}
                   <Button variant="secondary" size="sm" className="text-xs font-bold rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 h-8 mt-2">
-                     Xem thêm
+                     {t("seeMore")}
                   </Button>
                </CardContent>
             </Card>
 
-            {/* PHỐI LẠI */}
             <Card className="rounded-xl shadow-sm">
                <CardHeader>
-                  <CardTitle className="text-base font-bold">Nội dung được phối lại nhiều nhất</CardTitle>
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase">{days === 3650 ? "Toàn thời gian" : `${days} ngày qua`}</p>
+                  <CardTitle className="text-base font-bold">{t("mostRemixedTitle")}</CardTitle>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase">{days === 3650 ? t("allTime") : t("daysCount", { days })}</p>
                </CardHeader>
                <CardContent className="py-8 flex items-center justify-center border-2 border-dashed rounded-lg">
-                  <p className="text-xs text-muted-foreground">Chưa có đủ dữ liệu phối lại</p>
+                  <p className="text-xs text-muted-foreground">{t("notEnoughRemixData")}</p>
                </CardContent>
             </Card>
          </div>
@@ -747,14 +762,16 @@ const ShortsContentSection = ({ data, days, videoId }: { data: any, days: number
 };
 
 const PostsContentSection = ({ data, days, videoId }: { data: any, days: number, videoId?: string }) => {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
   const [activePostType, setActivePostType] = useState<"image" | "poll" | "question" | "text" | "video">("image");
 
   const postTypes = [
-    { id: "image", label: "Hình ảnh", icon: ImageIcon },
-    { id: "poll", label: "Cuộc thăm dò ý kiến", icon: BarChart2Icon },
-    { id: "question", label: "Câu hỏi", icon: MessageCircleIcon },
-    { id: "text", label: "Văn bản", icon: TypeIcon },
-    { id: "video", label: "Video", icon: PlayIcon },
+    { id: "image", label: t("image"), icon: ImageIcon },
+    { id: "poll", label: t("poll"), icon: BarChart2Icon },
+    { id: "question", label: t("question"), icon: MessageCircleIcon },
+    { id: "text", label: t("text"), icon: TypeIcon },
+    { id: "video", label: t("video"), icon: PlayIcon },
   ];
 
   const filteredPosts = data.contentBreakdown.postsBreakdown.topPosts.filter((p: any) => p.type === activePostType);
@@ -763,13 +780,12 @@ const PostsContentSection = ({ data, days, videoId }: { data: any, days: number,
 
   return (
     <div className="space-y-6">
-      {/* TỔNG QUAN BÀI ĐĂNG METRICS */}
       <Card className="rounded-xl shadow-sm border-none bg-white dark:bg-neutral-900 overflow-hidden">
          <div className="grid grid-cols-1 md:grid-cols-3 border-b divide-x dark:divide-neutral-800">
             {[
-              { label: "Số lượt hiển thị hình thu nhỏ", val: data.contentBreakdown.postsBreakdown.impressions, sub: "" },
-              { label: "Số lượt thích", val: data.contentBreakdown.postsBreakdown.likes, sub: "—" },
-              { label: "Số người đăng ký", val: data.contentBreakdown.postsBreakdown.subscribers, sub: "—" },
+              { label: t("postImpressions"), val: data.contentBreakdown.postsBreakdown.impressions, sub: "" },
+              { label: t("likes"), val: data.contentBreakdown.postsBreakdown.likes, sub: "—" },
+              { label: t("subscribers"), val: data.contentBreakdown.postsBreakdown.subscribers, sub: "—" },
             ].map((m, i) => (
               <div key={i} className="p-4 flex flex-col items-center justify-center text-center">
                  <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">{m.label}</p>
@@ -813,17 +829,17 @@ const PostsContentSection = ({ data, days, videoId }: { data: any, days: number,
             </div>
             <div className="p-4 flex justify-start px-6">
                <Button variant="secondary" size="sm" className="text-xs font-bold rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 h-8">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </div>
          </CardContent>
       </Card>
 
-      {/* BÀI ĐĂNG HÀNG ĐẦU */}
+      {/* TOP POSTS */}
       <Card className="rounded-xl shadow-sm">
          <CardHeader>
-            <CardTitle className="text-base font-bold">Bài đăng hàng đầu</CardTitle>
-            <p className="text-[10px] text-muted-foreground font-bold uppercase">28 ngày qua</p>
+            <CardTitle className="text-base font-bold">{t("topPosts")}</CardTitle>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase">{t("last28Days")}</p>
          </CardHeader>
          <CardContent className="space-y-6">
             <div className="flex flex-wrap gap-2">
@@ -850,18 +866,18 @@ const PostsContentSection = ({ data, days, videoId }: { data: any, days: number,
                             <ActiveIcon className="size-5 text-muted-foreground" />
                          </div>
                          <div className="min-w-0">
-                            <p className="text-xs truncate font-medium">{p.content || "Không có nội dung văn bản"}</p>
-                            <p className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(p.createdAt), { locale: vi, addSuffix: true })}</p>
+                            <p className="text-xs truncate font-medium">{p.content || t("noPostContent")}</p>
+                            <p className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(p.createdAt), { locale: dateFnsLocales[locale as keyof typeof dateFnsLocales] || enUS, addSuffix: true })}</p>
                          </div>
                       </div>
                       <div className="flex items-center gap-x-8">
                          <div className="text-center">
                             <p className="text-xs font-bold">{p.likeCount}</p>
-                            <p className="text-[10px] text-muted-foreground uppercase">Lượt thích</p>
+                            <p className="text-[10px] text-muted-foreground uppercase">{t("likes")}</p>
                          </div>
                          <div className="text-center">
                             <p className="text-xs font-bold">{p.commentCount}</p>
-                            <p className="text-[10px] text-muted-foreground uppercase">Bình luận</p>
+                            <p className="text-[10px] text-muted-foreground uppercase">{t("comments")}</p>
                          </div>
                       </div>
                    </div>
@@ -870,12 +886,12 @@ const PostsContentSection = ({ data, days, videoId }: { data: any, days: number,
             ) : (
               <div className="py-12 flex flex-col items-center justify-center space-y-3 opacity-50">
                  <ImageIcon className="size-10 text-muted-foreground" />
-                 <p className="text-xs font-medium">Không có dữ liệu để hiển thị cho những ngày này</p>
+                 <p className="text-xs font-medium">{t("noPostsData")}</p>
               </div>
             )}
 
             <Button variant="secondary" size="sm" className="text-xs font-bold rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4 h-8 mt-2">
-               Xem thêm
+               {t("seeMore")}
             </Button>
          </CardContent>
       </Card>
@@ -884,21 +900,22 @@ const PostsContentSection = ({ data, days, videoId }: { data: any, days: number,
 };
 
 const ContentTab = ({ days, videoId }: { days: number, videoId?: string }) => {
+  const t = useTranslations("Studio");
   const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
   const [activeSubTab, setActiveSubTab] = useState("all");
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-x-2">
-        {["all", "video", "shorts", "posts"].map((t) => (
+        {["all", "video", "shorts", "posts"].map((tab) => (
           <Button 
-            key={t}
-            variant={activeSubTab === t ? "default" : "secondary"} 
+            key={tab}
+            variant={activeSubTab === tab ? "default" : "secondary"} 
             size="sm" 
             className="rounded-lg h-8 px-4 font-bold"
-            onClick={() => setActiveSubTab(t)}
+            onClick={() => setActiveSubTab(tab)}
           >
-            {t === "all" ? "Tất cả" : t === "video" ? "Video" : t === "shorts" ? "Shorts" : "Bài đăng"}
+            {tab === "all" ? t("all") : tab === "video" ? t("video") : tab === "shorts" ? "Shorts" : t("posts")}
           </Button>
         ))}
       </div>
@@ -912,20 +929,26 @@ const ContentTab = ({ days, videoId }: { days: number, videoId?: string }) => {
 };
 
 const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string }) => {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
   const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
   const [activeStat, setActiveStat] = useState<"views" | "watchTime" | "subscribers">("views");
 
   return (
     <div className="flex flex-col xl:flex-row gap-6">
-      {/* CỘT TRÁI - CHI TIẾT */}
+      {/* LEFT COLUMN - DETAILS */}
       <div className="flex-1 space-y-6 min-w-0">
         <div className="text-center py-6">
           <h2 className="text-2xl font-bold">
-            {videoId ? "Video này" : "Kênh của bạn"} có {data.totalViews} lượt xem trong {days === 3650 ? "toàn thời gian" : `${days} ngày qua`}
+            {t("hasViewsInPeriod", { 
+               target: videoId ? t("thisVideo") : t("yourChannel"), 
+               count: data.totalViews, 
+               period: days === 3650 ? t("allTime") : t("daysCount", { days }) 
+            })}
           </h2>
         </div>
 
-        {/* THẺ CHỈ SỐ LỚN */}
+        {/* MAIN METRIC CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-3 bg-white dark:bg-neutral-900 border rounded-xl overflow-hidden shadow-sm">
           <div 
             className={cn(
@@ -934,7 +957,7 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
             )}
             onClick={() => setActiveStat("views")}
           >
-             <p className="text-[11px] text-muted-foreground uppercase font-bold mb-1">Số lượt xem ({days === 3650 ? "Toàn thời gian" : `${days} ngày`})</p>
+             <p className="text-[11px] text-muted-foreground uppercase font-bold mb-1">{t("videoViews")} ({days === 3650 ? t("allTime") : t("daysCount", { days })})</p>
              <div className="flex items-center gap-x-2">
                 <span className="text-2xl font-bold">{data.totalViews}</span>
                 {data.totalViews > 0 ? (
@@ -948,7 +971,7 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
                 )}
              </div>
              <p className="text-[10px] text-muted-foreground mt-1">
-               {data.totalViews > 0 ? "Tiến triển tốt trong chu kỳ" : "Khoảng thời gian này khá im ắng"}
+               {data.totalViews > 0 ? t("goodProgress") : t("quietPeriod")}
              </p>
           </div>
 
@@ -959,7 +982,7 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
              )}
              onClick={() => setActiveStat("watchTime")}
           >
-             <p className="text-[11px] text-muted-foreground uppercase font-bold mb-1">Thời gian xem (giờ)</p>
+             <p className="text-[11px] text-muted-foreground uppercase font-bold mb-1">{t("watchTimeHours")}</p>
              <div className="flex items-center gap-x-2">
                 <span className="text-2xl font-bold">{data.totalWatchTimeHours}</span>
                 {Number(data.totalWatchTimeHours) > 0 ? (
@@ -973,7 +996,7 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
                 )}
              </div>
              <p className="text-[10px] text-muted-foreground mt-1">
-               {Number(data.totalWatchTimeHours) > 0 ? "Tiến triển tốt trong chu kỳ" : "Dựa trên tiến trình xem"}
+               {Number(data.totalWatchTimeHours) > 0 ? t("goodProgress") : t("basedOnWatching")}
              </p>
           </div>
 
@@ -984,10 +1007,10 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
              )}
              onClick={() => setActiveStat("subscribers")}
           >
-             <p className="text-[11px] text-muted-foreground uppercase font-bold mb-1">Số người đăng ký</p>
+             <p className="text-[11px] text-muted-foreground uppercase font-bold mb-1">{t("subscribersGained")}</p>
              <div className="flex items-center gap-x-2">
                 <span className="text-2xl font-bold">
-                  {data.audience.subscribersGained > 0 ? `+${data.audience.subscribersGained}` : data.audience.subscribersGained}
+                   {data.audience.subscribersGained > 0 ? `+${data.audience.subscribersGained}` : data.audience.subscribersGained}
                 </span>
                 {data.audience.subscribersGained !== 0 ? (
                   <div className={cn("size-4 rounded-full flex items-center justify-center", data.audience.subscribersGained > 0 ? "bg-emerald-100 dark:bg-emerald-900/30" : "bg-red-100 dark:bg-red-900/30")}>
@@ -1004,7 +1027,7 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
                 )}
              </div>
              <p className="text-[10px] text-muted-foreground mt-1">
-               {data.audience.subscribersGained !== 0 ? "Biến động trong chu kỳ" : "Không có thay đổi mới"}
+               {data.audience.subscribersGained !== 0 ? t("changeInPeriod") : t("noChange")}
              </p>
           </div>
         </div>
@@ -1043,22 +1066,22 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
             </div>
             <div className="p-4 border-t flex justify-start">
                <Button variant="secondary" size="sm" className="text-xs font-bold h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none px-4">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* NỘI DUNG HÀNG ĐẦU TABLE */}
+        {/* TOP CONTENT TABLE */}
         <div className="space-y-4">
-           <h3 className="text-base font-bold">Nội dung hàng đầu trong khoảng thời gian này</h3>
+           <h3 className="text-base font-bold">{t("topContentInPeriod")}</h3>
            <div className="bg-white dark:bg-neutral-900 border rounded-xl overflow-hidden shadow-sm">
               <table className="w-full text-sm text-left">
                  <thead className="text-[11px] text-muted-foreground uppercase bg-neutral-50/50 dark:bg-neutral-800/50">
                     <tr>
-                       <th className="px-6 py-3 font-bold">Nội dung</th>
-                       <th className="px-6 py-3 font-bold text-center">Thời lượng xem trung bình</th>
-                       <th className="px-6 py-3 font-bold text-right">Số lượt xem</th>
+                       <th className="px-6 py-3 font-bold">{t("content")}</th>
+                       <th className="px-6 py-3 font-bold text-center">{t("avgViewDuration")}</th>
+                       <th className="px-6 py-3 font-bold text-right">{t("videoViews")}</th>
                     </tr>
                  </thead>
                  <tbody className="divide-y">
@@ -1086,29 +1109,29 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
         </div>
       </div>
 
-      {/* CỘT PHẢI - THỜI GIAN THỰC */}
+       {/* RIGHT COLUMN - REALTIME */}
       <div className="w-full xl:w-[350px] space-y-6">
         <Card className="rounded-xl shadow-sm overflow-hidden">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold flex items-center justify-between">
-              Thời gian thực
+              {t("realtime")}
               <div className="size-2 rounded-full bg-blue-500 animate-pulse" />
             </CardTitle>
-            <p className="text-[11px] text-muted-foreground">Đang cập nhật theo thời gian thực</p>
+            <p className="text-[11px] text-muted-foreground">{t("updatingRealtime")}</p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
                <div className="text-3xl font-bold">{data.totalSubscribers}</div>
-               <p className="text-[11px] text-muted-foreground">Số người đăng ký</p>
+               <p className="text-[11px] text-muted-foreground">{t("subscribers")}</p>
             </div>
             <Button variant="outline" className="w-full text-xs font-bold h-9 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none">
-               Xem số người đăng ký trực tiếp
+               {t("seeLiveSubscribers")}
             </Button>
             
             <div className="pt-4 border-t">
                <div className="flex items-center justify-between mb-2">
                   <span className="text-lg font-bold">{data.realtime.totalViews}</span>
-                  <span className="text-[10px] text-muted-foreground">Số lượt xem • 48 giờ qua</span>
+                  <span className="text-[10px] text-muted-foreground">{t("viewsLast48Hours")}</span>
                </div>
                {/* BAR CHART REALTIME */}
                <div className="h-16 w-full">
@@ -1138,15 +1161,15 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
                   </ResponsiveContainer>
                </div>
                <div className="flex justify-between text-[9px] text-muted-foreground mt-1">
-                  <span>48 giờ trước</span>
-                  <span className="font-bold">Ngay bây giờ</span>
+                  <span>{t("last48Hours")}</span>
+                  <span className="font-bold">{t("now")}</span>
                </div>
             </div>
 
             <div className="pt-4 space-y-2">
                <div className="flex justify-between text-[11px] text-muted-foreground font-bold uppercase">
-                  <span>Nội dung hàng đầu</span>
-                  <span>Số lượt xem</span>
+                  <span>{t("topPosts")}</span>
+                  <span>{t("views")}</span>
                </div>
                {data.realtime.topVideos.map((v: any) => (
                  <div key={v.id} className="flex items-center justify-between group cursor-pointer">
@@ -1156,37 +1179,37 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
                        </div>
                        <span className="text-xs truncate group-hover:text-blue-500 transition-colors">{v.title}</span>
                     </div>
-                    <span className="text-xs font-bold ml-2">{v.viewsCount}</span>
+<span className="text-xs font-bold ml-2">{v.viewsCount}</span>
                  </div>
                ))}
             </div>
 
             <Button variant="secondary" size="sm" className="w-full text-xs font-bold h-9 rounded-full bg-neutral-100 dark:bg-neutral-800 border-none mt-2">
-                Xem thêm
+                {t("seeMore")}
             </Button>
           </CardContent>
         </Card>
 
-        {/* NỘI DUNG MỚI NHẤT */}
+        {/* LATEST CONTENT */}
         {data.latestVideo && (
            <Card className="rounded-xl shadow-sm overflow-hidden border-none bg-neutral-900 text-white">
               <CardHeader className="pb-3">
-                 <CardTitle className="text-sm font-bold">Nội dung mới nhất</CardTitle>
+                 <CardTitle className="text-sm font-bold">{t("latestContent")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                  <div className="aspect-video relative rounded-md overflow-hidden bg-neutral-800">
                     <img src={data.latestVideo.thumbnailUrl || "/fallback.jpg"} alt="Latest" className="w-full h-full object-cover" />
                  </div>
                  <p className="text-xs font-bold line-clamp-2">{data.latestVideo.title}</p>
-                 <p className="text-[10px] text-neutral-400">{data.latestVideo.timeSincePosted} đầu tiên</p>
+                 <p className="text-[10px] text-neutral-400">{t("firstTimeLabel", { time: formatDistanceToNow(new Date(data.latestVideo.createdAt), { locale: dateFnsLocales[locale as keyof typeof dateFnsLocales] || enUS, addSuffix: true }) })}</p>
                  
                  <div className="space-y-2 pt-2 border-t border-neutral-800">
                     <div className="flex justify-between items-center text-[11px]">
-                       <span className="text-neutral-400">Số lượt xem</span>
+                       <span className="text-neutral-400">{t("views")}</span>
                        <span className="font-bold">{data.latestVideo.viewsCount}</span>
                     </div>
                     <div className="flex justify-between items-center text-[11px]">
-                       <span className="text-neutral-400">Tỷ lệ xem trung bình</span>
+                       <span className="text-neutral-400">{t("avgViewRate")}</span>
                        <span className="font-bold">{data.latestVideo.averageViewPercent}%</span>
                     </div>
                  </div>
@@ -1201,6 +1224,8 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
 // --- MAIN EXPORT ---
 
 const AudienceTab = ({ days, videoId }: { days: number, videoId?: string }) => {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
   const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
   const [activeStat, setActiveStat] = useState<"viewers" | "subscribers">("viewers");
 
@@ -1216,7 +1241,7 @@ const AudienceTab = ({ days, videoId }: { days: number, videoId?: string }) => {
               )}
               onClick={() => setActiveStat("viewers")}
             >
-               <p className="text-[11px] text-muted-foreground font-medium mb-1">Khán giả hàng tháng</p>
+               <p className="text-[11px] text-muted-foreground font-medium mb-1">{t("monthlyAudience")}</p>
                <p className="text-xl font-bold">{data.audience.uniqueViewers}</p>
             </div>
             <div 
@@ -1226,7 +1251,7 @@ const AudienceTab = ({ days, videoId }: { days: number, videoId?: string }) => {
               )}
               onClick={() => setActiveStat("subscribers")}
             >
-               <p className="text-[11px] text-muted-foreground font-medium mb-1">Số người đăng ký</p>
+               <p className="text-[11px] text-muted-foreground font-medium mb-1">{t("subscribersGained")}</p>
                <p className="text-xl font-bold">{data.audience.subscribersGained}</p>
             </div>
          </div>
@@ -1266,86 +1291,86 @@ const AudienceTab = ({ days, videoId }: { days: number, videoId?: string }) => {
             </div>
             <div className="p-4 flex justify-start px-6">
                <Button variant="secondary" size="sm" className="text-[10px] font-bold rounded-full bg-neutral-200/50 dark:bg-neutral-800 border-none px-4 h-7">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </div>
          </CardContent>
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-         {/* Khán giả phân theo hành vi xem */}
+         {/* Audience behavior breakdown */}
          <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Khán giả phân theo hành vi xem</CardTitle>
-               <p className="text-[10px] text-muted-foreground">Khán giả hàng tháng • 9 thg 5, 2026</p>
+               <CardTitle className="text-sm font-bold">{t("audienceByBehavior")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("monthlyAudience")} • {format(new Date(), "d MMM, yyyy", { locale: dateFnsLocales[locale as keyof typeof dateFnsLocales] || enUS })}</p>
             </CardHeader>
             <CardContent className="space-y-4">
-               <p className="text-xs text-muted-foreground mt-4 mb-8">Không đủ dữ liệu về người xem để hiện báo cáo này</p>
+               <p className="text-xs text-muted-foreground mt-4 mb-8">{t("noAudienceData")}</p>
                <Button variant="secondary" size="sm" className="text-[10px] font-bold rounded-full bg-neutral-200/50 dark:bg-neutral-800 border-none px-4 h-7 mt-4">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </CardContent>
          </Card>
 
-         {/* Phổ biến với nhiều đối tượng người xem */}
+         {/* Popular with various audiences */}
          <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Phổ biến với nhiều đối tượng người xem</CardTitle>
-               <p className="text-[10px] text-muted-foreground">Số lượt xem • 28 ngày qua</p>
+               <CardTitle className="text-sm font-bold">{t("popularWithAudiences")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("views")} • {t("last28Days")}</p>
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="flex gap-x-2">
-                  {["Mới", "Thông thường", "Thường xuyên"].map((t, i) => (
+                  {[t("new"), t("typical"), t("frequent")].map((txt, i) => (
                     <Button key={i} variant={i === 0 ? "secondary" : "ghost"} size="sm" className={cn("text-[10px] h-7 px-3 rounded-lg font-bold border", i === 0 ? "bg-black text-white dark:bg-white dark:text-black" : "border-neutral-300 dark:border-neutral-700")}>
-                       {t}
+                       {txt}
                     </Button>
                   ))}
                </div>
-               <p className="text-xs text-muted-foreground mt-4">Không có dữ liệu để hiển thị cho những ngày này</p>
+               <p className="text-xs text-muted-foreground mt-4">{t("noPostsData")}</p>
             </CardContent>
          </Card>
 
-         {/* Thời điểm khán giả xem YouTube */}
+         {/* When viewers are on YouTube */}
          <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Thời điểm khán giả xem YouTube</CardTitle>
-               <p className="text-[10px] text-muted-foreground">Giờ địa phương (GMT +0700) • 28 ngày qua</p>
+               <CardTitle className="text-sm font-bold">{t("whenViewersAreOnYoutube")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("localTime")} (GMT +0700) • {t("last28Days")}</p>
             </CardHeader>
             <CardContent>
-               <p className="text-xs text-muted-foreground mt-4 mb-4">Không đủ dữ liệu về người xem để hiện báo cáo này</p>
+               <p className="text-xs text-muted-foreground mt-4 mb-4">{t("noAudienceData")}</p>
             </CardContent>
          </Card>
 
-         {/* Kênh mà khán giả xem */}
+         {/* Channels your audience watches */}
          <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Kênh mà khán giả xem</CardTitle>
-               <p className="text-[10px] text-muted-foreground">28 ngày qua</p>
+               <CardTitle className="text-sm font-bold">{t("channelsYourAudienceWatches")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("last28Days")}</p>
             </CardHeader>
             <CardContent>
                <p className="text-[11px] text-muted-foreground mt-4 mb-4">
-                 Không có đủ dữ liệu hợp lệ về khán giả để hiển thị báo cáo này. <span className="text-blue-500 cursor-pointer hover:underline">Tìm hiểu thêm</span>
+                 {t("noAudienceData")} <span className="text-blue-500 cursor-pointer hover:underline">{t("learnMore")}</span>
                </p>
             </CardContent>
          </Card>
 
-         {/* Thời gian xem từ người đăng ký */}
+         {/* Watch time from subscribers */}
          <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Thời gian xem từ người đăng ký</CardTitle>
-               <p className="text-[10px] text-muted-foreground">Thời gian xem • 28 ngày qua</p>
+               <CardTitle className="text-sm font-bold">{t("watchTimeFromSubscribers")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("watchTimeEngagement")} • {t("last28Days")}</p>
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="space-y-3 mt-4">
                   <div className="flex justify-between text-[11px] font-bold items-center">
-                     <span>Chưa đăng ký</span>
+                     <span>{t("notSubscribed")}</span>
                      <div className="flex items-center gap-x-3 w-1/2 justify-end">
                        <div className="h-1.5 bg-[#c084fc] rounded-full" style={{ width: `${Math.max(data.audience.unsubscribedPercent, 1)}%` }} />
                        <span className="w-8 text-right">{data.audience.unsubscribedPercent.toFixed(1).replace(".", ",")}%</span>
                      </div>
                   </div>
                   <div className="flex justify-between text-[11px] font-bold items-center">
-                     <span>Đã đăng ký</span>
+                     <span>{t("subscribed")}</span>
                      <div className="flex items-center gap-x-3 w-1/2 justify-end">
                        <div className="h-1.5 bg-[#c084fc] rounded-full" style={{ width: `${Math.max(data.audience.subscribedPercent, 1)}%` }} />
                        <span className="w-8 text-right">{data.audience.subscribedPercent.toFixed(1).replace(".", ",")}%</span>
@@ -1353,32 +1378,32 @@ const AudienceTab = ({ days, videoId }: { days: number, videoId?: string }) => {
                   </div>
                </div>
                <Button variant="secondary" size="sm" className="text-[10px] font-bold rounded-full bg-neutral-200/50 dark:bg-neutral-800 border-none px-4 h-7 mt-6">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </CardContent>
          </Card>
 
-         {/* Nội dung khán giả của bạn xem */}
+         {/* Content your audience watches */}
          <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Nội dung khán giả của bạn xem</CardTitle>
-               <p className="text-[10px] text-muted-foreground">7 ngày qua</p>
+               <CardTitle className="text-sm font-bold">{t("channelsYourAudienceWatches")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("daysCount", { days: 7 })}</p>
             </CardHeader>
             <CardContent>
                <p className="text-[11px] text-muted-foreground mt-4 mb-4">
-                 Không có đủ dữ liệu hợp lệ về khán giả để hiển thị báo cáo này. <span className="text-blue-500 cursor-pointer hover:underline">Tìm hiểu thêm</span>
+                 {t("noAudienceData")} <span className="text-blue-500 cursor-pointer hover:underline">{t("learnMore")}</span>
                </p>
             </CardContent>
          </Card>
 
-         {/* Định dạng */}
+         {/* Formats */}
          <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Các định dạng mà khán giả của bạn xem trên YouTube</CardTitle>
-               <p className="text-[10px] text-muted-foreground">28 ngày qua</p>
+               <CardTitle className="text-sm font-bold">{t("formatsYourAudienceWatches")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("last28Days")}</p>
             </CardHeader>
             <CardContent>
-               <p className="text-xs text-muted-foreground mt-4 mb-4">Không đủ dữ liệu để hiện báo cáo này.</p>
+               <p className="text-xs text-muted-foreground mt-4 mb-4">{t("noPostsData")}</p>
             </CardContent>
          </Card>
       </div>
@@ -1387,6 +1412,7 @@ const AudienceTab = ({ days, videoId }: { days: number, videoId?: string }) => {
 };
 
 const ReachTab = ({ days, videoId }: { days: number, videoId?: string }) => {
+  const t = useTranslations("Studio");
   const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
 
   return (
@@ -1394,19 +1420,19 @@ const ReachTab = ({ days, videoId }: { days: number, videoId?: string }) => {
       {/* 4 THẺ CHỈ SỐ REACH */}
       <div className="grid grid-cols-1 md:grid-cols-4 bg-white dark:bg-neutral-900 border rounded-xl overflow-hidden shadow-sm">
          <div className="p-4 border-r flex flex-col items-center justify-center text-center">
-            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">Lượt hiển thị hình thu nhỏ</p>
+            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">{t("impressions")}</p>
             <p className="text-xl font-bold">{data.contentBreakdown.discovery.impressions}</p>
          </div>
          <div className="p-4 border-r flex flex-col items-center justify-center text-center">
-            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">Tỷ lệ nhấp (CTR)</p>
+            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">{t("clickThroughRate")} (CTR)</p>
             <p className="text-xl font-bold">{data.contentBreakdown.discovery.ctr}%</p>
          </div>
          <div className="p-4 border-r flex flex-col items-center justify-center text-center">
-            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">Số lượt xem</p>
+            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">{t("videoViews")}</p>
             <p className="text-xl font-bold">{data.totalViews}</p>
          </div>
          <div className="p-4 flex flex-col items-center justify-center text-center">
-            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">Số người xem riêng biệt</p>
+            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">{t("uniqueViewers")}</p>
             <p className="text-xl font-bold">{data.audience.uniqueViewers}</p>
          </div>
       </div>
@@ -1414,8 +1440,8 @@ const ReachTab = ({ days, videoId }: { days: number, videoId?: string }) => {
       {/* BIỂU ĐỒ REACH */}
       <Card className="rounded-xl shadow-sm overflow-hidden bg-transparent border-neutral-200 dark:border-neutral-800">
          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold">Lượt hiển thị hình thu nhỏ</CardTitle>
-            <p className="text-[10px] text-muted-foreground">Theo thời gian trong khoảng thời gian đã chọn</p>
+            <CardTitle className="text-sm font-bold">{t("impressions")}</CardTitle>
+            <p className="text-[10px] text-muted-foreground">{t("impressionsOverTime")}</p>
          </CardHeader>
          <CardContent className="p-0 pt-6">
             <div className="h-[300px] w-full px-6">
@@ -1442,7 +1468,7 @@ const ReachTab = ({ days, videoId }: { days: number, videoId?: string }) => {
                      <Line 
                        type="monotone" 
                        dataKey="impressions" 
-                       name="Lượt hiển thị"
+                       name={t("impressions")}
                        stroke="#3ea6ff" 
                        strokeWidth={2}
                        dot={false}
@@ -1452,26 +1478,26 @@ const ReachTab = ({ days, videoId }: { days: number, videoId?: string }) => {
             </div>
             <div className="p-4 flex justify-start px-6">
                <Button variant="secondary" size="sm" className="text-[10px] font-bold rounded-full bg-neutral-200/50 dark:bg-neutral-800 border-none px-4 h-7">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </div>
          </CardContent>
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         {/* CÁCH NGƯỜI XEM TÌM THẤY VIDEO NÀY */}
+         {/* How viewers found this video */}
          <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Cách người xem tìm thấy video này</CardTitle>
-               <p className="text-[10px] text-muted-foreground">Số lượt xem • Trong khoảng thời gian đã chọn</p>
+               <CardTitle className="text-sm font-bold">{t("howViewersFoundThisVideo")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("viewsInSelectedPeriod")}</p>
             </CardHeader>
             <CardContent className="space-y-6">
                <div className="flex flex-col items-center py-4">
                   <div className="size-48 rounded-full border-[20px] border-blue-500/20 relative flex items-center justify-center">
                      <div className="absolute inset-0 border-[20px] border-blue-500 rounded-full clip-path-half" style={{ clipPath: 'polygon(50% 50%, 100% 0, 100% 100%, 0 100%, 0 0)' }} />
                      <div className="text-center">
-                        <p className="text-[10px] text-muted-foreground">Nguồn lưu lượng truy cập</p>
-                        <p className="text-xs font-bold">Xem chi tiết bên dưới</p>
+                        <p className="text-[10px] text-muted-foreground">{t("trafficSourcesChartCenter")}</p>
+                        <p className="text-xs font-bold">{t("seeDetailsBelow")}</p>
                      </div>
                   </div>
                </div>
@@ -1487,34 +1513,34 @@ const ReachTab = ({ days, videoId }: { days: number, videoId?: string }) => {
                   ))}
                </div>
                <Button variant="secondary" size="sm" className="text-[10px] font-bold rounded-full bg-neutral-200/50 dark:bg-neutral-800 border-none px-4 h-7 w-full mt-4">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </CardContent>
          </Card>
 
-         {/* PHỄU DISCOVERY */}
+         {/* DISCOVERY FUNNEL */}
          <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800 overflow-hidden">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Số lượt hiển thị và cách chỉ số này đã tạo ra thời gian xem</CardTitle>
-               <p className="text-[10px] text-muted-foreground">Trong khoảng thời gian đã chọn</p>
+               <CardTitle className="text-sm font-bold">{t("discoveryFunnelTitle")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("discoveryFunnelSub")}</p>
             </CardHeader>
             <CardContent className="p-6 bg-neutral-50/50 dark:bg-neutral-900/30">
                <div className="relative flex flex-col items-center space-y-0.5">
                   <div className="w-full bg-neutral-100 dark:bg-neutral-800 p-4 text-center rounded-t-lg">
-                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Lượt hiển thị hình thu nhỏ</p>
+                     <p className="text-[10px] text-muted-foreground uppercase font-bold">{t("impressions")}</p>
                      <p className="text-lg font-bold">{data.contentBreakdown.discovery.impressions}</p>
-                     <p className="text-[10px] text-neutral-400">98,7% từ YouTube đề xuất nội dung của bạn</p>
+                     <p className="text-[10px] text-neutral-400">{t("discoveryCTRInfo", { ctr: data.contentBreakdown.discovery.ctr.toFixed(1) })}</p>
                   </div>
                   <div className="w-[85%] bg-neutral-200 dark:bg-neutral-700/50 p-4 text-center">
-                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Tỷ lệ nhấp: {data.contentBreakdown.discovery.ctr}%</p>
+                     <p className="text-[10px] text-muted-foreground uppercase font-bold">{t("clickThroughRate")}: {data.contentBreakdown.discovery.ctr}%</p>
                   </div>
                   <div className="w-[70%] bg-neutral-300 dark:bg-neutral-600/50 p-4 text-center">
-                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Lượt xem từ lượt hiển thị</p>
+                     <p className="text-[10px] text-muted-foreground uppercase font-bold">{t("viewsFromImpressions")}</p>
                      <p className="text-lg font-bold">{data.contentBreakdown.discovery.viewsFromImpressions}</p>
-                     <p className="text-[10px] text-neutral-400">{data.contentBreakdown.discovery.avgViewDuration} thời lượng xem trung bình</p>
+                     <p className="text-[10px] text-neutral-400">{(data.contentBreakdown.discovery.avgViewDuration)} {t("avgViewDurationLabel")}</p>
                   </div>
                   <div className="w-[55%] bg-neutral-400 dark:bg-neutral-500/50 p-4 text-center rounded-b-lg">
-                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Thời gian xem từ lượt hiển thị (giờ)</p>
+                     <p className="text-[10px] text-muted-foreground uppercase font-bold">{t("watchTimeFromImpressionsLabel")}</p>
                      <p className="text-lg font-bold">{data.contentBreakdown.discovery.watchTimeFromImpressions}</p>
                   </div>
                </div>
@@ -1526,6 +1552,7 @@ const ReachTab = ({ days, videoId }: { days: number, videoId?: string }) => {
 };
 
 const EngagementTab = ({ days, videoId }: { days: number, videoId?: string }) => {
+  const t = useTranslations("Studio");
   const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
 
   return (
@@ -1533,11 +1560,11 @@ const EngagementTab = ({ days, videoId }: { days: number, videoId?: string }) =>
       {/* 2 THẺ CHỈ SỐ ENGAGEMENT */}
       <div className="grid grid-cols-1 md:grid-cols-2 bg-white dark:bg-neutral-900 border rounded-xl overflow-hidden shadow-sm">
          <div className="p-6 border-r flex flex-col items-center justify-center text-center">
-            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">Thời gian xem (giờ)</p>
+            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">{t("watchTimeEngagement")}</p>
             <p className="text-3xl font-bold">{data.totalWatchTimeHours}</p>
          </div>
          <div className="p-6 flex flex-col items-center justify-center text-center">
-            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">Thời lượng xem trung bình</p>
+            <p className="text-[11px] text-muted-foreground font-medium mb-1 uppercase">{t("avgViewDurationEngagement")}</p>
             <p className="text-3xl font-bold">{data.contentBreakdown.discovery.avgViewDuration}</p>
          </div>
       </div>
@@ -1545,8 +1572,8 @@ const EngagementTab = ({ days, videoId }: { days: number, videoId?: string }) =>
       {/* BIỂU ĐỒ ENGAGEMENT */}
       <Card className="rounded-xl shadow-sm overflow-hidden bg-transparent border-neutral-200 dark:border-neutral-800">
          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold">Thời gian xem</CardTitle>
-            <p className="text-[10px] text-muted-foreground">Theo thời gian trong khoảng thời gian đã chọn</p>
+            <CardTitle className="text-sm font-bold">{t("watchTimeEngagement")}</CardTitle>
+            <p className="text-[10px] text-muted-foreground">{t("impressionsOverTime")}</p>
          </CardHeader>
          <CardContent className="p-0 pt-6">
             <div className="h-[300px] w-full px-6">
@@ -1573,7 +1600,7 @@ const EngagementTab = ({ days, videoId }: { days: number, videoId?: string }) =>
                      <Area 
                        type="monotone" 
                        dataKey="watchTime" 
-                       name="Thời gian xem"
+                       name={t("watchTimeLabel")}
                        stroke="#a855f7" 
                        fill="#a855f7"
                        fillOpacity={0.1}
@@ -1584,18 +1611,18 @@ const EngagementTab = ({ days, videoId }: { days: number, videoId?: string }) =>
             </div>
             <div className="p-4 flex justify-start px-6">
                <Button variant="secondary" size="sm" className="text-[10px] font-bold rounded-full bg-neutral-200/50 dark:bg-neutral-800 border-none px-4 h-7">
-                  Xem thêm
+                  {t("seeMore")}
                </Button>
             </div>
          </CardContent>
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         {/* GIỮ CHÂN KHÁN GIẢ */}
+         {/* AUDIENCE RETENTION */}
          <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Giữ chân khán giả</CardTitle>
-               <p className="text-[10px] text-muted-foreground">Video của bạn thu hút người xem như thế nào</p>
+               <CardTitle className="text-sm font-bold">{t("audienceRetention")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("howYourVideoAttractsViewers")}</p>
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="h-48 w-full">
@@ -1603,7 +1630,6 @@ const EngagementTab = ({ days, videoId }: { days: number, videoId?: string }) =>
                     <LineChart 
                       data={Array.from({ length: 10 }).map((_, i) => {
                         const target = data.engagement.avgViewPercent;
-                        // Giả lập đường cong sụt giảm: bắt đầu từ 100%, kết thúc ở mức avgViewPercent
                         const val = 100 - (100 - target) * Math.pow(i / 9, 0.5);
                         return { time: i, val: Number(val.toFixed(1)) };
                       })} 
@@ -1637,7 +1663,7 @@ const EngagementTab = ({ days, videoId }: { days: number, videoId?: string }) =>
                </div>
                <div className="space-y-2">
                   <div className="flex justify-between text-xs">
-                     <span>Tỷ lệ giữ chân trung bình</span>
+                     <span>{t("avgRetention")}</span>
                      <span className="font-bold">{data.engagement.avgViewPercent}%</span>
                   </div>
                   <div className="w-full bg-neutral-200 dark:bg-neutral-800 h-1.5 rounded-full">
@@ -1647,26 +1673,26 @@ const EngagementTab = ({ days, videoId }: { days: number, videoId?: string }) =>
             </CardContent>
          </Card>
  
-         {/* LƯỢT THÍCH VÀ XẾP HẠNG */}
+         {/* LIKES AND RATINGS */}
          <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
             <CardHeader className="pb-2">
-               <CardTitle className="text-sm font-bold">Lượt thích so với trung bình của kênh</CardTitle>
-               <p className="text-[10px] text-muted-foreground">Tỷ lệ lượt thích (%) • Trong khoảng thời gian đã chọn</p>
+               <CardTitle className="text-sm font-bold">{t("likesVsChannelAverage")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("likesPercentPeriod")}</p>
             </CardHeader>
             <CardContent className="space-y-8 py-8">
                <div className="flex flex-col items-center justify-center space-y-2">
                   <p className="text-4xl font-bold">{data.engagement.likePercent.toString().replace(".", ",")}%</p>
-                  <p className="text-xs text-muted-foreground">So với trung bình của kênh ({data.engagement.channelLikePercent.toString().replace(".", ",")}%)</p>
+                  <p className="text-xs text-muted-foreground">{t("vsChannelAverage", { percent: data.engagement.channelLikePercent.toString().replace(".", ",") })}</p>
                </div>
                {data.engagement.likePercent >= data.engagement.channelLikePercent ? (
                  <div className="flex items-center gap-x-2 text-xs text-emerald-500 font-bold justify-center bg-emerald-500/10 py-2 rounded-lg">
                     <TrendingUpIcon className="size-4" />
-                    Cao hơn bình thường
+                    {t("higherThanUsual")}
                  </div>
                ) : (
                  <div className="flex items-center gap-x-2 text-xs text-amber-500 font-bold justify-center bg-amber-500/10 py-2 rounded-lg">
                     <TrendingDownIcon className="size-4" />
-                    Thấp hơn bình thường
+                    {t("lowerThanUsual")}
                  </div>
                )}
             </CardContent>
@@ -1676,8 +1702,12 @@ const EngagementTab = ({ days, videoId }: { days: number, videoId?: string }) =>
   );
 };
 
-export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
-  const [dateRange, setDateRange] = useState("28 ngày qua");
+export const AnalyticsView = ({ videoId: videoIdParam }: { videoId?: string }) => {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
+  const params = useParams();
+  const videoId = videoIdParam || (params.videoId as string);
+  const [dateRange, setDateRange] = useState(t("last28Days"));
   const [isAdvancedModalOpen, setIsAdvancedModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -1687,18 +1717,18 @@ export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
   const getDaysFromRange = (range: string) => {
     const now = new Date();
 
-    if (range.startsWith("Tùy chỉnh (")) {
+    if (range.startsWith(t("custom"))) {
       const match = range.match(/\d+/);
       return match ? parseInt(match[0]) : 28;
     }
 
-    if (range === "7 ngày qua") return 7;
-    if (range === "28 ngày qua") return 28;
-    if (range === "90 ngày qua") return 90;
-    if (range === "365 ngày qua") return 365;
-    if (range === "Toàn thời gian") return 3650;
+    if (range === t("daysCount", { days: 7 })) return 7;
+    if (range === t("last28Days")) return 28;
+    if (range === t("daysCount", { days: 90 })) return 90;
+    if (range === t("daysCount", { days: 365 })) return 365;
+    if (range === t("allTime")) return 3650;
     
-    // Năm
+    // Year
     if (/^\d{4}$/.test(range)) {
       const year = parseInt(range);
       const startOfYear = new Date(year, 0, 1);
@@ -1706,8 +1736,8 @@ export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
       return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     }
 
-    // Tháng
-    if (range.startsWith("Tháng ")) {
+    // Month
+    if (range.startsWith(t("monthLabel", { month: "" }))) {
       const month = parseInt(range.split(" ")[1]) - 1;
       const startOfMonth = new Date(now.getFullYear(), month, 1);
       const diffTime = Math.abs(now.getTime() - startOfMonth.getTime());
@@ -1721,25 +1751,25 @@ export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
   const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
 
   const formatDateRange = (d: number) => {
-    if (d === 3650) return "Toàn thời gian";
+    if (d === 3650) return t("allTime");
     const end = new Date();
     const start = new Date();
     start.setDate(end.getDate() - d);
-    const formatStr = (date: Date) => `${date.getDate()} thg ${date.getMonth() + 1}`;
-    return `${formatStr(start)} – ${formatStr(end)}, ${end.getFullYear()}`;
+    const formatStr = (date: Date) => `${date.getDate()} ${t("monthLabel", { month: date.getMonth() + 1 })}`;
+    return t("dateRangeSummary", { start: formatStr(start), end: formatStr(end), year: end.getFullYear() });
   };
 
   const menuSections = [
-    { items: ["7 ngày qua", "28 ngày qua", "90 ngày qua", "365 ngày qua", "Toàn thời gian"] },
+    { items: [t("daysCount", { days: 7 }), t("last28Days"), t("daysCount", { days: 90 }), t("daysCount", { days: 365 }), t("allTime")] },
     { items: ["2026", "2025"] },
-    { items: ["Tháng 5", "Tháng 4", "Tháng 3"] },
-    { items: ["Tùy chỉnh"] },
+    { items: [t("monthLabel", { month: 5 }), t("monthLabel", { month: 4 }), t("monthLabel", { month: 3 })] },
+    { items: [t("custom")] },
   ];
 
   return (
     <div className="flex flex-col gap-y-4 p-4 lg:p-8 bg-neutral-50 dark:bg-black min-h-screen">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{videoId ? "Số liệu phân tích về video" : "Số liệu phân tích về kênh"}</h1>
+        <h1 className="text-xl font-bold">{videoId ? t("videoAnalytics") : t("channelAnalytics")}</h1>
         <div className="flex items-center gap-x-2">
            <Button 
              variant="outline" 
@@ -1747,7 +1777,7 @@ export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
              className="bg-white dark:bg-neutral-900"
              onClick={() => setIsAdvancedModalOpen(true)}
            >
-              Chế độ nâng cao
+              {t("advancedMode")}
            </Button>
         </div>
       </div>
@@ -1756,19 +1786,20 @@ export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
         isOpen={isAdvancedModalOpen} 
         onClose={() => setIsAdvancedModalOpen(false)} 
         dateRange={dateRange}
+        days={days}
         videoId={videoId}
       />
 
       <Tabs defaultValue="overview" className="w-full">
         <div className="flex items-center justify-between border-b mb-4">
           <TabsList className="bg-transparent h-auto p-0 gap-x-8">
-            {(videoId ? ["overview", "reach", "engagement", "audience"] : ["overview", "content", "audience"]).map((t) => (
+            {(videoId ? ["overview", "reach", "engagement", "audience"] : ["overview", "content", "audience"]).map((tab) => (
               <TabsTrigger 
-                key={t}
-                value={t} 
+                key={tab}
+                value={tab} 
                 className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary bg-transparent data-[state=active]:bg-transparent font-medium capitalize"
               >
-                {t === "overview" ? "Tổng quan" : t === "reach" ? "Phạm vi tiếp cận" : t === "engagement" ? "Mức độ tương tác" : t === "content" ? "Nội dung" : "Đối tượng người xem"}
+                {tab === "overview" ? t("overview") : tab === "reach" ? t("reach") : tab === "engagement" ? t("engagement") : tab === "content" ? t("posts") : t("audience")}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -1777,11 +1808,11 @@ export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
             <PopoverTrigger asChild>
               <div className="flex items-center gap-x-2 text-sm text-muted-foreground cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 p-2 rounded-md transition-colors">
                  {isPending ? (
-                   <span className="opacity-50">Đang tải...</span>
+                   <span className="opacity-50">{t("loading")}</span>
                  ) : (
                    <span>{formatDateRange(days)}</span>
                  )}
-                 <span className="font-bold">{dateRange.startsWith("Tùy chỉnh") ? "Tùy chỉnh" : dateRange}</span>
+                 <span className="font-bold">{dateRange.startsWith(t("custom")) ? t("custom") : dateRange}</span>
                  <ChevronDownIcon className="size-4" />
               </div>
             </PopoverTrigger>
@@ -1798,7 +1829,7 @@ export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
                               isPending && "opacity-50 pointer-events-none"
                             )}
                             onClick={() => {
-                              if (range === "Tùy chỉnh") {
+                              if (range === t("custom")) {
                                 setShowCustomPicker(true);
                                 return;
                               }
@@ -1818,7 +1849,7 @@ export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
                ) : (
                  <div className="p-4 flex flex-col gap-4">
                     <div className="flex items-center justify-between">
-                       <span className="font-bold text-sm">Tùy chỉnh</span>
+                       <span className="font-bold text-sm">{t("custom")}</span>
                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-white/10 text-muted-foreground" onClick={() => setShowCustomPicker(false)}>X</Button>
                     </div>
                     <Calendar
@@ -1829,7 +1860,7 @@ export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
                       className="bg-transparent text-white"
                     />
                     <div className="flex justify-end gap-2 mt-2">
-                       <Button variant="ghost" size="sm" onClick={() => setShowCustomPicker(false)} className="hover:bg-white/10">Hủy</Button>
+                       <Button variant="ghost" size="sm" onClick={() => setShowCustomPicker(false)} className="hover:bg-white/10">{t("cancel")}</Button>
                        <Button 
                          size="sm" 
                          disabled={!customRange?.from || !customRange?.to || isPending}
@@ -1838,7 +1869,7 @@ export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
                            if (customRange?.from && customRange?.to) {
                              const diff = Math.ceil(Math.abs(customRange.to.getTime() - customRange.from.getTime()) / (1000 * 60 * 60 * 24)) + 1;
                              startTransition(() => {
-                               setDateRange(`Tùy chỉnh (${diff} ngày)`);
+                               setDateRange(`${t("custom")} (${diff} ${t("daysCount", { days: "" })})`);
                              });
                              // Note: Popover doesn't auto-close because we don't have a direct ref to close it, 
                              // but setting showCustomPicker(false) resets the state for next time
@@ -1846,7 +1877,7 @@ export const AnalyticsView = ({ videoId }: { videoId?: string }) => {
                            }
                          }}
                        >
-                         Áp dụng
+                         {t("apply")}
                        </Button>
                     </div>
                  </div>

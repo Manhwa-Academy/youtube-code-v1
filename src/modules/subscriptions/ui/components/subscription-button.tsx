@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Button, ButtonProps } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface SubscriptionButtonProps {
   onClick: ButtonProps["onClick"];
@@ -16,6 +17,7 @@ export const SubscriptionButton = ({
   className,
   size
 }: SubscriptionButtonProps) => {
+  const t = useTranslations("Video");
   return (
     <Button
       size={size}
@@ -24,7 +26,7 @@ export const SubscriptionButton = ({
       onClick={onClick}
       disabled={disabled}
     >
-      {isSubscribed ? "Đã đăng ký" : "Đăng ký"}
+      {isSubscribed ? t("subscribed") : t("subscribe")}
     </Button>
   );
 };

@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   ListPlusIcon,
@@ -46,6 +47,8 @@ export const VideoMenu = ({
   onRemove,
 }: VideoMenuProps) => {
   const isOnline = useIsOnline();
+  const t = useTranslations("VideoMenu");
+  const tGeneral = useTranslations("General");
   const [isOpenPlaylistAddModal, setIsOpenPlaylistAddModal] = useState(false);
   const [isOpenCreateModal, setIsOpenCreateModal] = useState(false);
   const [isOpenMixAddModal, setIsOpenMixAddModal] = useState(false);
@@ -57,23 +60,23 @@ export const VideoMenu = ({
     if (!playbackId) return;
     try {
       await downloadManager.removeVideo(videoId, playbackId);
-      toast.success("Đã xóa nội dung tải xuống");
+      toast.success(t("removeDownload"));
       if (onRemove) onRemove(); // Trigger refresh if onRemove is provided
       else window.location.reload(); // Fallback to refresh the view
     } catch (e) {
-      toast.error("Lỗi khi xóa video");
+      toast.error(tGeneral("error"));
     }
   };
 
   const onShare = () => {
     const fullUrl = `${APP_URL}/videos/${videoId}`;
     navigator.clipboard.writeText(fullUrl);
-    toast.success("Đã sao chép liên kết");
+    toast.success(tGeneral("copySuccess"));
   };
 
   const handleAddToQueue = () => {
     if (!title || !playbackId) {
-      toast.error("Không thể thêm vào hàng chờ: Thiếu thông tin");
+      toast.error(t("queueError"));
       return;
     }
     addToQueue({
@@ -82,7 +85,7 @@ export const VideoMenu = ({
       thumbnailUrl,
       playbackId,
     });
-    toast.success("Đã thêm vào hàng chờ");
+    toast.success(t("queueSuccess"));
   };
 
   return (
@@ -123,35 +126,35 @@ export const VideoMenu = ({
             <>
               <DropdownMenuItem onClick={handleAddToQueue}>
                 <ListVideoIcon className="mr-2 size-4" />
-                Thêm vào hàng chờ
+                {t("addToQueue")}
               </DropdownMenuItem>
 
               <DropdownMenuItem onClick={onShare}>
                 <ShareIcon className="mr-2 size-4" />
-                Chia sẻ
+                {t("share")}
               </DropdownMenuItem>
 
               <DropdownMenuItem onClick={() => setIsOpenPlaylistAddModal(true)}>
                 <ListPlusIcon className="mr-2 size-4" />
-                Thêm vào danh sách phát
+                {t("addToPlaylist")}
               </DropdownMenuItem>
 
               <DropdownMenuItem onClick={() => setIsOpenCreateModal(true)}>
                 <PlusIcon className="mr-2 size-4" />
-                Tạo danh sách kết hợp mới
+                {t("createNewMix")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsOpenMixAddModal(true)}>
                 <ListPlusIcon className="mr-2 size-4" />
-                Thêm vào danh sách kết hợp
+                {t("addToMix")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsOpenReportModal(true)}>
                 <FlagIcon className="mr-2 size-4" />
-                Báo cáo vi phạm
+                {t("report")}
               </DropdownMenuItem>
               {onRemove && (
                 <DropdownMenuItem onClick={onRemove}>
                   <Trash2Icon className="mr-2 size-4" />
-                  Xóa khỏi lịch sử
+                  {t("removeFromHistory")}
                 </DropdownMenuItem>
               )}
             </>
@@ -159,7 +162,7 @@ export const VideoMenu = ({
             <>
               <DropdownMenuItem onClick={onRemoveDownload}>
                 <Trash2Icon className="mr-2 size-4" />
-                Xóa nội dung tải xuống
+                {t("removeDownload")}
               </DropdownMenuItem>
             </>
           )}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useMemo } from "react";
 
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { THUMBNAIL_FALLBACK } from "../../constants";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,14 +42,17 @@ export const VideoShortsCardSkeleton = ({ className }: { className?: string }) =
 };
 
 export const VideoShortsCard = ({ data, onRemove, className }: VideoShortsCardProps) => {
+  const locale = useLocale();
+  const t = useTranslations("Video");
+
   const compactViews = useMemo(() => {
     const count = data.viewCount || data.viewsCount || 0;
-    return count === 0
-      ? "Chưa có"
-      : new Intl.NumberFormat("vi-VN", {
-          notation: "compact",
-        }).format(count);
-  }, [data.viewCount, data.viewsCount]);
+    if (count === 0) return t("noViews");
+    
+    return new Intl.NumberFormat(locale, {
+      notation: "compact",
+    }).format(count);
+  }, [data.viewCount, data.viewsCount, locale, t]);
 
   return (
     <div className={cn("group flex flex-col gap-2 flex-shrink-0", className)}>
@@ -79,7 +83,7 @@ export const VideoShortsCard = ({ data, onRemove, className }: VideoShortsCardPr
               {data.title}
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
-              {compactViews} lượt xem
+              {(data.viewCount || data.viewsCount) > 0 ? `${compactViews} ${t("views")}` : compactViews}
             </p>
           </Link>
         </div>

@@ -33,14 +33,14 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const languages = [
-  { code: "vi", name: "Tiếng Việt" },
+  { code: "vi", name: "Tiếng Việt (Vietnamese)" },
   { code: "en", name: "English" },
-  { code: "ja", name: "日本語" },
-  { code: "ko", name: "한국어" },
-  { code: "zh", name: "简体中文" },
-  { code: "es", name: "Español" },
-  { code: "fr", name: "Français" },
-  { code: "de", name: "Deutsch" },
+  { code: "ja", name: "日本語 (Japanese)" },
+  { code: "ko", name: "한국어 (Korean)" },
+  { code: "zh", name: "简体中文 (Chinese)" },
+  { code: "es", name: "Español (Spanish)" },
+  { code: "fr", name: "Français (French)" },
+  { code: "de", name: "Deutsch (German)" },
 ];
 
 export const AuthButton = () => {
@@ -135,7 +135,7 @@ export const AuthButton = () => {
             {user?.primaryEmailAddress?.emailAddress === "vuliztva1@gmail.com" && (
               <DropdownMenuItem onClick={() => router.push("/admin")}>
                 <ShieldAlertIcon className="mr-3 size-4 text-red-500" />
-                <span className="font-bold text-red-500">Bảng quản trị hệ thống</span>
+                <span className="font-bold text-red-500">{t("systemAdmin")}</span>
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
@@ -184,7 +184,7 @@ export const AuthButton = () => {
             className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-500 border-blue-500/20 rounded-full shadow-none"
           >
             <UserCircleIcon />
-            Đăng nhập
+            {t("signIn")}
           </Button>
         </SignInButton>
       </SignedOut>

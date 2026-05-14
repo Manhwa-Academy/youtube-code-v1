@@ -8,18 +8,20 @@ import { DEFAULT_LIMIT } from "@/constants";
 import { InfiniteScroll } from "@/components/infinite-scroll";
 import { VideoRowCard, VideoRowCardSkeleton } from "@/modules/videos/ui/components/video-row-card";
 import { VideoGridCard, VideoGridCardSkeleton } from "@/modules/videos/ui/components/video-grid-card";
+import { useTranslations } from "next-intl";
 
 interface HashtagResultsSectionProps {
   tag: string;
 };
 
 export const HashtagResultsSection = (props: HashtagResultsSectionProps) => {
+  const t = useTranslations("Search");
   return (
     <Suspense 
       key={props.tag}  
       fallback={<HashtagResultsSectionSkeleton />}
     >
-      <ErrorBoundary fallback={<p className="text-center py-10">Đã xảy ra lỗi khi tìm kiếm hashtag.</p>}>
+      <ErrorBoundary fallback={<p className="text-center py-10">{t("errorHashtagSearch")}</p>}>
         <HashtagResultsSectionSuspense {...props} />
       </ErrorBoundary>
     </Suspense>
@@ -46,6 +48,7 @@ export const HashtagResultsSectionSkeleton = () => {
 const HashtagResultsSectionSuspense = ({
   tag,
 }: HashtagResultsSectionProps) => {
+  const t = useTranslations("Search");
   const [results, resultsQuery] = trpc.search.getHashtagMany.useSuspenseInfiniteQuery(
     { 
       tag, 
@@ -59,7 +62,7 @@ const HashtagResultsSectionSuspense = ({
   const items = results.pages.flatMap((page) => page.items);
 
   if (items.length === 0) {
-    return <div className="text-center py-20 text-muted-foreground">Không tìm thấy video nào với hashtag này.</div>;
+    return <div className="text-center py-20 text-muted-foreground">{t("noVideosHashtag")}</div>;
   }
 
   return (

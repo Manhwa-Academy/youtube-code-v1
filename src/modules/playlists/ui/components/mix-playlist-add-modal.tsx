@@ -2,6 +2,7 @@
 
 import { toast } from "sonner";
 import { Loader2Icon, SquareCheckIcon, SquareIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/trpc/client";
 import { DEFAULT_LIMIT } from "@/constants";
@@ -20,6 +21,7 @@ export const MixPlaylistAddModal = ({
   onOpenChange,
   videoId,
 }: MixPlaylistAddModalProps) => {
+  const t = useTranslations("Playlists");
   const utils = trpc.useUtils();
 
   const {
@@ -41,7 +43,7 @@ export const MixPlaylistAddModal = ({
 
   const addVideo = trpc.playlists.addVideo.useMutation({
     onSuccess: async () => {
-      toast.success("Đã thêm video vào danh sách kết hợp");
+      toast.success(t("videoAddedToMix"));
 
       await Promise.all([
         utils.playlists.getPublicMixPlaylists.invalidate(),
@@ -52,13 +54,13 @@ export const MixPlaylistAddModal = ({
     },
     onError: (err) => {
       console.error("ADD MIX VIDEO ERROR:", err);
-      toast.error(err.message || "Đã có lỗi xảy ra");
+      toast.error(err.message || t("errorOccurred"));
     },
   });
 
   const removeVideo = trpc.playlists.removeVideo.useMutation({
     onSuccess: async () => {
-      toast.success("Đã gỡ video khỏi danh sách kết hợp");
+      toast.success(t("videoRemovedFromMix"));
 
       await Promise.all([
         utils.playlists.getPublicMixPlaylists.invalidate(),
@@ -69,13 +71,13 @@ export const MixPlaylistAddModal = ({
     },
     onError: (err) => {
       console.error("REMOVE MIX VIDEO ERROR:", err);
-      toast.error(err.message || "Đã có lỗi xảy ra");
+      toast.error(err.message || t("errorOccurred"));
     },
   });
 
   return (
     <ResponsiveModal
-      title="Thêm vào danh sách kết hợp"
+      title={t("addToMixPlaylist")}
       open={open}
       onOpenChange={onOpenChange}
     >

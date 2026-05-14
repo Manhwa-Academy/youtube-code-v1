@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { XIcon, DeleteIcon, ArrowUpIcon, CornerDownLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface VirtualKeyboardProps {
   onInput: (char: string) => void;
@@ -13,6 +14,7 @@ interface VirtualKeyboardProps {
 export const VirtualKeyboard = ({ onInput, onBackspace, onClose }: VirtualKeyboardProps) => {
   const [isShift, setIsShift] = useState(false);
   const [isCaps, setIsCaps] = useState(false);
+  const t = useTranslations("Common");
 
   const rows = [
     ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "="],
@@ -33,7 +35,7 @@ export const VirtualKeyboard = ({ onInput, onBackspace, onClose }: VirtualKeyboa
   return (
     <div className="bg-neutral-100 dark:bg-[#1f1f1f] p-2 sm:p-3 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-800 w-[95vw] sm:w-[550px] select-none animate-in fade-in zoom-in duration-200">
       <div className="flex justify-between items-center mb-2 sm:mb-4 px-2">
-        <span className="text-xs sm:text-sm font-bold text-neutral-500 uppercase tracking-wider">Tiếng Việt</span>
+        <span className="text-xs sm:text-sm font-bold text-neutral-500 uppercase tracking-wider">{t("vietnamese")}</span>
         <button onClick={onClose} className="hover:bg-neutral-200 dark:hover:bg-neutral-800 p-1 rounded-full transition">
           <XIcon className="size-3 sm:size-4 text-neutral-500" />
         </button>
@@ -99,7 +101,7 @@ export const VirtualKeyboard = ({ onInput, onBackspace, onClose }: VirtualKeyboa
         {/* Row 5 */}
         <div className="flex gap-1 sm:gap-1.5 justify-center mt-1">
            <Key className="w-full sm:w-[300px]" onClick={() => onInput(" ")}>
-             Khoảng cách
+             {t("space")}
            </Key>
         </div>
       </div>

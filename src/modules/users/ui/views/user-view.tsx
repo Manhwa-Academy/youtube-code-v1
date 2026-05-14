@@ -12,12 +12,14 @@ import { PostsSection } from "@/modules/posts/ui/sections/posts-section";
 import { HomePostsSection } from "@/modules/posts/ui/sections/home-posts-section";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface UserViewProps {
   userId: string;
 }
 
 export const UserView = ({ userId }: UserViewProps) => {
+  const t = useTranslations("Users");
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -62,7 +64,7 @@ export const UserView = ({ userId }: UserViewProps) => {
           <h2
             className={`font-semibold text-lg mb-4 ${homeCount === 0 ? "hidden" : ""}`}
           >
-            Dành cho bạn
+            {t("forYou")}
           </h2>
           <VideosSection
             userId={userId}
@@ -74,7 +76,7 @@ export const UserView = ({ userId }: UserViewProps) => {
           <h2
             className={`font-semibold text-lg mb-4 mt-6 ${videoCount === 0 ? "hidden" : ""}`}
           >
-            Video phổ biến
+            {t("popularVideos")}
           </h2>
           <VideosSection
             userId={userId}

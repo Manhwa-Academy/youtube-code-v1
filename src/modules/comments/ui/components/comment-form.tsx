@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
@@ -37,6 +38,7 @@ export const CommentForm = ({
   onSuccess,
   variant = "comment",
 }: CommentFormProps) => {
+  const t = useTranslations("Comments");
   const clerk = useClerk();
   const { user } = useUser();
 
@@ -45,11 +47,11 @@ export const CommentForm = ({
     onSuccess: () => {
       utils.comments.getMany.invalidate();
       form.reset();
-      toast.success("Đã thêm bình luận");
+      toast.success(t("addSuccess"));
       onSuccess?.();
     },
     onError: (error) => {
-      toast.error("Có lỗi xảy ra");
+      toast.error(t("error"));
 
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
@@ -93,7 +95,7 @@ export const CommentForm = ({
         <UserAvatar
           size="lg"
           imageUrl={user?.imageUrl || "/user-placeholder.svg"}
-          name={user?.username || "Người dùng"}
+          name={user?.username || t("userPlaceholder")}
         />
 
         <div className="flex-1">
@@ -107,8 +109,8 @@ export const CommentForm = ({
                     {...field}
                     placeholder={
                       variant === "reply"
-                        ? "Trả lời bình luận..."
-                        : "Viết bình luận..."
+                        ? t("replyPlaceholder")
+                        : t("placeholder")
                     }
                     className="resize-none bg-transparent overflow-hidden min-h-0"
                   />
@@ -161,7 +163,7 @@ export const CommentForm = ({
                   type="button" 
                   className="size-8 text-muted-foreground hover:text-blue-500"
                   onClick={() => form.setValue("timestamp", Math.floor(currentTime))}
-                  title="Thêm mốc thời gian hiện tại"
+                  title={t("addTimestamp")}
                 >
                   <TimerIcon className="size-4" />
                 </Button>
@@ -171,12 +173,11 @@ export const CommentForm = ({
             <div className="flex gap-2">
               {onCancel && (
                 <Button variant="ghost" type="button" onClick={handleCancel}>
-                  Hủy
+                  {t("cancel")}
                 </Button>
               )}
-
               <Button disabled={create.isPending || (!form.watch("value") && !form.watch("imageUrl"))} type="submit" size="sm">
-                {variant === "reply" ? "Trả lời" : "Bình luận"}
+                {variant === "reply" ? t("addReply") : t("addComment")}
               </Button>
             </div>
           </div>

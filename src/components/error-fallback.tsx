@@ -2,6 +2,7 @@
 
 import { AlertCircle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface ErrorFallbackProps {
   error?: Error;
@@ -12,18 +13,21 @@ interface ErrorFallbackProps {
 
 export const ErrorFallback = ({
   resetErrorBoundary,
-  title = "Đã xảy ra lỗi",
-  message = "Chúng tôi không thể tải nội dung này vào lúc này. Vui lòng thử lại sau.",
+  title,
+  message,
 }: ErrorFallbackProps) => {
+  const t = useTranslations("Common");
+  const displayTitle = title || t("somethingWentWrong");
+  const displayMessage = message || t("errorLoadingContent");
   return (
     <div className="flex flex-col items-center justify-center p-10 bg-muted/20 rounded-2xl border border-dashed border-muted-foreground/20 text-center space-y-4">
       <div className="p-3 bg-red-100 dark:bg-red-900/20 rounded-full">
         <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
       </div>
       <div className="space-y-2">
-        <h3 className="text-lg font-semibold">{title}</h3>
+        <h3 className="text-lg font-semibold">{displayTitle}</h3>
         <p className="text-sm text-muted-foreground max-w-[300px]">
-          {message}
+          {displayMessage}
         </p>
       </div>
       {resetErrorBoundary && (
@@ -33,7 +37,7 @@ export const ErrorFallback = ({
           className="flex items-center gap-2"
         >
           <RotateCcw className="w-4 h-4" />
-          Thử lại
+          {t("retry")}
         </Button>
       )}
     </div>

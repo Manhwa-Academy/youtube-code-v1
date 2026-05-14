@@ -10,6 +10,7 @@ import { ErrorFallback } from "@/components/error-fallback";
 import { trpc } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from "next-intl";
 
 interface PlaylistHeaderSectionProps {
   playlistId: string;
@@ -39,18 +40,19 @@ export const PlaylistHeaderSectionSkeleton = () => {
 const PlaylistHeaderSectionSuspense = ({
   playlistId,
 }: PlaylistHeaderSectionProps) => {
+  const t = useTranslations("Playlists");
   const [playlist] = trpc.playlists.getOne.useSuspenseQuery({ id: playlistId });
 
   const router = useRouter();
   const utils = trpc.useUtils();
   const remove = trpc.playlists.remove.useMutation({
     onSuccess: () => {
-      toast.success("Playlist removed");
+      toast.success(t("deleteSuccess"));
       utils.playlists.getMany.invalidate();
       router.push("/playlists");
     },
     onError: () => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("errorOccurred"));
     },
   });
 
@@ -61,7 +63,7 @@ const PlaylistHeaderSectionSuspense = ({
           {playlist.name}
         </h1>
         <p className="text-xs text-muted-foreground truncate sm:ml-2">
-          Video từ danh sách phát
+          {t("videoFromPlaylist")}
         </p>
       </div>
       <Button

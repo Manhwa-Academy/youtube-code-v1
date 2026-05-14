@@ -77,16 +77,16 @@ export const reportsRouter = createTRPCRouter({
           let targetName = "Unknown";
           if (report.targetType === "video") {
             const [video] = await db.select({ title: videos.title }).from(videos).where(eq(videos.id, report.targetId));
-            targetName = video?.title || "Video không tồn tại";
+            targetName = video?.title || "Video does not exist";
           } else if (report.targetType === "comment") {
             const [comment] = await db.select({ value: comments.value }).from(comments).where(eq(comments.id, report.targetId));
-            targetName = comment?.value || "Bình luận không tồn tại";
+            targetName = comment?.value || "Comment does not exist";
           } else if (report.targetType === "user") {
             const [user] = await db.select({ name: users.name }).from(users).where(eq(users.id, report.targetId));
-            targetName = user?.name || "Người dùng không tồn tại";
+            targetName = user?.name || "User does not exist";
           } else if (report.targetType === "post") {
             const [post] = await db.select({ title: posts.content }).from(posts).where(eq(posts.id, report.targetId));
-            targetName = post?.title || "Bài đăng không tồn tại";
+            targetName = post?.title || "Post does not exist";
           }
           return { ...report, targetName };
         })

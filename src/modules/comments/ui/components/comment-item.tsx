@@ -1,7 +1,9 @@
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useState } from "react";
-import { formatDistanceToNow } from "date-fns";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import {
   ChevronDownIcon,
@@ -13,14 +15,12 @@ import {
   Trash2Icon,
   PinIcon,
   HeartIcon,
-  ImageIcon,
-  TimerIcon,
   ShieldCheckIcon,
   ShieldAlertIcon,
   FlagIcon,
 } from "lucide-react";
 import { formatDistanceToNowStrict } from "date-fns";
-import { vi } from "date-fns/locale";
+import { vi, enUS, ja, ko, zhCN, es, fr, de } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,17 @@ import { CommentForm } from "./comment-form";
 import { CommentReplies } from "./comment-replies";
 import { CommentsGetManyOutput } from "../../types";
 import { ReportModal } from "@/modules/reports/ui/components/report-modal";
-import { usePlayerStore } from "@/modules/videos/store/use-player-store";
+
+const dateLocales: Record<string, any> = {
+  vi,
+  en: enUS,
+  ja,
+  ko,
+  zh: zhCN,
+  es,
+  fr,
+  de,
+};
 
 interface CommentItemProps {
   comment: CommentsGetManyOutput["items"][number];
@@ -47,6 +57,8 @@ export const CommentItem = ({
   comment,
   variant = "comment",
 }: CommentItemProps) => {
+  const locale = useLocale();
+  const t = useTranslations("Comments");
   const clerk = useClerk();
   const { userId } = useAuth();
 
@@ -58,11 +70,11 @@ export const CommentItem = ({
 
   const remove = trpc.comments.remove.useMutation({
     onSuccess: () => {
-      toast.success("Bình luận đã bị xóa");
+      toast.success(t("deleteSuccess"));
       utils.comments.getMany.invalidate({ videoId: comment.videoId, postId: comment.postId });
     },
     onError: (error) => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("error"));
 
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
@@ -72,11 +84,11 @@ export const CommentItem = ({
 
   const pin = trpc.comments.pin.useMutation({
     onSuccess: () => {
-      toast.success(comment.isPinned ? "Đã bỏ ghim bình luận" : "Đã ghim bình luận");
+      toast.success(comment.isPinned ? t("unpinSuccess") : t("pinSuccess"));
       utils.comments.getMany.invalidate({ videoId: comment.videoId, postId: comment.postId });
     },
     onError: (error) => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("error"));
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
       }
@@ -88,7 +100,7 @@ export const CommentItem = ({
       utils.comments.getMany.invalidate({ videoId: comment.videoId, postId: comment.postId });
     },
     onError: (error) => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("error"));
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
       }
@@ -107,7 +119,7 @@ export const CommentItem = ({
       }
     },
     onError: (error) => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("error"));
 
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
@@ -123,7 +135,7 @@ export const CommentItem = ({
       }
     },
     onError: (error) => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("error"));
 
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
@@ -136,7 +148,7 @@ export const CommentItem = ({
       {comment.isPinned && variant === "comment" && (
         <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground pl-14">
           <PinIcon className="size-3" />
-          <span>Đã ghim bởi chủ kênh</span>
+          <span>{t("pinned")}</span>
         </div>
       )}
       <div className="flex gap-4">
@@ -162,15 +174,8 @@ export const CommentItem = ({
               <span className="text-xs text-muted-foreground">
                 {formatDistanceToNowStrict(new Date(comment.createdAt), {
                   addSuffix: true,
-                  locale: vi,
-                })
-                  .replace("vài giây trước", "vừa xong")
-                  .replace(" giây trước", " giây trước")
-                  .replace(" phút trước", " phút trước")
-                  .replace(" giờ trước", " giờ trước")
-                  .replace(" ngày trước", " ngày trước")
-                  .replace(" tháng trước", " tháng trước")
-                  .replace(" năm trước", "năm trước")}
+                  locale: dateLocales[locale] || enUS,
+                })}
               </span>
             </div>
           </Link>
@@ -270,7 +275,7 @@ export const CommentItem = ({
                 className="h-8"
                 onClick={() => setIsReplyOpen(true)}
               >
-                Trả lời
+                {t("reply")}
               </Button>
             )}
           </div>
@@ -284,17 +289,17 @@ export const CommentItem = ({
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => setIsReplyOpen(true)}>
               <MessageSquareIcon className="size-4 mr-2" />
-              Trả lời
+              {t("reply")}
             </DropdownMenuItem>
             {isContentOwner && (
               <>
                 <DropdownMenuItem onClick={() => pin.mutate({ id: comment.id })}>
                   <PinIcon className="size-4 mr-2" />
-                  {comment.isPinned ? "Bỏ ghim" : "Ghim"}
+                  {comment.isPinned ? t("unpin") : t("pin")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => heart.mutate({ id: comment.id })}>
                   <HeartIcon className={cn("size-4 mr-2", comment.creatorHearted && "fill-red-500 text-red-500")} />
-                  {comment.creatorHearted ? "Bỏ thả tim" : "Thả tim"}
+                  {comment.creatorHearted ? t("unheart") : t("heart")}
                 </DropdownMenuItem>
               </>
             )}
@@ -303,12 +308,12 @@ export const CommentItem = ({
                 onClick={() => remove.mutate({ id: comment.id })}
               >
                 <Trash2Icon className="size-4 mr-2" />
-                Xóa
+                {t("delete")}
               </DropdownMenuItem>
             )}
             <DropdownMenuItem onClick={() => setIsReportModalOpen(true)}>
               <FlagIcon className="size-4 mr-2" />
-              Báo cáo vi phạm
+              {t("report")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -342,7 +347,7 @@ export const CommentItem = ({
             onClick={() => setIsRepliesOpen((current) => !current)}
           >
             {isRepliesOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-            {comment.replyCount} lượt phản hồi
+            {isRepliesOpen ? t("hideReplies") : t("showReplies", { count: comment.replyCount })}
           </Button>
         </div>
       )}

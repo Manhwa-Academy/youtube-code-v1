@@ -14,7 +14,19 @@ import {
   AlertCircleIcon
 } from "lucide-react";
 import { format } from "date-fns";
-import { vi } from "date-fns/locale";
+import { useTranslations, useLocale } from "next-intl";
+import { enUS, vi, ja, ko, zhCN, de, es, fr } from "date-fns/locale";
+
+const dateFnsLocales = {
+  en: enUS,
+  vi: vi,
+  ja: ja,
+  ko: ko,
+  zh: zhCN,
+  de: de,
+  es: es,
+  fr: fr,
+};
 
 import { trpc } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
@@ -28,6 +40,10 @@ import { BannerUploadModal } from "@/modules/users/ui/components/banner-upload-m
 export const CustomizationView = () => {
   const [user] = trpc.users.getCurrent.useSuspenseQuery();
   const utils = trpc.useUtils();
+  const t = useTranslations("Studio");
+  const tGeneral = useTranslations("General");
+  const locale = useLocale();
+  const dateLocale = dateFnsLocales[locale as keyof typeof dateFnsLocales] || vi;
 
   const [name, setName] = useState(user.name);
   const [handle, setHandle] = useState(user.handle || "");
@@ -39,7 +55,7 @@ export const CustomizationView = () => {
 
   const updateChannel = trpc.users.updateChannel.useMutation({
     onSuccess: () => {
-      toast.success("Đã cập nhật kênh!");
+      toast.success(t("updateChannelSuccess"));
       utils.users.getCurrent.invalidate();
     },
     onError: (error) => {
@@ -67,25 +83,25 @@ export const CustomizationView = () => {
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Tùy chỉnh kênh</h1>
+          <h1 className="text-2xl font-bold">{t("customization")}</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" asChild className="font-bold text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30">
             <Link href={`/users/${user.id}`} target="_blank">
-              Xem kênh
+              {t("viewChannel")}
             </Link>
           </Button>
           <Button variant="ghost" disabled={!hasChanges} onClick={() => {
             setName(user.name);
             setHandle(user.handle || "");
             setBio(user.bio || "");
-          }}>Hủy</Button>
+          }}>{t("cancel")}</Button>
           <Button 
             disabled={!hasChanges || updateChannel.isPending} 
             onClick={handleSave}
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md px-6"
           >
-            Xuất bản
+            {t("publish")}
           </Button>
         </div>
       </div>
@@ -96,27 +112,27 @@ export const CustomizationView = () => {
             value="profile" 
             className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 pb-3 font-bold text-sm"
           >
-            Hồ sơ
+            {t("profile")}
           </TabsTrigger>
           <TabsTrigger 
             value="branding" 
             className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 pb-3 font-bold text-sm"
           >
-            Xây dựng thương hiệu
+            {t("branding")}
           </TabsTrigger>
           <TabsTrigger 
             value="home" 
             className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 pb-3 font-bold text-sm"
           >
-            Thẻ Trang chủ
+            {t("homeTab")}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="pt-6 space-y-8">
           {/* Section: Name */}
           <div className="space-y-2 max-w-2xl">
-            <h3 className="text-base font-bold">Tên</h3>
-            <p className="text-sm text-muted-foreground">Chọn tên kênh thể hiện cá tính và nội dung của bạn. Những thay đổi về tên và hình đại diện của bạn chỉ xuất hiện trên YouTube.</p>
+            <h3 className="text-base font-bold">{t("name")}</h3>
+            <p className="text-sm text-muted-foreground">{t("nameDescription")}</p>
             <Input 
               value={name} 
               onChange={(e) => setName(e.target.value)}
@@ -126,16 +142,16 @@ export const CustomizationView = () => {
 
           {/* Section: Handle */}
           <div className="space-y-2 max-w-2xl">
-            <h3 className="text-base font-bold">Tên người dùng</h3>
-            <p className="text-sm text-muted-foreground">Tên người dùng là một tên độc nhất bắt đầu bằng ký tự @. Bạn có thể đổi tên người dùng hai lần trong vòng 14 ngày.</p>
+            <h3 className="text-base font-bold">{t("handle")}</h3>
+            <p className="text-sm text-muted-foreground">{t("handleDescription")}</p>
             
             {isHandleBlocked ? (
               <div className="flex items-start gap-3 p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700">
                 <AlertCircleIcon className="size-5 text-muted-foreground shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium">Bạn đã đạt giới hạn đổi tên người dùng</p>
+                  <p className="text-sm font-medium">{t("handleLimitReached")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Bạn có thể đổi lại sau ngày {format(new Date(new Date(user.handlePreviousUpdatedAt!).getTime() + 14 * 24 * 60 * 60 * 1000), "d 'thg' M, yyyy", { locale: vi })}.
+                    {t("handleLimitInfo", { date: format(new Date(new Date(user.handlePreviousUpdatedAt!).getTime() + 14 * 24 * 60 * 60 * 1000), "d 'thg' M, yyyy", { locale: dateLocale }) })}
                   </p>
                 </div>
               </div>
@@ -146,7 +162,7 @@ export const CustomizationView = () => {
                   value={handle} 
                   onChange={(e) => setHandle(e.target.value)}
                   className="pl-8 bg-neutral-50 dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
-                  placeholder="ten-nguoi-dung"
+                  placeholder={t("handlePlaceholder")}
                 />
               </div>
             )}
@@ -158,26 +174,26 @@ export const CustomizationView = () => {
 
           {/* Section: Bio */}
           <div className="space-y-2 max-w-2xl">
-            <h3 className="text-base font-bold">Thông tin mô tả</h3>
-            <p className="text-sm text-muted-foreground">Giới thiệu với người xem về kênh của bạn. Nội dung mô tả sẽ xuất hiện trong phần Giới thiệu kênh.</p>
+            <h3 className="text-base font-bold">{t("description")}</h3>
+            <p className="text-sm text-muted-foreground">{t("descriptionPlaceholder")}</p>
             <Textarea 
               value={bio} 
               onChange={(e) => setBio(e.target.value)}
               className="min-h-[150px] bg-neutral-50 dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
-              placeholder="Kể cho người xem về kênh của bạn..."
+              placeholder={t("descriptionPlaceholder")}
             />
           </div>
 
           {/* Section: Links (Static placeholder for now) */}
           <div className="space-y-4 max-w-3xl">
             <div className="space-y-1">
-              <h3 className="text-base font-bold">Đường liên kết</h3>
-              <p className="text-sm text-muted-foreground">Chia sẻ đường liên kết bên ngoài với người xem.</p>
+              <h3 className="text-base font-bold">{t("links")}</h3>
+              <p className="text-sm text-muted-foreground">{t("linksDescription")}</p>
             </div>
             
             <Button variant="outline" className="rounded-full gap-2 text-blue-500 font-bold border-none hover:bg-blue-50 dark:hover:bg-blue-950/30">
               <PlusIcon className="size-5" />
-              Thêm đường liên kết
+              {t("addLink")}
             </Button>
           </div>
         </TabsContent>
@@ -193,11 +209,11 @@ export const CustomizationView = () => {
               />
             </div>
             <div className="space-y-3 flex-1">
-              <h3 className="text-base font-bold">Ảnh</h3>
-              <p className="text-sm text-muted-foreground">Ảnh hồ sơ sẽ xuất hiện cùng với kênh của bạn trên YouTube tại những vị trí như bên cạnh bình luận và video của bạn.</p>
+              <h3 className="text-base font-bold">{t("picture")}</h3>
+              <p className="text-sm text-muted-foreground">{t("pictureDescription")}</p>
               <div className="flex gap-4 pt-2">
-                <Button variant="ghost" className="text-blue-500 font-bold hover:bg-blue-50 dark:hover:bg-blue-950/30">Thay đổi</Button>
-                <Button variant="ghost" className="text-blue-500 font-bold hover:bg-blue-50 dark:hover:bg-blue-950/30">Xóa</Button>
+                <Button variant="ghost" className="text-blue-500 font-bold hover:bg-blue-50 dark:hover:bg-blue-950/30">{t("change")}</Button>
+                <Button variant="ghost" className="text-blue-500 font-bold hover:bg-blue-50 dark:hover:bg-blue-950/30">{t("remove")}</Button>
               </div>
             </div>
           </div>
@@ -214,18 +230,18 @@ export const CustomizationView = () => {
               )}
             </div>
             <div className="space-y-3 flex-1">
-              <h3 className="text-base font-bold">Hình ảnh biểu ngữ</h3>
-              <p className="text-sm text-muted-foreground">Hình ảnh này sẽ xuất hiện ở phần đầu kênh của bạn. Để hình ảnh đạt chất lượng cao nhất trên mọi thiết bị, hãy dùng ảnh có độ phân giải ít nhất 2048 x 1152 pixel.</p>
+              <h3 className="text-base font-bold">{t("banner")}</h3>
+              <p className="text-sm text-muted-foreground">{t("bannerDescription")}</p>
               <div className="flex gap-4 pt-2">
                 <Button 
                   variant="ghost" 
                   className="text-blue-500 font-bold hover:bg-blue-50 dark:hover:bg-blue-950/30"
                   onClick={() => setIsBannerModalOpen(true)}
                 >
-                  Thay đổi
+                  {t("change")}
                 </Button>
                 {user.bannerUrl && (
-                  <Button variant="ghost" className="text-blue-500 font-bold hover:bg-blue-50 dark:hover:bg-blue-950/30">Xóa</Button>
+                  <Button variant="ghost" className="text-blue-500 font-bold hover:bg-blue-50 dark:hover:bg-blue-950/30">{t("remove")}</Button>
                 )}
               </div>
             </div>
@@ -238,10 +254,10 @@ export const CustomizationView = () => {
                 <Wand2Icon className="size-8 text-muted-foreground" />
              </div>
              <div className="space-y-1">
-                <p className="font-bold">Sắp xếp bố cục Trang chủ của bạn</p>
-                <p className="text-sm text-muted-foreground max-w-md">Thêm video nổi bật, danh sách phát hoặc các mục khác để giới thiệu nội dung tốt nhất của bạn.</p>
+                <p className="font-bold">{t("homeLayoutTitle")}</p>
+                <p className="text-sm text-muted-foreground max-w-md">{t("homeLayoutDescription")}</p>
              </div>
-             <Button className="rounded-full font-bold">Thêm mục</Button>
+             <Button className="rounded-full font-bold">{t("addSection")}</Button>
           </div>
         </TabsContent>
       </Tabs>

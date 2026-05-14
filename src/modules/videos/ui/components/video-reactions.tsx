@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { useClerk } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { ThumbsDownIcon, ThumbsUpIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ export const VideoReactions = ({
 }: VideoReactionsProps) => {
   const clerk = useClerk();
   const utils = trpc.useUtils();
+  const t = useTranslations("General");
 
   const like = trpc.videoReactions.like.useMutation({
     onSuccess: () => {
@@ -33,7 +35,7 @@ export const VideoReactions = ({
       utils.playlists.getLiked.invalidate();
     },
     onError: (error) => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("error"));
 
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
@@ -47,7 +49,7 @@ export const VideoReactions = ({
       utils.playlists.getLiked.invalidate();
     },
     onError: (error) => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("error"));
 
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();

@@ -2,7 +2,19 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
-import { vi } from "date-fns/locale";
+import { enUS, vi, ja, ko, zhCN, de, es, fr } from "date-fns/locale";
+import { useTranslations, useLocale } from "next-intl";
+
+const dateFnsLocales = {
+  en: enUS,
+  vi: vi,
+  ja: ja,
+  ko: ko,
+  zh: zhCN,
+  de: de,
+  es: es,
+  fr: fr,
+};
 
 import { VideoOwner } from "./video-owner";
 import { VideoReactions } from "./video-reactions";
@@ -39,6 +51,8 @@ export const VideoTopRow = ({
   loopEnabled,
   setLoopEnabledAction,
 }: VideoTopRowProps) => {
+  const t = useTranslations("Video");
+  const locale = useLocale();
   const { setVideo, minimize } = usePlayerStore();
   const [playbackRate, setPlaybackRate] = useState(1);
 
@@ -49,53 +63,53 @@ export const VideoTopRow = ({
 
   const compactViews = useMemo(
     () =>
-      Intl.NumberFormat("vi-VN", { notation: "compact" }).format(
+      Intl.NumberFormat(locale, { notation: "compact" }).format(
         video.viewCount,
       ),
-    [video.viewCount],
+    [video.viewCount, locale],
   );
 
   const expandedViews = useMemo(
-    () => Intl.NumberFormat("vi-VN").format(video.viewCount),
-    [video.viewCount],
+    () => Intl.NumberFormat(locale).format(video.viewCount),
+    [video.viewCount, locale],
   );
 
   const compactDate = useMemo(
     () =>
       formatDistanceToNowStrict(new Date(video.createdAt), {
         addSuffix: true,
-        locale: vi,
+        locale: dateFnsLocales[locale as keyof typeof dateFnsLocales] || enUS,
       }),
-    [video.createdAt],
+    [video.createdAt, locale],
   );
 
   const expandedDate = useMemo(
-    () => new Date(video.createdAt).toLocaleDateString("vi-VN"),
-    [video.createdAt],
+    () => new Date(video.createdAt).toLocaleDateString(locale),
+    [video.createdAt, locale],
   );
   const handlePiP = async () => {
     const player = playerRef.current;
     if (!player) return;
 
     const video: any = player.media || player.video || player.shadowRoot?.querySelector("video") || document.querySelector("video");
-    if (!video) return toast.error("Không tìm thấy video");
+    if (!video) return toast.error(t("error") || "Video not found");
 
     try {
-      const video: any = player.nativeEl || player.media || player.video || player.shadowRoot?.querySelector("video") || document.querySelector("video");
+      const videoEl: any = player.nativeEl || player.media || player.video || player.shadowRoot?.querySelector("video") || document.querySelector("video");
       
-      if (!video) return toast.error("Không tìm thấy trình phát");
+      if (!videoEl) return toast.error(t("error") || "Player not found");
 
       // Ép mở khóa mạnh mẽ hơn cho các dòng máy kén chọn
-      video.disablePictureInPicture = false;
-      video.removeAttribute("disablePictureInPicture");
-      video.setAttribute("picture-in-picture", "true");
+      videoEl.disablePictureInPicture = false;
+      videoEl.removeAttribute("disablePictureInPicture");
+      videoEl.setAttribute("picture-in-picture", "true");
 
-      if (video.paused) await video.play();
+      if (videoEl.paused) await videoEl.play();
 
       // Thử dùng chuẩn W3C trước
-      if (video.requestPictureInPicture) {
+      if (videoEl.requestPictureInPicture) {
         try {
-          await video.requestPictureInPicture();
+          await videoEl.requestPictureInPicture();
           return; // Thành công
         } catch (innerErr) {
           console.warn("W3C PiP failed, trying fallbacks...", innerErr);
@@ -103,10 +117,10 @@ export const VideoTopRow = ({
       }
 
       // Thử dùng chuẩn Webkit (Safari/iPhone)
-      if (video.webkitSetPresentationMode) {
-        video.webkitSetPresentationMode("picture-in-picture");
+      if (videoEl.webkitSetPresentationMode) {
+        videoEl.webkitSetPresentationMode("picture-in-picture");
       } else {
-        toast.error("Trình duyệt này (hoặc ứng dụng bạn đang dùng) đã khóa tính năng Popup.");
+        toast.error("This browser has blocked Popups.");
       }
     } catch (err: any) {
       console.error("PiP Error:", err);
@@ -118,7 +132,7 @@ export const VideoTopRow = ({
         thumbnailUrl: video.thumbnailUrl || undefined,
       });
       minimize();
-      toast.info("Đã chuyển sang Mini-player do trình duyệt chặn Popup");
+      toast.info("Switched to Mini-player due to browser Popup blocking");
     }
   };
 
@@ -142,7 +156,7 @@ export const VideoTopRow = ({
             variant="secondary" 
             className="rounded-full px-4 font-bold text-xs flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 border-none h-9"
             onClick={handlePiP}
-            title="Xem dạng popup"
+            title="Popup"
           >
             <ExternalLinkIcon className="size-4" />
             <span className="hidden md:inline">Popup</span>

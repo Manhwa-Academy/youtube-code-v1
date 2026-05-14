@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface PostFiltersProps {
   onFilterChange: (filters: {
@@ -28,16 +29,18 @@ interface PostFiltersProps {
   }) => void;
 }
 
-const POST_TYPES = [
-  { id: "image", label: "Hình ảnh" },
-  { id: "playlist", label: "Danh sách phát" },
-  { id: "poll", label: "Cuộc thăm dò ý kiến" },
-  { id: "quiz", label: "Câu hỏi" },
-  { id: "text", label: "Văn bản" },
-  { id: "video", label: "Video" },
-];
-
 export const PostFilters = ({ onFilterChange }: PostFiltersProps) => {
+  const t = useTranslations("Studio");
+
+  const POST_TYPES = [
+    { id: "image", label: t("typeImage") },
+    { id: "playlist", label: t("typePlaylist") },
+    { id: "poll", label: t("typePoll") },
+    { id: "quiz", label: t("typeQuiz") },
+    { id: "text", label: t("typeText") },
+    { id: "video", label: t("typeVideo") },
+  ];
+
   const [activeFilters, setActiveFilters] = useState<{
     types?: string[];
     visibility?: "public" | "private";
@@ -83,7 +86,7 @@ export const PostFilters = ({ onFilterChange }: PostFiltersProps) => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-x-2">
               <ListFilterIcon className="size-4" />
-              Lọc
+              {t("filter")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
@@ -91,10 +94,10 @@ export const PostFilters = ({ onFilterChange }: PostFiltersProps) => {
               setCurrentFilterType("types");
               setTempTypes(activeFilters.types || []);
             }}>
-              Loại
+              {t("filterType")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setCurrentFilterType("visibility")}>
-              Chế độ hiển thị
+              {t("filterVisibility")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -102,7 +105,7 @@ export const PostFilters = ({ onFilterChange }: PostFiltersProps) => {
         <div className="flex items-center gap-x-2 flex-wrap">
           {activeFilters.types && activeFilters.types.length > 0 && (
             <Badge variant="secondary" className="gap-x-1 px-2 py-1">
-              Loại: {activeFilters.types.map(t => POST_TYPES.find(pt => pt.id === t)?.label).join(", ")}
+              {t("filterType")}: {activeFilters.types.map(t_id => POST_TYPES.find(pt => pt.id === t_id)?.label).join(", ")}
               <XIcon
                 className="size-3 cursor-pointer"
                 onClick={() => removeFilter("types")}
@@ -111,8 +114,8 @@ export const PostFilters = ({ onFilterChange }: PostFiltersProps) => {
           )}
           {activeFilters.visibility && (
             <Badge variant="secondary" className="gap-x-1 px-2 py-1">
-              Chế độ hiển thị:{" "}
-              {activeFilters.visibility === "public" ? "Công khai" : "Riêng tư"}
+              {t("filterVisibility")}:{" "}
+              {activeFilters.visibility === "public" ? t("public") : t("private")}
               <XIcon
                 className="size-3 cursor-pointer"
                 onClick={() => removeFilter("visibility")}
@@ -126,7 +129,7 @@ export const PostFilters = ({ onFilterChange }: PostFiltersProps) => {
               onClick={clearAll}
               className="text-xs text-muted-foreground"
             >
-              Xóa tất cả
+              {t("filterClearAll")}
             </Button>
           )}
         </div>
@@ -136,7 +139,7 @@ export const PostFilters = ({ onFilterChange }: PostFiltersProps) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-neutral-900 border border-neutral-800 rounded-lg w-[300px] shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-neutral-800">
-              <span className="font-bold">Loại</span>
+              <span className="font-bold">{t("filterType")}</span>
               <XIcon 
                 className="size-5 cursor-pointer text-neutral-400 hover:text-white" 
                 onClick={() => setCurrentFilterType(null)} 
@@ -169,7 +172,7 @@ export const PostFilters = ({ onFilterChange }: PostFiltersProps) => {
                 className="rounded-full px-6"
                 disabled={tempTypes.length === 0}
               >
-                Áp dụng
+                {t("filterApply")}
               </Button>
             </div>
           </div>
@@ -178,7 +181,7 @@ export const PostFilters = ({ onFilterChange }: PostFiltersProps) => {
 
       {currentFilterType === "visibility" && (
         <div className="flex items-center gap-x-2 bg-neutral-100/50 dark:bg-neutral-800/50 p-2 rounded-lg w-fit">
-          <span className="text-sm font-medium">Chế độ hiển thị:</span>
+          <span className="text-sm font-medium">{t("filterVisibility")}:</span>
           <Select
             onValueChange={(val: string) => {
               const updatedFilters = {
@@ -191,11 +194,11 @@ export const PostFilters = ({ onFilterChange }: PostFiltersProps) => {
             }}
           >
             <SelectTrigger className="w-[180px] h-9">
-              <SelectValue placeholder="Chọn quyền riêng tư" />
+              <SelectValue placeholder={t("filterSelectVisibility")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="public">Công khai</SelectItem>
-              <SelectItem value="private">Riêng tư</SelectItem>
+              <SelectItem value="public">{t("public")}</SelectItem>
+              <SelectItem value="private">{t("private")}</SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -203,7 +206,7 @@ export const PostFilters = ({ onFilterChange }: PostFiltersProps) => {
             size="sm"
             onClick={() => setCurrentFilterType(null)}
           >
-            Hủy
+            {t("cancel")}
           </Button>
         </div>
       )}

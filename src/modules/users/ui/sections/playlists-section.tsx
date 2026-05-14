@@ -6,6 +6,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { trpc } from "@/trpc/client";
 import { DEFAULT_LIMIT } from "@/constants";
 import { InfiniteScroll } from "@/components/infinite-scroll";
+import { useTranslations } from "next-intl";
 
 import {
   PlaylistGridCard,
@@ -17,9 +18,10 @@ interface PlaylistsSectionProps {
 }
 
 export const PlaylistsSection = (props: PlaylistsSectionProps) => {
+  const t = useTranslations("Playlists");
   return (
     <Suspense fallback={<PlaylistsSectionSkeleton />}>
-      <ErrorBoundary fallback={<p>Lỗi khi tải danh sách phát</p>}>
+      <ErrorBoundary fallback={<p>{t("errorLoading")}</p>}>
         <PlaylistsSectionSuspense {...props} />
       </ErrorBoundary>
     </Suspense>
@@ -37,6 +39,7 @@ const PlaylistsSectionSkeleton = () => {
 };
 
 const PlaylistsSectionSuspense = ({ userId }: PlaylistsSectionProps) => {
+  const t = useTranslations("Playlists");
   const [playlists, query] = trpc.playlists.getManyByUser.useSuspenseInfiniteQuery(
     { userId, limit: DEFAULT_LIMIT },
     {
@@ -47,7 +50,7 @@ const PlaylistsSectionSuspense = ({ userId }: PlaylistsSectionProps) => {
   const items = playlists.pages.flatMap((page) => page.items);
 
   if (items.length === 0) {
-    return <p className="text-muted-foreground">Kênh này chưa có danh sách phát.</p>;
+    return <p className="text-muted-foreground">{t("noPlaylists")}</p>;
   }
 
   return (

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FilterIcon, ListFilterIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +29,8 @@ interface PlaylistFiltersProps {
 }
 
 export const PlaylistFilters = ({ onFilterChange }: PlaylistFiltersProps) => {
+  const tStudio = useTranslations("Studio");
+  const tPlaylists = useTranslations("Playlists");
   const [activeFilters, setActiveFilters] = useState<{
     name?: string;
     visibility?: "public" | "private";
@@ -74,15 +77,15 @@ export const PlaylistFilters = ({ onFilterChange }: PlaylistFiltersProps) => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-x-2">
               <ListFilterIcon className="size-4" />
-              Lọc
+              {tStudio("filterTitle")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
             <DropdownMenuItem onClick={() => setCurrentFilterType("name")}>
-              Tiêu đề
+              {tStudio("filterName")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setCurrentFilterType("visibility")}>
-              Chế độ hiển thị
+              {tStudio("filterVisibility")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -90,7 +93,7 @@ export const PlaylistFilters = ({ onFilterChange }: PlaylistFiltersProps) => {
         <div className="flex items-center gap-x-2 flex-wrap">
           {activeFilters.name && (
             <Badge variant="secondary" className="gap-x-1 px-2 py-1">
-              Tiêu đề: {activeFilters.name}
+              {tStudio("filterName")}: {activeFilters.name}
               <XIcon
                 className="size-3 cursor-pointer"
                 onClick={() => removeFilter("name")}
@@ -99,8 +102,8 @@ export const PlaylistFilters = ({ onFilterChange }: PlaylistFiltersProps) => {
           )}
           {activeFilters.visibility && (
             <Badge variant="secondary" className="gap-x-1 px-2 py-1">
-              Chế độ hiển thị:{" "}
-              {activeFilters.visibility === "public" ? "Công khai" : "Riêng tư"}
+              {tStudio("filterVisibility")}:{" "}
+              {activeFilters.visibility === "public" ? tPlaylists("public") : tPlaylists("private")}
               <XIcon
                 className="size-3 cursor-pointer"
                 onClick={() => removeFilter("visibility")}
@@ -114,7 +117,7 @@ export const PlaylistFilters = ({ onFilterChange }: PlaylistFiltersProps) => {
               onClick={clearAll}
               className="text-xs text-muted-foreground"
             >
-              Xóa tất cả
+              {tStudio("filterClearAll")}
             </Button>
           )}
         </div>
@@ -123,7 +126,7 @@ export const PlaylistFilters = ({ onFilterChange }: PlaylistFiltersProps) => {
       {currentFilterType && (
         <div className="flex items-center gap-x-2 bg-neutral-100/50 dark:bg-neutral-800/50 p-2 rounded-lg w-fit">
           <span className="text-sm font-medium">
-            {currentFilterType === "name" ? "Tiêu đề" : "Chế độ hiển thị"}:
+            {currentFilterType === "name" ? tStudio("filterName") : tStudio("filterVisibility")}:
           </span>
           {currentFilterType === "visibility" ? (
             <Select
@@ -141,17 +144,17 @@ export const PlaylistFilters = ({ onFilterChange }: PlaylistFiltersProps) => {
               }}
             >
               <SelectTrigger className="w-[180px] h-9">
-                <SelectValue placeholder="Chọn quyền riêng tư" />
+                <SelectValue placeholder={tStudio("filterSelectVisibility")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="public">Công khai</SelectItem>
-                <SelectItem value="private">Riêng tư</SelectItem>
+                <SelectItem value="public">{tPlaylists("public")}</SelectItem>
+                <SelectItem value="private">{tPlaylists("private")}</SelectItem>
               </SelectContent>
             </Select>
           ) : (
             <div className="flex items-center gap-x-2">
               <Input
-                placeholder="Nhập tiêu đề..."
+                placeholder={tStudio("filterNamePlaceholder")}
                 value={inputValue}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
                 className="h-9 w-[250px]"
@@ -162,14 +165,14 @@ export const PlaylistFilters = ({ onFilterChange }: PlaylistFiltersProps) => {
                 autoFocus
               />
               <Button size="sm" onClick={handleApplyFilter}>
-                Áp dụng
+                {tStudio("filterApply")}
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setCurrentFilterType(null)}
               >
-                Hủy
+                {tStudio("cancel")}
               </Button>
             </div>
           )}

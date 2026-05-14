@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FlameIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/trpc/client";
 import { DEFAULT_LIMIT } from "@/constants";
@@ -42,6 +43,7 @@ const ShortsVideosSectionSkeleton = () => {
 };
 
 const ShortsVideosSectionSuspense = () => {
+  const t = useTranslations("Studio");
   const [videos, query] = trpc.videos.getManyShorts.useSuspenseInfiniteQuery(
     { limit: DEFAULT_LIMIT },
     { getNextPageParam: (lastPage) => lastPage.nextCursor }
@@ -53,8 +55,8 @@ const ShortsVideosSectionSuspense = () => {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
         <FlameIcon className="size-12 mb-3 opacity-40" />
-        <p className="text-lg font-medium">Chưa có Shorts nào</p>
-        <p className="text-sm">Hãy upload video dưới 1 phút để tạo Shorts!</p>
+        <p className="text-lg font-medium">{t("noShortsDataTitle")}</p>
+        <p className="text-sm">{t("noShortsDataSub")}</p>
       </div>
     );
   }

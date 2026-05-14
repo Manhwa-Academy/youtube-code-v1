@@ -1,12 +1,24 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/trpc/client";
 import { EyeIcon, ThumbsUpIcon, MessageCircleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, formatDistanceToNow } from "date-fns";
-import { vi } from "date-fns/locale";
+import { enUS, vi, ja, ko, zhCN, de, es, fr } from "date-fns/locale";
 import Link from "next/link";
+
+const dateFnsLocales = {
+  en: enUS,
+  vi: vi,
+  ja: ja,
+  ko: ko,
+  zh: zhCN,
+  de: de,
+  es: es,
+  fr: fr,
+};
 
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -75,12 +87,16 @@ export const StudioDashboardSkeleton = () => {
 };
 
 export const StudioDashboard = () => {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
+  const dateLocale = dateFnsLocales[locale as keyof typeof dateFnsLocales] || vi;
+
   const { data: videoData, isLoading: isVideosLoading } = trpc.studio.getMany.useQuery({ limit: 10 });
   const { data: statsData, isLoading: isStatsLoading } = trpc.studio.getStats.useQuery();
 
   if (isVideosLoading || isStatsLoading) return <StudioDashboardSkeleton />;
   if (!videoData || !videoData.items)
-    return <div>Không có dữ liệu</div>;
+    return <div>{t("noData")}</div>;
 
   const latestVideo = videoData.items[0];
   const totalViews = videoData.items.reduce((acc, v) => acc + (v.viewsCount || 0), 0);
@@ -95,7 +111,7 @@ export const StudioDashboard = () => {
         {latestVideo && (
           <Card className="shadow-md rounded-lg overflow-hidden border-neutral-200 dark:border-neutral-800">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-bold">Hiệu suất của video mới nhất</CardTitle>
+              <CardTitle className="text-base font-bold">{t("latestPerformance")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="relative aspect-video rounded-md overflow-hidden bg-neutral-100 dark:bg-neutral-800 group cursor-pointer">
@@ -106,7 +122,7 @@ export const StudioDashboard = () => {
                 />
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                    <Link href={`/studio/videos/${latestVideo.id}`} className="px-4 py-2 bg-white text-black text-sm font-bold rounded-full shadow-lg">
-                      CHI TIẾT VIDEO
+                      {t("videoDetails")}
                    </Link>
                 </div>
               </div>
@@ -114,25 +130,25 @@ export const StudioDashboard = () => {
               <div className="space-y-1">
                 <p className="text-sm font-semibold line-clamp-2">{latestVideo.title}</p>
                 <p className="text-[11px] text-muted-foreground italic">
-                  Đã đăng {formatDistanceToNow(new Date(latestVideo.createdAt), { addSuffix: true, locale: vi })}
+                  {formatDistanceToNow(new Date(latestVideo.createdAt), { addSuffix: true, locale: dateLocale })}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-2">
                 <div className="space-y-0.5 border-r border-neutral-100 dark:border-neutral-800 pr-2">
-                  <p className="text-xs text-muted-foreground">Số lượt xem</p>
+                  <p className="text-xs text-muted-foreground">{t("views")}</p>
                   <p className="text-lg font-bold">{latestVideo.viewsCount || 0}</p>
                 </div>
                 <div className="space-y-0.5">
-                  <p className="text-xs text-muted-foreground">Tỷ lệ xem trung bình</p>
+                  <p className="text-xs text-muted-foreground">{t("avgViewPercent")}</p>
                   <p className="text-lg font-bold">{averageViewPercent}%</p>
                 </div>
                 <div className="space-y-0.5 border-r border-neutral-100 dark:border-neutral-800 pr-2">
-                  <p className="text-xs text-muted-foreground">Số lượt thích</p>
+                  <p className="text-xs text-muted-foreground">{t("likes")}</p>
                   <p className="text-lg font-bold">{latestVideo.likeCount || 0}</p>
                 </div>
                 <div className="space-y-0.5">
-                  <p className="text-xs text-muted-foreground">Bình luận</p>
+                  <p className="text-xs text-muted-foreground">{t("comments")}</p>
                   <p className="text-lg font-bold">{latestVideo.commentCount || 0}</p>
                 </div>
               </div>
@@ -143,7 +159,7 @@ export const StudioDashboard = () => {
         {/* Card Bài đăng mới nhất */}
         <Card className="shadow-md rounded-lg overflow-hidden border-neutral-200 dark:border-neutral-800">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold">Bài đăng mới nhất</CardTitle>
+            <CardTitle className="text-base font-bold">{t("latestPost")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {latestPost ? (
@@ -153,13 +169,13 @@ export const StudioDashboard = () => {
                   <div className="flex flex-col">
                     <span className="text-xs font-semibold">{statsData?.userName}</span>
                     <span className="text-[10px] text-muted-foreground">
-                      {format(new Date(latestPost.createdAt), "d 'thg' M, yyyy", { locale: vi })}
+                      {format(new Date(latestPost.createdAt), "d 'thg' M, yyyy", { locale: dateLocale })}
                     </span>
                   </div>
                 </div>
 
                 <div className="text-sm line-clamp-3">
-                  {latestPost.content || "Không có nội dung"}
+                  {latestPost.content || t("noData")}
                 </div>
 
                 {latestPost.images?.[0] && (
@@ -186,32 +202,32 @@ export const StudioDashboard = () => {
 
                 <div className="grid grid-cols-3 gap-2 pt-2 text-center">
                   <div className="space-y-0.5">
-                    <p className="text-[10px] text-muted-foreground uppercase">Số phiếu</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">{t("votes")}</p>
                     <p className="text-base font-bold">
                        {latestPost.poll?.options.reduce((acc: number, o: any) => acc + (o.voteCount || 0), 0) || 0}
                     </p>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-[10px] text-muted-foreground uppercase">Bình luận</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">{t("comments")}</p>
                     <p className="text-base font-bold">{latestPost.commentCount || 0}</p>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-[10px] text-muted-foreground uppercase">Lượt thích</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">{t("likes")}</p>
                     <p className="text-base font-bold">{latestPost.likeCount || 0}</p>
                   </div>
                 </div>
 
                 <Button variant="outline" className="w-full text-xs font-bold h-9 rounded-full mt-2" asChild>
                    <Link href="/studio?tab=posts">
-                      CHUYỂN ĐẾN THẺ BÀI ĐĂNG
+                      {t("goToPosts")}
                    </Link>
                 </Button>
               </>
             ) : (
               <div className="text-center py-10">
-                <p className="text-sm text-muted-foreground">Bạn chưa có bài đăng nào</p>
+                <p className="text-sm text-muted-foreground">{t("noPosts")}</p>
                 <Button variant="link" className="text-xs font-bold" asChild>
-                   <Link href="/studio?tab=posts">Tạo bài đăng đầu tiên</Link>
+                   <Link href="/studio?tab=posts">{t("createFirstPost")}</Link>
                 </Button>
               </div>
             )}
@@ -224,28 +240,28 @@ export const StudioDashboard = () => {
         {/* Card tổng quan kênh */}
         <Card className="shadow-md rounded-lg border-neutral-200 dark:border-neutral-800">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold">Số liệu phân tích về kênh</CardTitle>
+            <CardTitle className="text-base font-bold">{t("channelAnalytics")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-xs text-muted-foreground">Số người đăng ký hiện tại</p>
+              <p className="text-xs text-muted-foreground">{t("currentSubscribers")}</p>
               <p className="text-4xl font-extrabold">{statsData?.totalSubscribers || 0}</p>
             </div>
 
             <div className="pt-2 pb-2 border-y border-neutral-100 dark:border-neutral-800">
-               <p className="text-xs font-bold mb-3 uppercase text-neutral-500">Tóm tắt (28 ngày qua)</p>
+               <p className="text-xs font-bold mb-3 uppercase text-neutral-500">{t("summary28Days")}</p>
                <div className="flex justify-between items-center text-sm py-1">
-                  <span>Số lượt xem</span>
+                  <span>{t("views")}</span>
                   <span className="font-bold">{totalViews}</span>
                </div>
                <div className="flex justify-between items-center text-sm py-1">
-                  <span>Thời gian xem (giờ)</span>
+                  <span>{t("watchTime")}</span>
                   <span className="font-bold">{(totalViews / 60).toFixed(1)}</span>
                </div>
             </div>
 
             <div>
-               <p className="text-xs font-bold mb-3 uppercase text-neutral-500">Nội dung hàng đầu (48 giờ qua)</p>
+               <p className="text-xs font-bold mb-3 uppercase text-neutral-500">{t("topContent48Hours")}</p>
                {latestVideo && (
                  <div className="flex items-center justify-between text-sm group cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800 p-1 rounded transition-colors">
                     <span className="truncate flex-1">{latestVideo.title}</span>
@@ -255,7 +271,7 @@ export const StudioDashboard = () => {
             </div>
 
             <Button variant="secondary" className="w-full text-xs font-bold h-9 rounded-full" asChild>
-              <Link href="/studio?tab=analytics">CHUYỂN ĐẾN SỐ LIỆU PHÂN TÍCH</Link>
+              <Link href="/studio?tab=analytics">{t("goToAnalytics")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -263,9 +279,9 @@ export const StudioDashboard = () => {
         {/* Card Bình luận */}
         <Card className="shadow-md rounded-lg border-neutral-200 dark:border-neutral-800 flex-1">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
-            <CardTitle className="text-base font-bold">Bình luận mới nhất</CardTitle>
+            <CardTitle className="text-base font-bold">{t("latestComments")}</CardTitle>
             <Button variant="link" size="sm" className="text-blue-500 font-bold p-0" asChild>
-               <Link href="/studio?tab=comments">Xem tất cả</Link>
+               <Link href="/studio?tab=comments">{t("seeAll")}</Link>
             </Button>
           </CardHeader>
           <CardContent className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
@@ -276,7 +292,7 @@ export const StudioDashboard = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-x-1.5 mb-0.5">
                       <span className="text-xs font-bold truncate">{c.userName}</span>
-                      <span className="text-[10px] text-muted-foreground">• {c.createdAt ? formatDistanceToNow(new Date(c.createdAt), { addSuffix: true, locale: vi }) : "Vừa xong"}</span>
+                      <span className="text-[10px] text-muted-foreground">• {c.createdAt ? formatDistanceToNow(new Date(c.createdAt), { addSuffix: true, locale: dateLocale }) : t("justNow")}</span>
                     </div>
                     <p className="text-sm line-clamp-2">{c.value}</p>
                   </div>
@@ -286,7 +302,7 @@ export const StudioDashboard = () => {
                 </div>
               ))
             ) : (
-              <p className="text-center text-sm text-muted-foreground py-10">Không có bình luận nào</p>
+              <p className="text-center text-sm text-muted-foreground py-10">{t("noComments")}</p>
             )}
           </CardContent>
         </Card>
@@ -294,8 +310,8 @@ export const StudioDashboard = () => {
         {/* Card Người đăng ký gần đây */}
         <Card className="shadow-md rounded-lg border-neutral-200 dark:border-neutral-800">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
-            <CardTitle className="text-base font-bold">Người đăng ký gần đây</CardTitle>
-            <Button variant="link" size="sm" className="text-blue-500 font-bold p-0">Xem tất cả</Button>
+            <CardTitle className="text-base font-bold">{t("recentSubscribers")}</CardTitle>
+            <Button variant="link" size="sm" className="text-blue-500 font-bold p-0">{t("seeAll")}</Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -304,7 +320,7 @@ export const StudioDashboard = () => {
                     <img src={s.avatarUrl} alt={s.name} className="size-10 rounded-full border dark:border-neutral-700" />
                     <div className="w-full">
                        <p className="text-[11px] font-bold truncate">{s.name}</p>
-                       <p className="text-[9px] text-muted-foreground">{s.subscriberCount || 0} người đăng ký</p>
+                       <p className="text-[9px] text-muted-foreground">{t("subscribers", { count: s.subscriberCount || 0 })}</p>
                     </div>
                  </div>
                ))}

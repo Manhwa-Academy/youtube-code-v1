@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { DownloadIcon, Trash2Icon, PlayIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { downloadManager, DownloadedVideo } from "@/lib/download-manager";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ export default function DownloadPage() {
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<DownloadedVideo | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const t = useTranslations("Offline");
 
   useEffect(() => {
     loadVideos();
@@ -31,7 +33,7 @@ export default function DownloadPage() {
       setVideos(data.sort((a, b) => b.downloadedAt - a.downloadedAt));
     } catch (error) {
       console.error("LOAD DOWNLOADS ERROR:", error);
-      toast.error("Không thể tải danh sách video đã tải.");
+      toast.error(t("errorLoadingDownloadedVideos"));
     } finally {
       setLoading(false);
     }
@@ -39,14 +41,14 @@ export default function DownloadPage() {
 
   const handleDelete = async (e: React.MouseEvent, video: DownloadedVideo) => {
     e.stopPropagation();
-    if (!confirm("Bạn có chắc chắn muốn xóa video này khỏi danh sách tải xuống?")) return;
+    if (!confirm(t("confirmDeleteDownloadedVideo"))) return;
 
     try {
       await downloadManager.removeVideo(video.id, video.playbackId);
       setVideos(prev => prev.filter(v => v.id !== video.id));
-      toast.success("Đã xóa video.");
+      toast.success(t("videoDeleted"));
     } catch (error) {
-      toast.error("Lỗi khi xóa video.");
+      toast.error(t("errorDeletingVideo"));
     }
   };
 
@@ -57,10 +59,10 @@ export default function DownloadPage() {
         setVideoUrl(url);
         setSelectedVideo(video);
       } else {
-        toast.error("Không tìm thấy dữ liệu video cục bộ.");
+        toast.error(t("noLocalVideoData"));
       }
     } catch (error) {
-      toast.error("Không thể phát video.");
+      toast.error(t("cannotPlayVideo"));
     }
   };
 
@@ -84,9 +86,9 @@ export default function DownloadPage() {
           <DownloadIcon className="w-6 h-6 text-blue-600" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Nội dung tải xuống</h1>
+          <h1 className="text-2xl font-bold">{t("downloadedContent")}</h1>
           <p className="text-sm text-muted-foreground">
-            {videos.length} video có sẵn để xem ngoại tuyến
+            {t("videosAvailableOffline", { count: videos.length })}
           </p>
         </div>
       </div>
@@ -94,9 +96,9 @@ export default function DownloadPage() {
       {videos.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <DownloadIcon className="w-16 h-16 text-muted-foreground/30 mb-4" />
-          <h2 className="text-xl font-medium">Chưa có nội dung tải xuống</h2>
+          <h2 className="text-xl font-medium">{t("noDownloadedContent")}</h2>
           <p className="text-muted-foreground mt-2">
-            Video bạn tải xuống để xem ngoại tuyến sẽ xuất hiện ở đây.
+            {t("downloadVideosToWatchOffline")}
           </p>
         </div>
       ) : (

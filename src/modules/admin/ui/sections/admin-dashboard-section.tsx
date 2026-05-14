@@ -14,17 +14,20 @@ import {
 import { trpc } from "@/trpc/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from "next-intl";
 
 export const AdminDashboardSection = () => {
+  const t = useTranslations("Admin");
+
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Tổng quan hệ thống</h1>
-       <p className="text-muted-foreground">Phân tích nền tảng và tình trạng hệ thống.</p>
+        <h1 className="text-2xl font-bold">{t("systemOverview")}</h1>
+       <p className="text-muted-foreground">{t("platformAnalysis")}</p>
       </div>
 
       <Suspense fallback={<AdminStatsSkeleton />}>
-        <ErrorBoundary fallback={<p>Lỗi khi tải thông số hệ thống</p>}>
+        <ErrorBoundary fallback={<p>{t("errorLoadingStats")}</p>}>
           <AdminStatsSuspense />
         </ErrorBoundary>
       </Suspense>
@@ -43,60 +46,61 @@ const AdminStatsSkeleton = () => {
 };
 
 const AdminStatsSuspense = () => {
+  const t = useTranslations("Admin");
   const [stats] = trpc.admin.getStats.useSuspenseQuery();
 
   const formatWatchTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
-    return `${hours.toLocaleString()} giờ`;
+    return t("hours", { count: hours });
   };
 
-  const statCards = [
+   const statCards = [
     {
-      title: "Người dùng",
+      title: t("users"),
       value: stats.totalUsers.toLocaleString(),
-      description: "Tổng số tài khoản đã đăng ký",
+      description: t("totalRegisteredAccounts"),
       icon: UsersIcon,
       color: "text-blue-600",
     },
     {
-      title: "Video",
+      title: t("videos"),
       value: stats.totalVideos.toLocaleString(),
-      description: "Tổng số video đã tải lên",
+      description: t("totalUploadedVideos"),
       icon: VideoIcon,
       color: "text-red-600",
     },
     {
-      title: "Bình luận",
+      title: t("comments"),
       value: stats.totalComments.toLocaleString(),
-      description: "Tổng số thảo luận",
+      description: t("totalDiscussions"),
       icon: MessageSquareIcon,
       color: "text-purple-600",
     },
     {
-      title: "Bài đăng",
+      title: t("posts"),
       value: stats.totalPosts.toLocaleString(),
-      description: "Tổng số bài đăng cộng đồng",
+      description: t("totalCommunityPosts"),
       icon: FileTextIcon,
       color: "text-orange-600",
     },
     {
-      title: "Thời gian xem",
+      title: t("watchTime"),
       value: formatWatchTime(Number(stats.totalWatchTime)),
-      description: "Tổng thời gian xem video",
+      description: t("totalVideoWatchTime"),
       icon: ClockIcon,
       color: "text-green-600",
     },
     {
-      title: "Hoạt động (DAU)",
+      title: t("activeDAU"),
       value: stats.dau.toLocaleString(),
-      description: "Người dùng hoạt động trong 24h",
+      description: t("activeUsers24h"),
       icon: ActivityIcon,
       color: "text-cyan-600",
     },
     {
-      title: "Hoạt động (MAU)",
+      title: t("activeMAU"),
       value: stats.mau.toLocaleString(),
-      description: "Người dùng hoạt động trong 30 ngày",
+      description: t("activeUsers30d"),
       icon: ActivityIcon,
       color: "text-indigo-600",
     },

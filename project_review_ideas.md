@@ -19,11 +19,6 @@
 - Lưu lại VOD sau khi stream kết thúc
 - Scheduled live streams
 
-#### 13. Multi-Language Support (i18n)
-- Hiện tại UI hoàn toàn bằng Tiếng Việt
-- Thêm hỗ trợ English, Japanese,...
-- Dùng `next-intl` hoặc `react-i18next`
-
 ---
 
 ### 🟢 Ưu tiên thấp — Ý tưởng dài hạn

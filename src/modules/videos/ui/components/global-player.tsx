@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { XIcon, Maximize2Icon, MinusIcon, ChevronRightIcon, ListVideoIcon, Minimize2Icon, ExternalLinkIcon } from "lucide-react";
 import MuxPlayer from "@mux/mux-player-react";
 import { usePlayerStore } from "@/modules/videos/store/use-player-store";
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const GlobalPlayer = () => {
+  const t = useTranslations("Video");
   const pathname = usePathname();
   const router = useRouter();
   const { 
@@ -77,7 +79,7 @@ export const GlobalPlayer = () => {
           size="icon" 
           className="size-8 text-white hover:bg-white/20"
           onClick={() => isMinimized ? maximize() : minimize()}
-          title={isMinimized ? "Mở rộng" : "Thu nhỏ"}
+          title={isMinimized ? t("expand") : t("minimize")}
         >
           {isMinimized ? <Maximize2Icon className="size-4" /> : <Minimize2Icon className="size-4" />}
         </Button>
@@ -89,7 +91,7 @@ export const GlobalPlayer = () => {
             router.push(`/videos/${activeVideo.id}`);
             maximize();
           }}
-          title="Xem trang video"
+          title={t("goVideoPage")}
         >
           <ExternalLinkIcon className="size-4" />
         </Button>
@@ -164,7 +166,7 @@ export const GlobalPlayer = () => {
         {!isMinimized && showQueue && (
           <div className="w-[300px] bg-background border-l border-border flex flex-col">
             <div className="p-3 border-b border-border flex items-center justify-between">
-              <span className="font-semibold text-sm">Danh sách chờ ({queue.length})</span>
+              <span className="font-semibold text-sm">{t("queue", { count: queue.length })}</span>
               <Button variant="ghost" size="icon" className="size-6" onClick={() => setShowQueue(false)}>
                 <XIcon className="size-3" />
               </Button>
@@ -188,7 +190,7 @@ export const GlobalPlayer = () => {
                   </div>
                 ))}
                 {queue.length === 0 && (
-                  <p className="text-xs text-muted-foreground text-center py-10">Hàng chờ trống</p>
+                  <p className="text-xs text-muted-foreground text-center py-10">{t("emptyQueue")}</p>
                 )}
               </div>
             </ScrollArea>
@@ -201,7 +203,7 @@ export const GlobalPlayer = () => {
         <div className="p-3 bg-background flex items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold truncate">{activeVideo.title}</p>
-            <p className="text-xs text-muted-foreground truncate">Đang phát</p>
+            <p className="text-xs text-muted-foreground truncate">{t("playing")}</p>
           </div>
           <Button 
             variant="ghost" 

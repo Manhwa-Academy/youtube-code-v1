@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import { 
   BarChart2Icon, 
@@ -60,24 +61,25 @@ export const PostsSection = ({ limit }: PostsSectionProps) => {
 };
 
 const PostsSectionSkeleton = () => {
+  const t = useTranslations("Studio");
   return (
     <div className="border-y">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="pl-6 w-[400px]">Bài đăng</TableHead>
-            <TableHead>Loại</TableHead>
-            <TableHead>Chế độ hiển thị</TableHead>
-            <TableHead>Hạn chế</TableHead>
+            <TableHead className="pl-6 w-[400px]">{t("post")}</TableHead>
+            <TableHead>{t("type")}</TableHead>
+            <TableHead>{t("visibility")}</TableHead>
+            <TableHead>{t("restrictions")}</TableHead>
             <TableHead>
               <div className="flex items-center gap-1">
-                Ngày
+                {t("date")}
                 <ArrowDownIcon className="size-4" />
               </div>
             </TableHead>
-            <TableHead className="text-right">Bình luận</TableHead>
-            <TableHead className="text-right">Lượt thích</TableHead>
-            <TableHead className="text-right pr-6">Phản hồi</TableHead>
+            <TableHead className="text-right">{t("comments")}</TableHead>
+            <TableHead className="text-right">{t("likes")}</TableHead>
+            <TableHead className="text-right pr-6">{t("responses")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -114,6 +116,7 @@ interface PostsSectionSuspenseProps {
 }
 
 const PostsSectionSuspense = ({ limit, userId, filters }: PostsSectionSuspenseProps) => {
+  const t = useTranslations("Studio");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const [posts, query] = trpc.posts.getMany.useSuspenseInfiniteQuery(
@@ -138,22 +141,22 @@ const PostsSectionSuspense = ({ limit, userId, filters }: PostsSectionSuspensePr
     switch (type) {
       case "poll":
         return {
-          label: isQuiz ? "Câu hỏi" : (pollType === "image" ? "Cuộc thăm dò ý kiến bằng hình ảnh" : "Cuộc thăm dò ý kiến"),
+          label: isQuiz ? t("quiz") : (pollType === "image" ? t("imagePoll") : t("poll")),
           icon: isQuiz ? CheckCircle2Icon : BarChart2Icon,
         };
       case "image":
         return {
-          label: "Hình ảnh",
+          label: t("image"),
           icon: ImageIcon,
         };
       case "video":
         return {
-          label: "Video",
+          label: t("video"),
           icon: ImageIcon,
         };
       default:
         return {
-          label: "Văn bản",
+          label: t("text"),
           icon: TypeIcon,
         };
     }
@@ -165,16 +168,16 @@ const PostsSectionSuspense = ({ limit, userId, filters }: PostsSectionSuspensePr
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="pl-6 w-[400px]">Bài đăng</TableHead>
-              <TableHead>Loại</TableHead>
-              <TableHead>Chế độ hiển thị</TableHead>
-              <TableHead>Hạn chế</TableHead>
+              <TableHead className="pl-6 w-[400px]">{t("post")}</TableHead>
+              <TableHead>{t("type")}</TableHead>
+              <TableHead>{t("visibility")}</TableHead>
+              <TableHead>{t("restrictions")}</TableHead>
               <TableHead 
                 className="cursor-pointer select-none group"
                 onClick={toggleSortOrder}
               >
                 <div className="flex items-center gap-1">
-                  Ngày
+                  {t("date")}
                   {sortOrder === "desc" ? (
                     <ArrowDownIcon className="size-4" />
                   ) : (
@@ -182,9 +185,9 @@ const PostsSectionSuspense = ({ limit, userId, filters }: PostsSectionSuspensePr
                   )}
                 </div>
               </TableHead>
-              <TableHead className="text-right">Bình luận</TableHead>
-              <TableHead className="text-right">Lượt thích</TableHead>
-              <TableHead className="text-right pr-6">Phản hồi</TableHead>
+              <TableHead className="text-right">{t("comments")}</TableHead>
+              <TableHead className="text-right">{t("likes")}</TableHead>
+              <TableHead className="text-right pr-6">{t("responses")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -193,7 +196,7 @@ const PostsSectionSuspense = ({ limit, userId, filters }: PostsSectionSuspensePr
                 <TableCell colSpan={8} className="h-[400px] text-center text-muted-foreground">
                    <div className="flex flex-col items-center justify-center gap-y-4">
                     <SearchIcon className="size-16 text-muted-foreground/50" />
-                    <p className="text-sm text-muted-foreground">Không có bài đăng nào phù hợp</p>
+                    <p className="text-sm text-muted-foreground">{t("noVideosMatching")}</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -222,12 +225,12 @@ const PostsSectionSuspense = ({ limit, userId, filters }: PostsSectionSuspensePr
                       
                       <div className="flex items-center gap-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Link href={`/studio/posts/${post.id}`}>
-                          <div className="p-2 hover:bg-neutral-700 rounded-full cursor-pointer transition-colors" title="Chi tiết">
+                          <div className="p-2 hover:bg-neutral-700 rounded-full cursor-pointer transition-colors" title={t("details")}>
                             <PencilIcon className="size-4 text-neutral-400" />
                           </div>
                         </Link>
                         <Link href={`/studio/posts/${post.id}/comments`}>
-                          <div className="p-2 hover:bg-neutral-700 rounded-full cursor-pointer transition-colors" title="Bình luận">
+                          <div className="p-2 hover:bg-neutral-700 rounded-full cursor-pointer transition-colors" title={t("comments")}>
                             <MessageSquareIcon className="size-4 text-neutral-400" />
                           </div>
                         </Link>
@@ -235,7 +238,7 @@ const PostsSectionSuspense = ({ limit, userId, filters }: PostsSectionSuspensePr
 
                       <div className="flex flex-col overflow-hidden">
                         <span className="text-sm font-medium line-clamp-2">
-                          {post.content || "Không có nội dung"}
+                          {post.content || t("noContent")}
                         </span>
                       </div>
                     </div>
@@ -249,11 +252,11 @@ const PostsSectionSuspense = ({ limit, userId, filters }: PostsSectionSuspensePr
                   <TableCell>
                     <div className="flex items-center gap-x-2 text-sm">
                       <Globe2Icon className="size-4 text-neutral-400" />
-                      <span>Công khai</span>
+                      <span>{t("public")}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-neutral-400">
-                    Không có
+                    {t("none")}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
@@ -261,7 +264,7 @@ const PostsSectionSuspense = ({ limit, userId, filters }: PostsSectionSuspensePr
                         {format(new Date(post.createdAt), "d 'thg' M, yyyy")}
                       </span>
                       <span className="text-xs text-neutral-500">
-                        Đã đăng
+                        {t("published")}
                       </span>
                     </div>
                   </TableCell>

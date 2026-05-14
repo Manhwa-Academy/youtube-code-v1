@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 
@@ -19,14 +20,16 @@ interface VideoViewProps {
 }
 
 export const VideoView = ({ videoId }: VideoViewProps) => {
+  const t = useTranslations("Video");
   return (
-    <Suspense fallback={<div className="flex justify-center pt-20 text-muted-foreground animate-pulse font-medium">Đang chuẩn bị video...</div>}>
+    <Suspense fallback={<div className="flex justify-center pt-20 text-muted-foreground animate-pulse font-medium">{t("loading")}</div>}>
       <VideoViewSuspense videoId={videoId} />
     </Suspense>
   );
 };
 
 const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
+  const t = useTranslations("Video");
   const router = useRouter();
   const [canGoBack, setCanGoBack] = useState(false);
 
@@ -101,7 +104,7 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
   };
 
   const handleNotInterested = () => {
-    toast.success("Đã ẩn video tạm thời");
+    toast.success(t("hideVideo"));
     handleNextShort();
   };
 

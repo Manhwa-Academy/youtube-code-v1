@@ -9,6 +9,7 @@ import { ErrorFallback } from "@/components/error-fallback";
 import { trpc } from "@/trpc/client";
 import { DEFAULT_LIMIT } from "@/constants";
 import { InfiniteScroll } from "@/components/infinite-scroll";
+import { useTranslations } from "next-intl";
 
 import {
   SubscriptionItem,
@@ -36,6 +37,8 @@ const SubscriptionsSectionSkeleton = () => {
 };
 
 const SubscriptionsSectionSuspense = () => {
+  const tSub = useTranslations("Subscriptions");
+  const tGen = useTranslations("General");
   const utils = trpc.useUtils();
   const [subscriptions, query] =
     trpc.subscriptions.getMany.useSuspenseInfiniteQuery(
@@ -47,13 +50,13 @@ const SubscriptionsSectionSuspense = () => {
 
   const unsubscribe = trpc.subscriptions.remove.useMutation({
     onSuccess: (data) => {
-      toast.success("Đã hủy đăng ký");
+      toast.success(tSub("unsubscribedSuccess"));
       utils.subscriptions.getMany.invalidate();
       utils.videos.getManySubscribed.invalidate();
       utils.users.getOne.invalidate({ id: data.creatorId });
     },
     onError: () => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(tGen("error"));
     },
   });
 

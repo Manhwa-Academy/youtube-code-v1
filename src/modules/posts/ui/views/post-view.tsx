@@ -2,6 +2,7 @@
 
 import { trpc } from "@/trpc/client";
 import { PostCard } from "../components/post-card";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -11,6 +12,7 @@ interface PostViewProps {
 }
 
 export const PostView = ({ postId }: PostViewProps) => {
+  const t = useTranslations("Posts");
   const router = useRouter();
   const [post] = trpc.posts.getOne.useSuspenseQuery({ id: postId });
 
@@ -25,7 +27,7 @@ export const PostView = ({ postId }: PostViewProps) => {
         >
           <ChevronLeft className="size-6" />
         </Button>
-        <h1 className="text-xl font-bold">Bài đăng</h1>
+        <h1 className="text-xl font-bold">{t("post")}</h1>
       </div>
       <PostCard post={post} />
     </div>

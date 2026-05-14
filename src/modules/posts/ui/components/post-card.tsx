@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { formatDistanceToNow, format, isAfter } from "date-fns";
-import { vi } from "date-fns/locale";
-import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 import { UserAvatar } from "@/components/user-avatar";
-
+import { enUS, vi as viLocale, de, es, fr, ja, ko, zhCN } from "date-fns/locale";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { ThumbsUp, ThumbsDown, MessageSquare, MoreVertical, Trash2, CheckCircle2, Pencil, Share2, Flag } from "lucide-react";
@@ -31,9 +31,26 @@ interface PostCardProps {
 }
 
 export const PostCard = ({ post, isCompact }: PostCardProps) => {
+  const t = useTranslations("Posts");
+  const locale = useLocale();
   const router = useRouter();
   const { user } = useUser();
   const utils = trpc.useUtils();
+
+  const getDateLocale = () => {
+    switch (locale) {
+      case "vi": return viLocale;
+      case "de": return de;
+      case "es": return es;
+      case "fr": return fr;
+      case "ja": return ja;
+      case "ko": return ko;
+      case "zh": return zhCN;
+      default: return enUS;
+    }
+  };
+
+  const dateLocale = getDateLocale();
   const [showComments, setShowComments] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -49,19 +66,19 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
 
   const remove = trpc.posts.remove.useMutation({
     onSuccess: () => {
-      toast.success("Đã xóa bài viết");
+      toast.success(t("postDeletedSuccess"));
       utils.posts.getMany.invalidate();
     }
   });
 
   const update = trpc.posts.update.useMutation({
     onSuccess: () => {
-      toast.success("Đã cập nhật bài viết");
+      toast.success(t("postUpdatedSuccess"));
       setIsEditing(false);
       utils.posts.getMany.invalidate();
     },
     onError: () => {
-      toast.error("Lỗi khi cập nhật bài viết");
+      toast.error(t("postUpdateError"));
     }
   });
 
@@ -72,7 +89,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
 
   const handleVote = (optionId: string) => {
     if (isOwner) {
-      toast.error("Chủ kênh không thể bình chọn bài viết của mình");
+      toast.error(t("ownerCannotVote"));
       return;
     }
     vote.mutate({ postId: post.id, optionId });
@@ -104,11 +121,11 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
               </Link>
               <span className="text-[11px] text-muted-foreground">
                 {post.scheduledAt && isAfter(new Date(post.scheduledAt), new Date()) ? (
-                  `Đã lên lịch đăng vào ${format(new Date(post.scheduledAt), "HH:mm d 'thg' M, yyyy", { locale: vi })} (giờ địa phương)`
+                  t("scheduledFor", { time: format(new Date(post.scheduledAt), "HH:mm d 'thg' M, yyyy", { locale: dateLocale }) })
                 ) : (
                   <>
-                    {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: vi })}
-                    {post.isEdited && " (đã chỉnh sửa)"}
+                    {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: dateLocale })}
+                    {post.isEdited && t("edited")}
                   </>
                 )}
               </span>
@@ -125,18 +142,18 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
                       {post.type === "image" && (
                         <DropdownMenuItem onClick={() => setIsEditing(true)}>
                           <Pencil className="size-4 mr-2" />
-                          Chỉnh sửa
+                          {t("edit")}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem className="text-red-500" onClick={() => remove.mutate({ id: post.id })}>
                         <Trash2 className="size-4 mr-2" />
-                        Xóa bài viết
+                        {t("deletePost")}
                       </DropdownMenuItem>
                     </>
                   ) : (
                     <DropdownMenuItem onClick={() => setIsReportModalOpen(true)}>
                       <Flag className="size-4 mr-2" />
-                      Báo cáo vi phạm
+                      {t("reportViolation")}
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
@@ -150,7 +167,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                   className="min-h-[100px] bg-transparent border-gray-300 dark:border-neutral-700 focus-visible:ring-blue-500"
-                  placeholder="Chỉnh sửa bài đăng..."
+                  placeholder={t("editPostPlaceholder")}
                 />
                 <div className="flex justify-end gap-2">
                   <Button 
@@ -161,7 +178,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
                       setEditContent(post.content || "");
                     }}
                   >
-                    Hủy
+                    {t("cancel")}
                   </Button>
                   <Button 
                     size="sm" 
@@ -169,7 +186,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
                     onClick={handleUpdate}
                     disabled={update.isPending || !editContent.trim()}
                   >
-                    Lưu
+                    {t("save")}
                   </Button>
                 </div>
               </div>
@@ -186,7 +203,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
                   {isCompact && post.poll && (
                     <div className="mt-2">
                       <div className="text-[11px] text-muted-foreground mb-1.5 font-medium">
-                        {totalVotes} người đã trả lời
+                        {t("peopleResponded", { totalVotes })}
                       </div>
                       <Button 
                         variant="outline" 
@@ -198,7 +215,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
                           router.push(`/posts/${post.id}`);
                         }}
                       >
-                        Trả lời ngay
+                        {t("respondNow")}
                       </Button>
                     </div>
                   )}
@@ -215,7 +232,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
             {/* Non-compact details */}
             {isQuiz && !isCompact && (
               <div className="text-xs text-muted-foreground mb-3">
-                {totalVotes} người đã trả lời
+                {t("peopleResponded", { totalVotes })}
               </div>
             )}
 
@@ -301,7 +318,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
                 })}
                 {!isQuiz && (
                   <div className="text-[10px] text-muted-foreground pl-1">
-                    {totalVotes} lượt bình chọn
+                    {t("votes", { totalVotes })}
                   </div>
                 )}
               </div>
@@ -359,7 +376,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
               e.stopPropagation();
               const url = `${window.location.origin}/posts/${post.id}`;
               navigator.clipboard.writeText(url);
-              toast.success("Đã sao chép liên kết bài đăng");
+              toast.success(t("postLinkCopied"));
             }}
           >
             <Share2 className={cn("size-4", isCompact && "size-3.5")} />

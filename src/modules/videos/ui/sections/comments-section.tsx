@@ -1,10 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Suspense, useState } from "react";
 import { Loader2Icon, ListFilterIcon } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorFallback } from "@/components/error-fallback";
-
 import { trpc } from "@/trpc/client";
 import { DEFAULT_LIMIT } from "@/constants";
 import { InfiniteScroll } from "@/components/infinite-scroll";
@@ -42,6 +42,7 @@ export const CommentsSectionSkeleton = () => {
 };
 
 const CommentsSectionSuspense = ({ videoId }: CommentsSectionProps) => {
+  const t = useTranslations("Comments");
   const [video] = trpc.videos.getOne.useSuspenseQuery({ id: videoId });
   const [sortBy, setSortBy] = useState<"top" | "newest">("top");
 
@@ -59,7 +60,7 @@ const CommentsSectionSuspense = ({ videoId }: CommentsSectionProps) => {
   if (!video.canComment) {
     return (
       <div className="mt-6 p-4 border rounded-xl bg-muted/30 text-center">
-        <p className="text-muted-foreground text-sm font-medium">Tính năng bình luận đã bị tắt.</p>
+        <p className="text-muted-foreground text-sm font-medium">{t("disabled")}</p>
       </div>
     );
   }
@@ -70,22 +71,22 @@ const CommentsSectionSuspense = ({ videoId }: CommentsSectionProps) => {
     <div className="mt-6">
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold">{total} bình luận</h1>
+          <h1 className="text-xl font-bold">{t("count", { count: total })}</h1>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-2">
                 <ListFilterIcon className="size-4" />
-                Sắp xếp theo
+                {t("sortBy")}
               </Button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="start">
               <DropdownMenuItem onClick={() => setSortBy("top")}>
-                Nổi bật nhất
+                {t("top")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setSortBy("newest")}>
-                Mới nhất
+                {t("newest")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

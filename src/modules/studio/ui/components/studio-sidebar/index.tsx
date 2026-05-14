@@ -9,6 +9,7 @@ import {
   Wand2Icon,
   LogOutIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Separator } from "@/components/ui/separator";
 import {
@@ -24,33 +25,79 @@ import { StudioSidebarHeader } from "./studio-sidebar-header";
 import { PostDetailsSidebar } from "./post-details-sidebar";
 import { VideoDetailsSidebar } from "./video-details-sidebar";
 
-const menuItems = [
-  {
-    href: "/studio/dashboard", // Tổng quan bây giờ là dashboard
-    label: "Tổng quan",
-    icon: LayoutDashboardIcon,
-  },
-  {
-    href: "/studio", // Nội dung là route chính /studio
-    label: "Nội dung",
-    icon: VideoIcon,
-  },
-  {
-    href: "/studio/analytics",
-    label: "Số liệu phân tích",
-    icon: BarChart3Icon,
-  },
-  {
-    href: "/studio/community",
-    label: "Cộng đồng",
-    icon: UsersIcon,
-  },
-  {
-    href: "/studio/customization",
-    label: "Tùy chỉnh",
-    icon: Wand2Icon,
-  },
-];
+const StudioSidebarInternal = () => {
+  const t = useTranslations("Studio");
+  const pathname = usePathname();
+
+  const menuItems = [
+    {
+      href: "/studio/dashboard",
+      label: t("dashboard"),
+      icon: LayoutDashboardIcon,
+    },
+    {
+      href: "/studio",
+      label: t("content"),
+      icon: VideoIcon,
+    },
+    {
+      href: "/studio/analytics",
+      label: t("analytics"),
+      icon: BarChart3Icon,
+    },
+    {
+      href: "/studio/community",
+      label: t("community"),
+      icon: UsersIcon,
+    },
+    {
+      href: "/studio/customization",
+      label: t("customization"),
+      icon: Wand2Icon,
+    },
+  ];
+
+  const isPostDetails = pathname.includes("/studio/posts/");
+  const isVideoDetails = pathname.includes("/studio/videos/");
+
+  return (
+    <SidebarGroup>
+      <SidebarMenu>
+        <StudioSidebarHeader />
+
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+
+          return (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                isActive={pathname === item.href}
+                tooltip={item.label}
+                asChild
+              >
+                <Link prefetch href={item.href}>
+                  <Icon className="size-5" />
+                  <span className="text-sm">{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          );
+        })}
+
+        <Separator />
+
+        <SidebarMenuItem>
+          <SidebarMenuButton tooltip={t("exitStudio")} asChild>
+            <Link prefetch href="/">
+              <LogOutIcon className="size-5" />
+              <span className="text-sm">{t("exitStudio")}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarGroup>
+  );
+};
 
 export const StudioSidebar = () => {
   const pathname = usePathname();
@@ -64,43 +111,7 @@ export const StudioSidebar = () => {
         {isPostDetails && <PostDetailsSidebar />}
         {isVideoDetails && <VideoDetailsSidebar />}
         
-        {!isPostDetails && !isVideoDetails && (
-          <SidebarGroup>
-            <SidebarMenu>
-              <StudioSidebarHeader />
-
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      isActive={pathname === item.href}
-                      tooltip={item.label}
-                      asChild
-                    >
-                      <Link prefetch href={item.href}>
-                        <Icon className="size-5" />
-                        <span className="text-sm">{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-
-              <Separator />
-
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Thoát Studio" asChild>
-                  <Link prefetch href="/">
-                    <LogOutIcon className="size-5" />
-                    <span className="text-sm">Thoát Studio</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-        )}
+        {!isPostDetails && !isVideoDetails && <StudioSidebarInternal />}
       </SidebarContent>
     </Sidebar>
   );

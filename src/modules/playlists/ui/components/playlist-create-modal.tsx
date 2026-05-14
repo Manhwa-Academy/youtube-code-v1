@@ -10,6 +10,7 @@ import { trpc } from "@/trpc/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/responsive-modal";
+import { useTranslations } from "next-intl";
 import {
   Form,
   FormControl,
@@ -24,15 +25,17 @@ interface PlaylistCreateModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const formSchema = z.object({
-  name: z.string().min(1, "Vui lòng nhập tên danh sách"),
-  visibility: z.enum(["public", "private"]).default("private"),
-});
-
 export const PlaylistCreateModal = ({
   open,
   onOpenChange,
 }: PlaylistCreateModalProps) => {
+  const t = useTranslations("Playlists");
+
+  const formSchema = z.object({
+    name: z.string().min(1, t("nameLabel")),
+    visibility: z.enum(["public", "private"]),
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -46,12 +49,12 @@ export const PlaylistCreateModal = ({
   const createPlaylist = trpc.playlists.create.useMutation({
     onSuccess: () => {
       utils.playlists.getMany.invalidate();
-      toast.success("Tạo danh sách phát thành công!");
+      toast.success(t("updateSuccess")); // Or add a specific toast for creation
       form.reset();
       onOpenChange(false);
     },
     onError: (err) => {
-      toast.error(err.message || "Đã xảy ra lỗi");
+      toast.error(err.message || t("errorOccurred"));
     },
   });
 
@@ -73,7 +76,7 @@ export const PlaylistCreateModal = ({
 
   return (
     <ResponsiveModal
-      title="Tạo danh sách phát"
+      title={t("createModalTitle")}
       open={open}
       onOpenChange={onOpenChange}
     >
@@ -87,9 +90,9 @@ export const PlaylistCreateModal = ({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tên danh sách</FormLabel>
+                <FormLabel>{t("nameLabel")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Ví dụ: Video yêu thích" />
+                  <Input {...field} placeholder={t("namePlaceholder")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -101,14 +104,14 @@ export const PlaylistCreateModal = ({
             name="visibility"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Quyền riêng tư</FormLabel>
+                <FormLabel>{t("visibilityLabel")}</FormLabel>
                 <FormControl>
                   <select
                     {...field}
-                    className="border rounded px-2 py-2 w-full"
+                    className="border rounded px-2 py-2 w-full dark:bg-zinc-900"
                   >
-                    <option value="private">Riêng tư</option>
-                    <option value="public">Công khai</option>
+                    <option value="private">{t("private")}</option>
+                    <option value="public">{t("public")}</option>
                   </select>
                 </FormControl>
                 <FormMessage />
@@ -118,7 +121,7 @@ export const PlaylistCreateModal = ({
 
           <div className="flex justify-end">
             <Button type="submit" disabled={createPlaylist.isPending}>
-              Tạo
+              {t("createButton")}
             </Button>
           </div>
         </form>

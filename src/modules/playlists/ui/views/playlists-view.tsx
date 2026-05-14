@@ -4,11 +4,13 @@ import { useState } from "react";
 import { PlusIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 import { PlaylistsSection } from "../sections/playlists-section";
 import { PlaylistCreateModal } from "../components/playlist-create-modal";
 
 export const PlaylistsView = () => {
+  const t = useTranslations("Playlists");
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   return (
@@ -19,9 +21,9 @@ export const PlaylistsView = () => {
       />
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">Danh sách phát</h1>
+          <h1 className="text-2xl font-bold">{t("playlist")}</h1>
           <p className="text-xs text-muted-foreground">
-            Bộ sưu tập bạn đã tạo
+            {t("collection")}
           </p>
         </div>
         <Button

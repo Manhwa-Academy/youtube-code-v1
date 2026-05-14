@@ -11,15 +11,9 @@ import {
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import {
-  RepeatIcon,
-  SkipForwardIcon,
-  SettingsIcon,
-  ClockIcon,
-  DownloadIcon,
-  Loader2Icon,
-} from "lucide-react";
+import { Loader2Icon, ClockIcon, DownloadIcon, RepeatIcon, SkipForwardIcon, SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { downloadManager } from "@/lib/download-manager";
 import { VideoGetOneOutput } from "../../types";
 
@@ -52,17 +46,20 @@ export const VideoPlaybackMenu = ({
   setPlaybackRate,
 }: Props) => {
   const [downloading, setDownloading] = useState(false);
+  const t = useTranslations("Playback");
+  const tGeneral = useTranslations("General");
+  const tShorts = useTranslations("Shorts");
 
   const handleDownload = async () => {
     if (downloading) return;
 
     if (!assetId || !playbackId) {
-      toast.error("Không tìm thấy thông tin video");
+      toast.error(tShorts("noFileError"));
       return;
     }
 
     setDownloading(true);
-    toast.success("Đang bắt đầu tải video để xem ngoại tuyến...");
+    toast.success(tShorts("preparingFile"));
 
     try {
       const downloadUrl = `https://stream.mux.com/${playbackId}/highest.mp4`;
@@ -72,7 +69,7 @@ export const VideoPlaybackMenu = ({
       if (!response.ok) {
         // Fallback to API if direct fetch fails
         const apiResponse = await fetch(`/api/download-video?assetId=${assetId}`);
-        if (!apiResponse.ok) throw new Error("Tải xuống thất bại");
+        if (!apiResponse.ok) throw new Error("Download failed");
         blob = await apiResponse.blob();
       } else {
         blob = await response.blob();
@@ -101,10 +98,10 @@ export const VideoPlaybackMenu = ({
         playbackId: playbackId,
       }, blob);
 
-      toast.success("Đã tải video về máy và lưu vào mục Nội dung tải xuống!");
+      toast.success(tShorts("downloadSuccess"));
     } catch (error) {
       console.error("OFFLINE DOWNLOAD ERROR:", error);
-      toast.error("Không thể tải video.");
+      toast.error(tShorts("downloadError"));
     } finally {
       setDownloading(false);
     }
@@ -128,7 +125,7 @@ export const VideoPlaybackMenu = ({
         >
           <div className="flex items-center gap-2">
             <SkipForwardIcon className="w-4 h-4 text-gray-500" />
-            <span>Tự chuyển</span>
+            <span>{t("autoPlay")}</span>
           </div>
           <div
             className={`w-9 h-5 flex items-center rounded-full p-1 transition ${
@@ -149,7 +146,7 @@ export const VideoPlaybackMenu = ({
         >
           <div className="flex items-center gap-2">
             <RepeatIcon className="w-4 h-4 text-gray-500" />
-            <span>Lặp lại</span>
+            <span>{t("loop")}</span>
           </div>
           <div
             className={`w-9 h-5 flex items-center rounded-full p-1 transition ${
@@ -174,7 +171,7 @@ export const VideoPlaybackMenu = ({
           ) : (
             <DownloadIcon className="w-4 h-4 text-gray-500" />
           )}
-          <span>{downloading ? "Đang tải..." : "Tải video"}</span>
+          <span>{downloading ? t("downloading") : t("download")}</span>
         </DropdownMenuItem>
         {/* SPEED Submenu */}
         <DropdownMenuSub>
@@ -182,7 +179,7 @@ export const VideoPlaybackMenu = ({
             <div className="flex items-center gap-2">
               {/* Icon giống Tự chuyển/Lặp lại */}
               <ClockIcon className="w-4 h-4 text-gray-500" />
-              <span>Tốc độ phát</span>
+              <span>{t("speed")}</span>
             </div>
           </DropdownMenuSubTrigger>
 

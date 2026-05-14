@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/responsive-modal";
 import { useAuth } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 
 interface ThumbnailGenerateModalProps {
   videoId: string;
@@ -23,6 +24,7 @@ export const ThumbnailGenerateModal = ({
   onOpenChange = () => {},
   onThumbnailUpdate = () => {},
 }: ThumbnailGenerateModalProps) => {
+  const t = useTranslations("Studio");
   const [isLoading, setIsLoading] = useState(false);
   const { userId: clerkId } = useAuth();
 
@@ -48,16 +50,14 @@ export const ThumbnailGenerateModal = ({
         throw new Error("Invalid response from server");
       }
 
-      toast.success(
-        "Thumbnail generated from video! ⏳ Uploading… it will appear shortly.",
-      );
+      toast.success(t("generateThumbnailSuccess"));
       onOpenChange(false);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        toast.error("Failed to generate thumbnail: " + err.message);
+        toast.error(`${t("generateThumbnailError")}: ${err.message}`);
         console.error("Generate thumbnail error:", err);
       } else {
-        toast.error("Failed to generate thumbnail: Unknown error");
+        toast.error(t("generateThumbnailError"));
         console.error("Generate thumbnail unknown error:", err);
       }
     } finally {
@@ -67,13 +67,13 @@ export const ThumbnailGenerateModal = ({
 
   return (
     <ResponsiveModal
-      title="Tạo thumbnail từ video"
+      title={t("generateThumbnailFromVideo")}
       open={open}
       onOpenChange={onOpenChange}
     >
       <div className="flex justify-end p-4">
         <Button onClick={generateFromVideo} disabled={isLoading}>
-          {isLoading ? "Đang tạo..." : "Tạo thumbnail"}
+          {isLoading ? t("generating") : t("generateThumbnail")}
         </Button>
       </div>
     </ResponsiveModal>

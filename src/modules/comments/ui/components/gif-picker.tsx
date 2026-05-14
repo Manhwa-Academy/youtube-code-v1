@@ -12,6 +12,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { useTranslations } from "next-intl";
+
 interface GifPickerProps {
   onSelect: (url: string) => void;
   children: React.ReactNode;
@@ -34,6 +36,7 @@ export const GifPicker = ({
   onSelect,
   children,
 }: GifPickerProps) => {
+  const t = useTranslations("Common");
   const [search, setSearch] = useState("");
   const [gifs, setGifs] = useState<TenorGif[]>([]);
   const [loading, setLoading] = useState(false);
@@ -120,7 +123,7 @@ export const GifPicker = ({
             <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
 
             <Input
-              placeholder="Tìm kiếm GIF..."
+              placeholder={t("searchGifs")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-8 h-8 text-xs bg-neutral-100 dark:bg-neutral-800 border-none"
@@ -152,7 +155,7 @@ export const GifPicker = ({
             </div>
           ) : gifs.length === 0 ? (
             <p className="text-center text-xs text-muted-foreground py-10">
-              Không tìm thấy GIF nào
+              {t("noGifsFound")}
             </p>
           ) : (
             <div className="grid grid-cols-3 gap-1">

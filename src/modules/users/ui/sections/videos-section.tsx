@@ -13,6 +13,7 @@ import {
   VideoGridCard,
   VideoGridCardSkeleton,
 } from "@/modules/videos/ui/components/video-grid-card";
+import { useTranslations } from "next-intl";
 
 interface VideosSectionProps {
   userId: string;
@@ -23,9 +24,10 @@ interface VideosSectionProps {
 }
 
 export const VideosSection = (props: VideosSectionProps) => {
+  const t = useTranslations("Users");
   return (
     <Suspense fallback={<VideosSectionSkeleton />}>
-      <ErrorBoundary fallback={<p>Lỗi khi tải video</p>}>
+      <ErrorBoundary fallback={<p>{t("errorLoadingVideos")}</p>}>
         <VideosSectionSuspense {...props} />
       </ErrorBoundary>
     </Suspense>

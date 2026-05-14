@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { ErrorBoundary } from "react-error-boundary";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/trpc/client";
 import { FilterCarousel } from "@/components/filter-carousel";
@@ -26,12 +27,13 @@ export const CategoriesSectionSkeleton = () => {
 };
 
 const CategoriesSectionSuspense = ({ categoryId }: CategoriesSectionProps) => {
+  const t = useTranslations("Categories");
   const router = useRouter();
   const [categories] = trpc.categories.getMany.useSuspenseQuery();
 
   const data = categories.map((category) => ({
     value: category.id,
-    label: category.name,
+    label: t(category.name),
   }));
 
   const onSelect = (value: string | null) => {

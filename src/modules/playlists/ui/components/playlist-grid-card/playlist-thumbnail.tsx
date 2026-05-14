@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { useMemo } from "react";
 import { ListVideoIcon, PlayIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,6 +29,7 @@ export const PlaylistThumbnail = ({
   className,
   imageUrl,
 }: PlaylistThumbnailProps) => {
+  const t = useTranslations("Playlists");
   const compactViews = useMemo(() => {
     return Intl.NumberFormat("en", {
       notation: "compact"
@@ -59,7 +61,7 @@ export const PlaylistThumbnail = ({
           <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <div className="flex items-center gap-x-2">
               <PlayIcon className="size-4 text-white fill-white" />
-              <span className="text-white font-medium">Phát tất cả</span>
+              <span className="text-white font-medium">{t("playAll")}</span>
             </div>
           </div>
         </div>
@@ -68,7 +70,7 @@ export const PlaylistThumbnail = ({
       {/* Video count indicator */}
       <div className="absolute bottom-2 right-2 px-1 py-0.5 rounded bg-black/80 text-white text-xs font-medium flex items-center gap-x-1">
         <ListVideoIcon className="size-4" />
-        {compactViews} videos
+        {t("videosCount", { count: compactViews })}
       </div>
     </div>
   );

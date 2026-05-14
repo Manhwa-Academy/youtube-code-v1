@@ -9,6 +9,7 @@ import { trpc } from "@/trpc/client";
 import { DEFAULT_LIMIT } from "@/constants";
 import { InfiniteScroll } from "@/components/infinite-scroll";
 import { CommentItem } from "@/modules/comments/ui/components/comment-item";
+import { useTranslations } from "next-intl";
 
 interface StudioPostCommentsSectionProps {
   postId: string;
@@ -33,6 +34,7 @@ export const StudioPostCommentsSectionSkeleton = () => {
 };
 
 const StudioPostCommentsSectionSuspense = ({ postId }: StudioPostCommentsSectionProps) => {
+  const t = useTranslations("Studio");
   const [comments, query] = trpc.comments.getMany.useSuspenseInfiniteQuery(
     {
       postId,
@@ -51,7 +53,7 @@ const StudioPostCommentsSectionSuspense = ({ postId }: StudioPostCommentsSection
       <div className="flex flex-col items-center justify-center py-24 gap-y-4">
         <MessageSquareOffIcon className="size-16 text-neutral-500" />
         <p className="text-neutral-400 text-sm">
-          Không tìm thấy bình luận nào.
+          {t("noCommentsFound")}
         </p>
       </div>
     );

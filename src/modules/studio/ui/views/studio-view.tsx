@@ -6,6 +6,7 @@ import { VideosSection } from "../sections/videos-section";
 import { PlaylistsSection } from "../sections/playlists-section";
 import { PostsSection } from "../sections/posts-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTranslations } from "next-intl";
 import {
   Select,
   SelectContent,
@@ -29,6 +30,8 @@ const StudioViewSuspense = () => {
   
   const [limit, setLimit] = useState(30);
 
+  const t = useTranslations("Studio");
+
   const onTabChange = (value: string) => {
     router.push(`/studio?tab=${value}`, { scroll: false });
   };
@@ -37,9 +40,9 @@ const StudioViewSuspense = () => {
     <div className="flex flex-col gap-y-6 pt-2.5">
       <div className="px-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Nội dung của kênh</h1>
+          <h1 className="text-2xl font-bold">{t("channelContent")}</h1>
           <p className="text-xs text-muted-foreground">
-            Quản lý video, shorts, danh sách phát và bài đăng trên kênh của bạn
+            {t("channelContentDescription")}
           </p>
         </div>
       </div>
@@ -51,7 +54,7 @@ const StudioViewSuspense = () => {
               value="videos" 
               className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary bg-transparent data-[state=active]:bg-transparent font-medium"
             >
-              Video
+              {t("video")}
             </TabsTrigger>
             <TabsTrigger 
               value="shorts"
@@ -63,13 +66,13 @@ const StudioViewSuspense = () => {
               value="playlists"
               className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary bg-transparent data-[state=active]:bg-transparent font-medium"
             >
-              Danh sách phát
+              {t("playlists")}
             </TabsTrigger>
             <TabsTrigger 
               value="posts"
               className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary bg-transparent data-[state=active]:bg-transparent font-medium"
             >
-              Bài đăng
+              {t("posts")}
             </TabsTrigger>
           </TabsList>
         </div>
@@ -88,7 +91,7 @@ const StudioViewSuspense = () => {
         </TabsContent>
 
         <div className="px-4 py-4 border-t flex items-center justify-end gap-x-2 text-sm text-muted-foreground">
-          <span>Số hàng mỗi trang:</span>
+          <span>{t("rowsPerPage")}</span>
           <Select value={limit.toString()} onValueChange={(val) => setLimit(Number(val))}>
             <SelectTrigger className="w-[70px] h-8 border-none bg-transparent shadow-none focus:ring-0">
               <SelectValue placeholder={limit} />

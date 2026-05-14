@@ -8,8 +8,12 @@ import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export const StudioSearch = () => {
+  const t = useTranslations("Studio");
+  const tGen = useTranslations("General");
+  const tPlaylists = useTranslations("Playlists");
   const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get("query") || "";
@@ -57,7 +61,7 @@ export const StudioSearch = () => {
             value={value}
             onFocus={() => setIsFocused(true)}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Tìm kiếm trên kênh của bạn"
+            placeholder={t("searchChannelPlaceholder")}
             className="w-full bg-neutral-900 border border-neutral-700 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
           />
         </div>
@@ -67,15 +71,15 @@ export const StudioSearch = () => {
         <div className="absolute top-full mt-2 w-full bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-50">
           <div className="p-4 border-b border-neutral-800">
             <h3 className="text-sm font-bold text-white">
-              {value ? "Kết quả tìm kiếm" : "Video gần đây"}
+              {value ? t("searchResults") : t("recentVideos")}
             </h3>
           </div>
           
           <div className="max-h-[400px] overflow-y-auto">
             {isLoading ? (
-              <div className="p-4 text-sm text-neutral-400">Đang tải...</div>
+              <div className="p-4 text-sm text-neutral-400">{tGen("loading")}</div>
             ) : results?.length === 0 ? (
-              <div className="p-4 text-sm text-neutral-400">Không tìm thấy video nào</div>
+              <div className="p-4 text-sm text-neutral-400">{tGen("noResults")}</div>
             ) : (
               results?.map((video) => (
                 <Link
@@ -96,12 +100,12 @@ export const StudioSearch = () => {
                       {video.title}
                     </h4>
                     <p className="text-xs text-neutral-400 line-clamp-1">
-                      {video.description || "Không có mô tả"}
+                      {video.description || t("noDescription")}
                     </p>
                     <div className="flex items-center gap-2 text-[10px] text-neutral-500">
                       <span>{format(new Date(video.createdAt), "d 'thg' M, yyyy", { locale: vi })}</span>
                       <span>•</span>
-                      <span>{video.visibility === 'public' ? 'Đã xuất bản' : 'Riêng tư'}</span>
+                      <span>{video.visibility === 'public' ? t("published") : tPlaylists("private")}</span>
                     </div>
                   </div>
                 </Link>

@@ -99,26 +99,26 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
   const t = useTranslations("Studio");
   const router = useRouter();
   const utils = trpc.useUtils();
-
   const [post] = trpc.studio.getPost.useSuspenseQuery({ id: postId });
+  const tGeneral = useTranslations("General");
 
   const update = trpc.posts.update.useMutation({
     onSuccess: () => {
       utils.studio.getPost.invalidate({ id: postId });
-      toast.success("Đã cập nhật bài đăng");
+      toast.success(t("updatePostSuccess"));
     },
     onError: () => {
-      toast.error("Cập nhật thất bại");
+      toast.error(t("updatePostError"));
     },
   });
 
   const remove = trpc.posts.remove.useMutation({
     onSuccess: () => {
-      toast.success("Đã xóa bài đăng");
+      toast.success(t("deletePostSuccess"));
       router.push("/studio");
     },
     onError: () => {
-      toast.error("Xóa thất bại");
+      toast.error(t("deletePostError"));
     },
   });
 
@@ -158,13 +158,13 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
     switch (type) {
       case "poll":
         return { 
-          label: isQuiz ? "Câu hỏi" : "Cuộc thăm dò ý kiến", 
+          label: isQuiz ? t("quiz") : t("poll"), 
           icon: isQuiz ? CheckCircle2Icon : BarChart2Icon 
         };
       case "image":
-        return { label: "Hình ảnh", icon: ImageIcon };
+        return { label: t("image"), icon: ImageIcon };
       default:
-        return { label: "Văn bản", icon: TypeIcon };
+        return { label: t("text"), icon: TypeIcon };
     }
   };
 
@@ -178,7 +178,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold">Chi tiết về bài đăng</h1>
+            <h1 className="text-2xl font-bold">{t("postDetails")}</h1>
           </div>
           <div className="flex items-center gap-x-2">
             <Button
@@ -187,14 +187,14 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
               onClick={() => form.reset()}
               disabled={!form.formState.isDirty || update.isPending}
             >
-              Huỷ thay đổi
+              {t("undoChanges")}
             </Button>
             <Button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700"
               disabled={!form.formState.isDirty || update.isPending}
             >
-              Lưu
+              {t("save")}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -208,7 +208,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                   className="text-red-500 focus:text-red-500"
                 >
                   <TrashIcon className="size-4 mr-2" />
-                  Xóa bài đăng
+                  {t("deletePost")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -225,7 +225,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                 <FormItem>
                   <div className="border border-neutral-700 rounded-md p-4 bg-neutral-900/50">
                     <FormLabel className="text-xs text-neutral-400 uppercase font-bold mb-2 block">
-                      Văn bản (bắt buộc)
+                      {t("textContent")}
                     </FormLabel>
                     <FormControl>
                       <Textarea
@@ -233,7 +233,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                         value={field.value ?? ""}
                         rows={6}
                         className="bg-transparent border-none focus-visible:ring-0 p-0 resize-none"
-                        placeholder="Nội dung bài đăng của bạn"
+                        placeholder={t("postContentPlaceholder")}
                       />
                     </FormControl>
                     <FormMessage />
@@ -244,7 +244,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
 
             {post.images && post.images.length > 0 && (
               <div className="border border-neutral-700 rounded-md p-4 bg-neutral-900/50">
-                <p className="text-xs text-neutral-400 uppercase font-bold mb-4">Hình ảnh</p>
+                <p className="text-xs text-neutral-400 uppercase font-bold mb-4">{t("image")}</p>
                 <div className="grid grid-cols-1 gap-4">
                    {post.images.map((img: { id: string; imageUrl: string }) => (
                      <div key={img.id} className="relative aspect-square max-w-[400px] border border-neutral-800 rounded-md overflow-hidden">
@@ -266,12 +266,12 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
             {post.type === "poll" && post.poll && (
                <div className="border border-neutral-700 rounded-md p-4 bg-neutral-900/50">
                   <p className="text-xs text-neutral-400 uppercase font-bold mb-1">
-                    {isQuiz ? "Kết quả đố vui" : "Kết quả cuộc thăm dò ý kiến"}
+                    {isQuiz ? t("quizResults") : t("pollResults")}
                   </p>
                   <p className="text-xs text-neutral-500 mb-4">
                     {isQuiz 
-                      ? `Câu đố vui này nhận được ${totalVotes} câu trả lời` 
-                      : `Cuộc thăm dò ý kiến này có ${totalVotes} lượt bình chọn`}
+                      ? t("quizSummary", { count: totalVotes })
+                      : t("pollSummary", { count: totalVotes })}
                   </p>
                   <div className="space-y-2">
                     {post.poll.options.map((option: { id: string; text: string | null; imageUrl?: string | null; isCorrect: boolean; voteCount: number }) => {
@@ -304,8 +304,8 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
 
             <div className="space-y-4">
               <div>
-                <h2 className="text-base font-bold">Bình luận và thông tin đánh giá</h2>
-                <p className="text-xs text-neutral-400">Chọn xem bạn muốn hiển thị hay ẩn phần bình luận và chọn cách hiển thị.</p>
+                <h2 className="text-base font-bold">{t("commentSettings")}</h2>
+                <p className="text-xs text-neutral-400">{t("commentSettingsDescription")}</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -316,7 +316,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                     <FormItem>
                       <div className="relative group border border-neutral-700 focus-within:border-blue-500 rounded-md px-3 py-1.5 transition-colors bg-neutral-900/50">
                         <FormLabel className="text-[10px] text-neutral-400 group-focus-within:text-blue-500 uppercase font-bold">
-                          Bình luận
+                          {t("comments")}
                         </FormLabel>
                         <Select
                           onValueChange={(value) => field.onChange(value === "true")}
@@ -324,12 +324,12 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                         >
                           <FormControl>
                             <SelectTrigger className="border-none focus:ring-0 p-0 h-auto text-sm bg-transparent">
-                              <SelectValue placeholder="Chọn trạng thái" />
+                              <SelectValue placeholder={t("selectStatus")} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="true">Bật</SelectItem>
-                            <SelectItem value="false">Tắt</SelectItem>
+                            <SelectItem value="true">{tGeneral("on")}</SelectItem>
+                            <SelectItem value="false">{tGeneral("off")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -345,7 +345,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                     <FormItem>
                       <div className="relative group border border-neutral-700 focus-within:border-blue-500 rounded-md px-3 py-1.5 transition-colors bg-neutral-900/50">
                         <FormLabel className="text-[10px] text-neutral-400 group-focus-within:text-blue-500 uppercase font-bold">
-                          Kiểm duyệt
+                          {t("moderation")}
                         </FormLabel>
                         <Select
                           onValueChange={field.onChange}
@@ -353,14 +353,14 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                         >
                           <FormControl>
                             <SelectTrigger className="border-none focus:ring-0 p-0 h-auto text-sm bg-transparent">
-                              <SelectValue placeholder="Chọn mức độ" />
+                              <SelectValue placeholder={t("selectModeration")} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="none">Không</SelectItem>
-                            <SelectItem value="basic">Cơ bản</SelectItem>
-                            <SelectItem value="strict">Nghiêm ngặt</SelectItem>
-                            <SelectItem value="all">Tất cả</SelectItem>
+                            <SelectItem value="none">{t("moderationNone")}</SelectItem>
+                            <SelectItem value="basic">{t("moderationBasic")}</SelectItem>
+                            <SelectItem value="strict">{t("moderationStrict")}</SelectItem>
+                            <SelectItem value="all">{t("moderationAll")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -378,17 +378,17 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                <div className="p-4 space-y-6">
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <p className="text-[10px] text-neutral-400 uppercase font-bold text-nowrap">Lượt thích</p>
+                      <p className="text-[10px] text-neutral-400 uppercase font-bold text-nowrap">{t("likes")}</p>
                       <p className="text-xl font-medium">{post.likeCount}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-neutral-400 uppercase font-bold text-nowrap">Bình luận</p>
+                      <p className="text-[10px] text-neutral-400 uppercase font-bold text-nowrap">{t("comments")}</p>
                       <p className="text-xl font-medium">{post.commentCount}</p>
                     </div>
                     {post.type === "poll" && (
                       <div>
                         <p className="text-[10px] text-neutral-400 uppercase font-bold text-nowrap">
-                          {isQuiz ? "Câu trả lời" : "Số phiếu"}
+                          {isQuiz ? t("responses") : t("votes")}
                         </p>
                         <p className="text-xl font-medium">{totalVotes}</p>
                       </div>
@@ -396,7 +396,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                   </div>
 
                   <div className="space-y-1">
-                    <p className="text-[10px] text-neutral-400 uppercase font-bold">Loại</p>
+                    <p className="text-[10px] text-neutral-400 uppercase font-bold">{t("type")}</p>
                     <div className="flex items-center gap-x-2">
                       <TypeIconComponent className="size-4 text-neutral-400" />
                       <span className="text-sm">{typeInfo.label}</span>
@@ -404,7 +404,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                   </div>
 
                   <div className="space-y-1">
-                    <p className="text-[10px] text-neutral-400 uppercase font-bold">Đường liên kết</p>
+                    <p className="text-[10px] text-neutral-400 uppercase font-bold">{t("links")}</p>
                     <div className="flex items-center gap-x-2 group/link">
                       <Link href={`/posts/${postId}`} className="text-sm text-blue-500 truncate hover:underline">
                         {fullUrl}
@@ -424,16 +424,16 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
             </div>
 
             <div className="bg-neutral-900/50 border border-neutral-700 rounded-xl p-4 space-y-1">
-              <p className="text-[10px] text-neutral-400 uppercase font-bold">Chế độ hiển thị</p>
+              <p className="text-[10px] text-neutral-400 uppercase font-bold">{t("visibility")}</p>
               <div className="flex items-center gap-x-2">
                 <Globe2Icon className="size-4 text-neutral-400" />
-                <span className="text-sm">Công khai</span>
+                <span className="text-sm">{t("public")}</span>
               </div>
             </div>
 
             <div className="bg-neutral-900/50 border border-neutral-700 rounded-xl p-4 space-y-1">
-              <p className="text-[10px] text-neutral-400 uppercase font-bold">Hạn chế</p>
-              <p className="text-sm text-neutral-400">Không có</p>
+              <p className="text-[10px] text-neutral-400 uppercase font-bold">{t("restrictions")}</p>
+              <p className="text-sm text-neutral-400">{t("none")}</p>
             </div>
           </div>
         </div>

@@ -20,7 +20,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "YouTube",
-  description: "Trang web video của chủ nhân-sama",
+  description: "YouTube clone project", // Default fallback
   manifest: "/manifest.json",
 };
 

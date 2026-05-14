@@ -1,6 +1,7 @@
 "use client"; // ✅ chỉ 1 lần
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface UserTabsProps {
   userId: string;
@@ -16,17 +17,18 @@ export const UserTabs = ({
   activeTab,
   setActiveTabAction,
 }: UserTabsProps) => {
+  const t = useTranslations("Tabs");
   const tabs = [
-    { key: "home", label: "Trang chủ" },
-    { key: "videos", label: "Video" },
-    { key: "shorts", label: "Shorts" },
-    { key: "playlists", label: "Danh sách phát" },
-    { key: "posts", label: "Bài đăng" },
+    { key: "home", label: t("home") },
+    { key: "videos", label: t("videos") },
+    { key: "shorts", label: t("shorts") },
+    { key: "playlists", label: t("playlists") },
+    { key: "posts", label: t("posts") },
   ];
   const videoSubTabs = [
-    { key: "latest", label: "Mới nhất" },
-    { key: "popular", label: "Phổ biến" },
-    { key: "oldest", label: "Cũ nhất" },
+    { key: "latest", label: t("latest") },
+    { key: "popular", label: t("popular") },
+    { key: "oldest", label: t("oldest") },
   ];
 
   return (

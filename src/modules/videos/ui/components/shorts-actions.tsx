@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import { trpc } from "@/trpc/client";
@@ -49,13 +50,15 @@ export const ShortsActions = ({
 }: ShortsActionsProps) => {
   const clerk = useClerk();
   const utils = trpc.useUtils();
+  const t = useTranslations("Shorts");
+  const locale = useLocale();
 
   const like = trpc.videoReactions.like.useMutation({
     onSuccess: () => {
       utils.videos.getOne.invalidate({ id: video.id });
     },
     onError: (error) => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("downloadError") || "An error occurred");
       if (error.data?.code === "UNAUTHORIZED") clerk.openSignIn();
     },
   });
@@ -65,14 +68,14 @@ export const ShortsActions = ({
       utils.videos.getOne.invalidate({ id: video.id });
     },
     onError: (error) => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("downloadError") || "An error occurred");
       if (error.data?.code === "UNAUTHORIZED") clerk.openSignIn();
     },
   });
 
   const compactLikes = useMemo(() => {
-    return Intl.NumberFormat("vi-VN", { notation: "compact" }).format(video.likeCount);
-  }, [video.likeCount]);
+    return Intl.NumberFormat(locale, { notation: "compact" }).format(video.likeCount);
+  }, [video.likeCount, locale]);
 
   const labelClass = cn(
     "text-xs font-medium drop-shadow-sm",
@@ -112,7 +115,7 @@ export const ShortsActions = ({
         >
           <ThumbsDownIcon className={cn("size-6", video.viewerReaction === "dislike" && "fill-current animate-likeBounce")} />
         </Button>
-        <span className={labelClass}>{video.showLikeCount ? "Không thích" : ""}</span>
+        <span className={labelClass}>{video.showLikeCount ? t("dislike") : ""}</span>
       </div>
 
       {/* Comments */}
@@ -129,7 +132,7 @@ export const ShortsActions = ({
           </SheetTrigger>
           <SheetContent side="right" className="w-full sm:w-[450px] p-0 flex flex-col">
             <SheetHeader className="p-4 border-b">
-              <SheetTitle>Bình luận</SheetTitle>
+              <SheetTitle>{t("comments")}</SheetTitle>
             </SheetHeader>
             <div className="flex-1 overflow-y-auto px-4 pb-10">
               <CommentsSection videoId={video.id} />
@@ -145,7 +148,7 @@ export const ShortsActions = ({
           onClick={() => {
             const url = `${window.location.origin}/videos/${video.id}`;
             navigator.clipboard.writeText(url);
-            toast.success("Đã sao chép liên kết vào bộ nhớ tạm");
+            toast.success(t("copySuccess"));
           }}
           size="icon"
           variant="secondary"
@@ -153,7 +156,7 @@ export const ShortsActions = ({
         >
           <Share2Icon className="size-6" />
         </Button>
-        <span className={labelClass}>Chia sẻ</span>
+        <span className={labelClass}>{t("share")}</span>
       </div>
 
       {/* Download */}
@@ -161,14 +164,14 @@ export const ShortsActions = ({
         <Button
           onClick={async () => {
             if (!video.muxPlaybackId) {
-              toast.error("Không tìm thấy tệp tải xuống");
+              toast.error(t("noFileError"));
               return;
             }
 
             const downloadUrl = `https://stream.mux.com/${video.muxPlaybackId}/highest.mp4`;
             
             try {
-              toast.info("Đang chuẩn bị tệp tải xuống...");
+              toast.info(t("preparingFile"));
               
               const response = await fetch(downloadUrl);
               let blob: Blob;
@@ -176,7 +179,7 @@ export const ShortsActions = ({
               if (!response.ok) {
                 // Fallback to API if direct fetch fails
                 const apiResponse = await fetch(`/api/download-video?assetId=${video.muxAssetId}`);
-                if (!apiResponse.ok) throw new Error("Tải xuống thất bại");
+                if (!apiResponse.ok) throw new Error("Download failed");
                 blob = await apiResponse.blob();
               } else {
                 blob = await response.blob();
@@ -205,10 +208,10 @@ export const ShortsActions = ({
                 playbackId: video.muxPlaybackId,
               }, blob);
 
-              toast.success("Đã tải video về máy và lưu vào mục Nội dung tải xuống!");
+              toast.success(t("downloadSuccess"));
             } catch (error) {
               console.error("Download error:", error);
-              toast.error("Không thể tải video trực tiếp. Vui lòng thử lại sau.");
+              toast.error(t("downloadError"));
             }
           }}
           size="icon"
@@ -217,7 +220,7 @@ export const ShortsActions = ({
         >
           <DownloadIcon className="size-6" />
         </Button>
-        <span className={labelClass}>Tải xuống</span>
+        <span className={labelClass}>{t("download")}</span>
       </div>
 
       {/* More */}
@@ -239,7 +242,7 @@ export const ShortsActions = ({
             >
               <div className="flex items-center gap-3">
                 <PlayIcon className="size-4" />
-                <span>Tự động phát tiếp</span>
+                <span>{t("autoNext")}</span>
               </div>
               {isAutoNext && <CheckIcon className="size-4 text-blue-500" />}
             </DropdownMenuItem>
@@ -250,7 +253,7 @@ export const ShortsActions = ({
             >
               <div className="flex items-center gap-3">
                 <RepeatIcon className="size-4" />
-                <span>Lặp lại video</span>
+                <span>{t("loop")}</span>
               </div>
               {isLooping && <CheckIcon className="size-4 text-blue-500" />}
             </DropdownMenuItem>
@@ -262,7 +265,7 @@ export const ShortsActions = ({
               className="focus:bg-neutral-800 focus:text-red-400 text-red-500 cursor-pointer flex items-center gap-3 py-3"
             >
               <XCircleIcon className="size-4" />
-              <span>Không quan tâm</span>
+              <span>{t("notInterested")}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

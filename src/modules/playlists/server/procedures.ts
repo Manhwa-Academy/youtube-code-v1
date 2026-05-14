@@ -318,7 +318,7 @@ export const playlistsRouter = createTRPCRouter({
         if (userVideos.length !== videoIds.length) {
           throw new TRPCError({
             code: "FORBIDDEN",
-            message: "Chỉ chủ sở hữu video mới có quyền tạo playlist kết hợp",
+            message: "Only video owners can create mix playlists",
           });
         }
       }
@@ -418,7 +418,7 @@ export const playlistsRouter = createTRPCRouter({
       if (!updated) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Bạn không có quyền chỉnh sửa danh sách này",
+          message: "You don't have permission to edit this playlist",
         });
       }
 
@@ -548,7 +548,7 @@ export const playlistsRouter = createTRPCRouter({
       if (existingPlaylistVideo) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "Video đã tồn tại trong danh sách",
+          message: "Video already exists in the playlist",
         });
       }
 

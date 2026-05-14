@@ -155,6 +155,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   const [video] = trpc.studio.getOne.useSuspenseQuery({ id: videoId });
+  const tCategories = useTranslations("Categories");
   const [categories] = trpc.categories.getMany.useSuspenseQuery();
   const [playlists] = trpc.playlists.getManyForVideo.useSuspenseQuery({
     videoId,
@@ -427,7 +428,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                               onClick={() => setThumbnailModalOpen(true)}
                             >
                               <ImagePlusIcon className="size-4 mr-1" />
-                              Thay đổi
+                              {t("change")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
@@ -435,7 +436,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                               }
                             >
                               <SparklesIcon className="size-4 mr-1" />
-                              Tạo bằng AI
+                              {t("generateThumbnail")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
@@ -575,7 +576,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                       <SelectContent>
                         {categories.map((category) => (
                           <SelectItem key={category.id} value={category.id}>
-                            {category.name}
+                            {tCategories(category.name)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -628,9 +629,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                         {t("videoStatus")}
                       </p>
                       <p className="text-sm">
-                        {STATUS_MAP[
-                          video.muxStatus as keyof typeof STATUS_MAP
-                        ] || t("processing")}
+                        {t(video.muxStatus || "processing")}
                       </p>
                     </div>
                   </div>
@@ -641,9 +640,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                         {t("trackStatus")}
                       </p>
                       <p className="text-sm">
-                        {TRACK_STATUS_MAP[
-                          video.muxTrackStatus as keyof typeof TRACK_STATUS_MAP
-                        ] || t("noSubtitle")}
+                        {t(video.muxTrackStatus || "no_subtitles")}
                       </p>
                     </div>
                   </div>

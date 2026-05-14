@@ -1,14 +1,17 @@
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { getTranslations } from "next-intl/server";
 import { CustomizationView } from "@/modules/studio/ui/views/customization-view";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const dynamic = "force-dynamic";
 
-const Page = () => {
+const Page = async () => {
+  const t = await getTranslations("Studio");
+
   return (
     <Suspense fallback={<CustomizationLoading />}>
-      <ErrorBoundary fallback={<p>Lỗi khi tải trang tùy chỉnh</p>}>
+      <ErrorBoundary fallback={<p>{t("errorLoadingCustomization")}</p>}>
         <CustomizationView />
       </ErrorBoundary>
     </Suspense>

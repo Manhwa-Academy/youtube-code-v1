@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { CornerDownRightIcon, Loader2Icon } from "lucide-react";
 
 import { trpc } from "@/trpc/client";
@@ -13,6 +14,7 @@ interface CommentRepliesProps {
 }
 
 export const CommentReplies = ({ parentId, videoId, postId }: CommentRepliesProps) => {
+  const t = useTranslations("Comments");
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     trpc.comments.getMany.useInfiniteQuery(
       {
@@ -52,7 +54,7 @@ export const CommentReplies = ({ parentId, videoId, postId }: CommentRepliesProp
           disabled={isFetchingNextPage}
         >
           <CornerDownRightIcon className="size-4 mr-1" />
-          Xem thêm
+          {t("loadMore")}
         </Button>
       )}
     </div>

@@ -7,7 +7,7 @@ import { cache } from "react";
 import superjson from "superjson";
 import { ratelimit } from "@/lib/ratelimit";
 
-// Tạo context TRPC
+// Create TRPC context
 export const createTRPCContext = cache(async () => {
   const { userId } = await auth();
   return { clerkUserId: userId };
@@ -15,7 +15,7 @@ export const createTRPCContext = cache(async () => {
 
 export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 
-// Khởi tạo TRPC
+// Initialize TRPC
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
 });
@@ -24,7 +24,7 @@ export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 export const baseProcedure = t.procedure;
 
-// Middleware bảo vệ procedure và auto-upsert user
+// Middleware to protect procedures and auto-upsert user
 export const protectedProcedure = t.procedure.use(async function isAuthed(opts) {
   const { ctx } = opts;
 
@@ -72,7 +72,7 @@ export const protectedProcedure = t.procedure.use(async function isAuthed(opts) 
   }
 
   if (user.banned) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Tài khoản của bạn đã bị cấm" });
+    throw new TRPCError({ code: "FORBIDDEN", message: "Your account has been banned" });
   }
 
   const { success } = await ratelimit.limit(user.id);
@@ -93,16 +93,16 @@ export const protectedProcedure = t.procedure.use(async function isAuthed(opts) 
   });
 });
 
-// ✅ Admin procedure
+// Admin procedure
 export const adminProcedure = protectedProcedure.use(async function isAdmin(opts) {
   const { ctx } = opts;
 
   if (ctx.user.email !== "vuliztva1@gmail.com") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Bạn không có quyền quản trị" });
+    throw new TRPCError({ code: "FORBIDDEN", message: "You do not have administrator privileges" });
   }
 
   return opts.next(opts);
 });
 
-// ✅ Tạo publicProcedure để mọi người có thể gọi mà không cần login
+// Create publicProcedure for anyone to call without login
 export const publicProcedure = t.procedure;

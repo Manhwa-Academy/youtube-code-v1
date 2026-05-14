@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { vi } from "date-fns/locale";
+import { vi, enUS, ja, ko, zhCN, es, fr, de } from "date-fns/locale";
+import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,6 +10,17 @@ import { UserAvatar } from "@/components/user-avatar";
 import { UserInfo } from "@/modules/users/ui/components/user-info";
 import { VideoMenu } from "./video-menu";
 import { VideoGetManyOutput } from "../../types";
+
+const locales: Record<string, any> = {
+  vi,
+  en: enUS,
+  ja,
+  ko,
+  zh: zhCN,
+  es,
+  fr,
+  de,
+};
 
 interface VideoInfoProps {
   data: VideoGetManyOutput["items"][number];
@@ -29,20 +41,23 @@ export const VideoInfoSkeleton = ({ hideAvatar }: { hideAvatar?: boolean }) => {
 };
 
 export const VideoInfo = ({ data, onRemove, hideAvatar }: VideoInfoProps) => {
+  const locale = useLocale();
+  const t = useTranslations("Video");
+
   const compactViews = useMemo(() => {
-    return data.viewCount === 0
-      ? "Chưa có"
-      : new Intl.NumberFormat("vi-VN", {
-          notation: "compact",
-        }).format(data.viewCount);
-  }, [data.viewCount]);
+    if (data.viewCount === 0) return t("noViews");
+    
+    return new Intl.NumberFormat(locale, {
+      notation: "compact",
+    }).format(data.viewCount);
+  }, [data.viewCount, locale, t]);
 
   const compactDate = useMemo(() => {
     return formatDistanceToNow(data.createdAt, {
       addSuffix: true,
-      locale: vi,
+      locale: locales[locale] || enUS,
     });
-  }, [data.createdAt]);
+  }, [data.createdAt, locale]);
 
   return (
     <div className="flex gap-3">
@@ -70,7 +85,7 @@ export const VideoInfo = ({ data, onRemove, hideAvatar }: VideoInfoProps) => {
 
         <Link prefetch href={`/videos/${data.id}`}>
           <p className="text-sm text-muted-foreground line-clamp-1">
-            {compactViews} lượt xem • {compactDate}
+            {data.viewCount > 0 ? `${compactViews} ${t("views")}` : compactViews} • {compactDate}
           </p>
         </Link>
       </div>

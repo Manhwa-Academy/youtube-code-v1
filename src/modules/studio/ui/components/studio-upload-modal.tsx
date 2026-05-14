@@ -3,6 +3,7 @@
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2Icon, PlusIcon } from "lucide-react"
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/trpc/client";
 import { Button } from "@/components/ui/button"
@@ -17,13 +18,14 @@ interface StudioUploadModalProps {
 export const StudioUploadModal = ({ children }: StudioUploadModalProps) => {
   const router = useRouter();
   const utils = trpc.useUtils();
+  const t = useTranslations("Studio");
   const create = trpc.videos.create.useMutation({
     onSuccess: () => {
-      toast.success("Video đang được tạo, bạn có thể bắt đầu upload");
+      toast.success(t("uploadVideoStarted"));
       utils.studio.getMany.invalidate();
     },
     onError: () => {
-      toast.error("Đã xảy ra lỗi vì đủ 10 video trên Mux nên không thể tạo video mới. Vui lòng xóa bớt video cũ hoặc liên hệ support để được hỗ trợ.");
+      toast.error(t("muxQuotaError"));
     },
   });
 
@@ -37,7 +39,7 @@ export const StudioUploadModal = ({ children }: StudioUploadModalProps) => {
   return (
     <>
       <ResponsiveModal
-        title="Upload a video"
+        title={t("uploadVideo")}
         open={!!create.data?.url}
         onOpenChange={() => create.reset()}
       >
@@ -53,7 +55,7 @@ export const StudioUploadModal = ({ children }: StudioUploadModalProps) => {
       ) : (
         <Button variant="secondary" onClick={() => create.mutate()} disabled={create.isPending}>
           {create.isPending ? <Loader2Icon className="animate-spin" /> : <PlusIcon />}
-          Tạo
+          {t("create")}
         </Button>
       )}
     </>

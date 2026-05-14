@@ -3,8 +3,9 @@
 import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { format } from "date-fns";
-import { vi } from "date-fns/locale";
+import { vi, enUS, de, es, fr, ja, ko, zhCN } from "date-fns/locale";
 import { toast } from "sonner";
+import { useTranslations, useLocale } from "next-intl";
 import {
   MoreVerticalIcon,
   ShieldAlertIcon,
@@ -48,19 +49,20 @@ import { Input } from "@/components/ui/input";
 import { UserAvatar } from "@/components/user-avatar";
 
 export const AdminUsersSection = () => {
+  const t = useTranslations("Admin");
   const [search, setSearch] = useState("");
 
   return (
     <div className="p-6">
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Quản lý người dùng</h1>
-          <p className="text-muted-foreground">Quản lý tài khoản và trạng thái của người dùng trên hệ thống.</p>
+          <h1 className="text-2xl font-bold">{t("userManagement")}</h1>
+          <p className="text-muted-foreground">{t("manageUserAccounts")}</p>
         </div>
         <div className="relative w-full sm:w-80">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Tìm kiếm theo tên hoặc handle..." 
+            placeholder={t("searchPlaceholder")} 
             className="pl-10 rounded-full"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -69,7 +71,7 @@ export const AdminUsersSection = () => {
       </div>
 
       <Suspense fallback={<AdminUsersSkeleton />} key={search}>
-        <ErrorBoundary fallback={<p>Lỗi khi tải danh sách người dùng</p>}>
+        <ErrorBoundary fallback={<p>{t("errorLoadingUsers")}</p>}>
           <AdminUsersSuspense search={search} />
         </ErrorBoundary>
       </Suspense>
@@ -92,15 +94,29 @@ interface AdminUsersSuspenseProps {
 }
 
 const AdminUsersSuspense = ({ search }: AdminUsersSuspenseProps) => {
+  const t = useTranslations("Admin");
+  const tCommon = useTranslations("Common");
+  const locale = useLocale();
   const { user: currentUser } = useUser();
   const [usersData] = trpc.admin.getUsers.useSuspenseQuery({ limit: 50, search });
   const utils = trpc.useUtils();
+
+  const dateFnsLocale = {
+    vi,
+    en: enUS,
+    de,
+    es,
+    fr,
+    ja,
+    ko,
+    zh: zhCN,
+  }[locale] || enUS;
 
   const [banUser, setBanUser] = useState<{ id: string, name: string } | null>(null);
 
   const updateUserStatus = trpc.admin.updateUserStatus.useMutation({
     onSuccess: () => {
-      toast.success("Đã cập nhật trạng thái người dùng");
+      toast.success(t("userStatusUpdated"));
       utils.admin.getUsers.invalidate();
       setBanUser(null);
     },
@@ -114,19 +130,18 @@ const AdminUsersSuspense = ({ search }: AdminUsersSuspenseProps) => {
       <AlertDialog open={!!banUser} onOpenChange={(open) => !open && setBanUser(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận cấm tài khoản?</AlertDialogTitle>
+            <AlertDialogTitle>{t("confirmBanTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn cấm tài khoản <span className="font-bold text-black dark:text-white">{banUser?.name}</span>? 
-              Người dùng này sẽ không thể thực hiện các thao tác đăng nhập và tương tác trên hệ thống.
+       {t("confirmBanDesc", { name: banUser?.name ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
             <AlertDialogAction 
               className="bg-red-600 hover:bg-red-700"
               onClick={() => banUser && updateUserStatus.mutate({ userId: banUser.id, banned: true })}
             >
-              Cấm tài khoản
+              {t("banAccount")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -137,11 +152,11 @@ const AdminUsersSuspense = ({ search }: AdminUsersSuspenseProps) => {
         <Table>
           <TableHeader>
             <TableRow className="bg-neutral-50 dark:bg-neutral-800/50">
-              <TableHead className="min-w-[200px]">Người dùng</TableHead>
-              <TableHead className="min-w-[120px]">Ngày tham gia</TableHead>
+              <TableHead className="min-w-[200px]">{t("tableUser")}</TableHead>
+              <TableHead className="min-w-[120px]">{t("tableJoinedDate")}</TableHead>
               <TableHead className="min-w-[150px]">Handle</TableHead>
-              <TableHead className="min-w-[120px]">Trạng thái</TableHead>
-              <TableHead className="min-w-[150px] text-center pr-32">Thao tác</TableHead>
+              <TableHead className="min-w-[120px]">{t("tableStatus")}</TableHead>
+              <TableHead className="min-w-[150px] text-center pr-32">{t("tableActions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -157,7 +172,7 @@ const AdminUsersSuspense = ({ search }: AdminUsersSuspenseProps) => {
                 </div>
               </TableCell>
               <TableCell className="text-sm">
-                {format(new Date(user.createdAt), "dd/MM/yyyy", { locale: vi })}
+                {format(new Date(user.createdAt), "dd/MM/yyyy", { locale: dateFnsLocale })}
               </TableCell>
               <TableCell>
                 <span className="text-sm text-blue-500 font-medium">@{user.handle || "no-handle"}</span>
@@ -166,12 +181,12 @@ const AdminUsersSuspense = ({ search }: AdminUsersSuspenseProps) => {
                 {user.banned ? (
                   <Badge variant="destructive" className="gap-1">
                     <ShieldAlertIcon className="size-3" />
-                    Đã bị cấm
+                    {t("statusBanned")}
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="gap-1 text-green-600 border-green-600">
                     <ShieldCheckIcon className="size-3" />
-                    Hoạt động
+                    {t("statusActive")}
                   </Badge>
                 )}
               </TableCell>
@@ -186,12 +201,12 @@ const AdminUsersSuspense = ({ search }: AdminUsersSuspenseProps) => {
                     <DropdownMenuContent align="end" className="w-56">
                       <DropdownMenuItem onClick={() => window.open(`/users/${user.id}`, '_blank')}>
                         <SearchIcon className="size-4 mr-2" />
-                        Xem kênh
+                        {t("viewChannel")}
                       </DropdownMenuItem>
                       {user.banned ? (
                         <DropdownMenuItem onClick={() => updateUserStatus.mutate({ userId: user.id, banned: false })}>
                           <UserCheckIcon className="size-4 mr-2 text-green-500" />
-                          Gỡ cấm tài khoản
+                          {t("unbanAccount")}
                         </DropdownMenuItem>
                       ) : (
                         <DropdownMenuItem 
@@ -199,7 +214,7 @@ const AdminUsersSuspense = ({ search }: AdminUsersSuspenseProps) => {
                           onClick={() => setBanUser({ id: user.id, name: user.name })}
                         >
                           <UserXIcon className="size-4 mr-2" />
-                          Cấm tài khoản
+                          {t("banAccount")}
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>

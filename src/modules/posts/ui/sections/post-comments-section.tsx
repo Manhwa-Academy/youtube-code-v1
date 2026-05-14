@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { Loader2Icon, ListFilterIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorFallback } from "@/components/error-fallback";
 
@@ -43,6 +44,7 @@ export const PostCommentsSectionSkeleton = () => {
 };
 
 const PostCommentsSectionSuspense = ({ postId, canComment }: PostCommentsSectionProps) => {
+  const t = useTranslations("Posts");
   const [sortBy, setSortBy] = useState<"top" | "newest">("top");
 
   const [comments, query] = trpc.comments.getMany.useSuspenseInfiniteQuery(
@@ -62,22 +64,22 @@ const PostCommentsSectionSuspense = ({ postId, canComment }: PostCommentsSection
     <div className="mt-6">
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-sm font-bold">{total} bình luận</h1>
+          <h1 className="text-sm font-bold">{t("commentsCount", { count: total })}</h1>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2 text-xs">
                 <ListFilterIcon className="size-3" />
-                Sắp xếp theo
+                {t("sortBy")}
               </Button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="start">
               <DropdownMenuItem onClick={() => setSortBy("top")}>
-                Nổi bật nhất
+                {t("topComments")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setSortBy("newest")}>
-                Mới nhất
+                {t("newestFirst")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -88,7 +90,7 @@ const PostCommentsSectionSuspense = ({ postId, canComment }: PostCommentsSection
         ) : (
           <div className="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg text-center">
             <p className="text-sm text-muted-foreground font-medium">
-              Tính năng bình luận đã bị tắt cho bài đăng này.
+              {t("commentsDisabled")}
             </p>
           </div>
         )}

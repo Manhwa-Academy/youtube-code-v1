@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { useState, useMemo } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import DOMPurify from "dompurify";
@@ -19,10 +20,12 @@ export const VideoDescription = ({
   expandedDate,
   description,
 }: VideoDescriptionProps) => {
+  const t = useTranslations("Video");
+  const tCard = useTranslations("VideoCard");
   const [isExpanded, setIsExpanded] = useState(false);
 
   const parsedDescription = useMemo(() => {
-    if (!description) return "Không có mô tả";
+    if (!description) return tCard("noDescription");
 
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const hashtagRegex = /#(\w+)/g;
@@ -48,7 +51,7 @@ export const VideoDescription = ({
  return DOMPurify.sanitize(parsed, {
   ADD_ATTR: ["target"],
 });
-  }, [description]);
+  }, [description, tCard]);
 
   return (
     <div
@@ -57,7 +60,7 @@ export const VideoDescription = ({
     >
       <div className="flex gap-2 text-sm mb-2">
         <span className="font-medium">
-          {isExpanded ? expandedViews : compactViews} lượt xem
+          {isExpanded ? expandedViews : compactViews} {t("views")}
         </span>
         <span className="font-medium">
           {isExpanded ? expandedDate : compactDate}
@@ -83,11 +86,11 @@ export const VideoDescription = ({
         <div className="flex items-center gap-1 mt-4 text-sm font-medium">
           {isExpanded ? (
             <>
-              Thu gọn <ChevronUpIcon className="size-4" />
+              {tCard("showLess")} <ChevronUpIcon className="size-4" />
             </>
           ) : (
             <>
-              Xem thêm <ChevronDownIcon className="size-4" />
+              {tCard("showMore")} <ChevronDownIcon className="size-4" />
             </>
           )}
         </div>

@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface HomePostsSectionProps {
   userId: string;
@@ -16,9 +17,11 @@ interface HomePostsSectionProps {
 }
 
 export const HomePostsSection = (props: HomePostsSectionProps) => {
+  const t = useTranslations("Posts");
+
   return (
     <Suspense fallback={<HomePostsSectionSkeleton />}>
-      <ErrorBoundary fallback={<p>Lỗi khi tải bài đăng</p>}>
+      <ErrorBoundary fallback={<p>{t("errorLoading")}</p>}>
         <HomePostsSectionSuspense {...props} />
       </ErrorBoundary>
     </Suspense>
@@ -37,6 +40,7 @@ export const HomePostsSectionSkeleton = () => (
 );
 
 const HomePostsSectionSuspense = ({ userId, onPostsCount, onSeeAll }: HomePostsSectionProps) => {
+  const t = useTranslations("Posts");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [posts] = trpc.posts.getMany.useSuspenseInfiniteQuery({
     userId,
@@ -65,7 +69,7 @@ const HomePostsSectionSuspense = ({ userId, onPostsCount, onSeeAll }: HomePostsS
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h2 className="font-semibold text-lg">Bài đăng</h2>
+          <h2 className="font-semibold text-lg">{t("title")}</h2>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
@@ -92,7 +96,7 @@ const HomePostsSectionSuspense = ({ userId, onPostsCount, onSeeAll }: HomePostsS
             className="text-blue-500 font-bold hover:bg-blue-50 dark:hover:bg-blue-900/10" 
             onClick={onSeeAll}
           >
-            Xem tất cả
+            {t("viewAll")}
           </Button>
         )}
       </div>

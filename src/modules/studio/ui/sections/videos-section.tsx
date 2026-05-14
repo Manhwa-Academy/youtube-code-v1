@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { 
   ArrowDownIcon, 
   ArrowUpIcon, 
@@ -92,6 +93,7 @@ export const VideosSection = ({ limit, isShorts }: VideosSectionProps) => {
 };
 
 const VideosSectionSkeleton = () => {
+  const t = useTranslations("Studio");
   return (
     <>
       <div className="border-y">
@@ -101,18 +103,18 @@ const VideosSectionSkeleton = () => {
               <TableHead className="pl-6 w-[40px]">
                 <Checkbox disabled />
               </TableHead>
-              <TableHead className="w-[510px]">Video</TableHead>
-              <TableHead>Quyền riêng tư</TableHead>
-              <TableHead>Trạng thái</TableHead>
+              <TableHead className="w-[510px]">{t("video")}</TableHead>
+              <TableHead>{t("privacy")}</TableHead>
+              <TableHead>{t("status")}</TableHead>
               <TableHead>
                 <div className="flex items-center gap-1">
-                  Ngày
+                  {t("date")}
                   <ArrowDownIcon className="size-4" />
                 </div>
               </TableHead>
-              <TableHead className="text-right">Lượt xem</TableHead>
-              <TableHead className="text-right">Bình luận</TableHead>
-              <TableHead className="text-right pr-6">Lượt thích</TableHead>
+              <TableHead className="text-right">{t("views")}</TableHead>
+              <TableHead className="text-right">{t("comments")}</TableHead>
+              <TableHead className="text-right pr-6">{t("likes")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -167,6 +169,7 @@ interface VideosSectionSuspenseProps extends VideosSectionProps {
 }
 
 const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspenseProps) => {
+  const t = useTranslations("Studio");
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -180,11 +183,11 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
   const utils = trpc.useUtils();
   const remove = trpc.videos.remove.useMutation({
     onSuccess: () => {
-      toast.success("Video đã được xóa");
+      toast.success(t("deleteSuccess"));
       utils.studio.getMany.invalidate();
     },
     onError: () => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(t("errorOccurred"));
     },
   });
 
@@ -235,15 +238,15 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                   onCheckedChange={toggleSelectAll}
                 />
               </TableHead>
-              <TableHead className="w-[510px]">Video</TableHead>
-              <TableHead>Quyền riêng tư</TableHead>
-              <TableHead>Trạng thái</TableHead>
+              <TableHead className="w-[510px]">{t("video")}</TableHead>
+              <TableHead>{t("privacy")}</TableHead>
+              <TableHead>{t("status")}</TableHead>
               <TableHead 
                 className="cursor-pointer select-none group"
                 onClick={toggleSortOrder}
               >
                 <div className="flex items-center gap-1">
-                  Ngày
+                  {t("date")}
                   {sortOrder === "desc" ? (
                     <ArrowDownIcon className="size-4" />
                   ) : (
@@ -251,9 +254,9 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                   )}
                 </div>
               </TableHead>
-              <TableHead className="text-right">Lượt xem</TableHead>
-              <TableHead className="text-right">Bình luận</TableHead>
-              <TableHead className="text-right pr-6">Lượt thích</TableHead>
+              <TableHead className="text-right">{t("views")}</TableHead>
+              <TableHead className="text-right">{t("comments")}</TableHead>
+              <TableHead className="text-right pr-6">{t("likes")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -262,7 +265,7 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                 <TableCell colSpan={8} className="h-[400px] text-center text-muted-foreground">
                    <div className="flex flex-col items-center justify-center gap-y-4">
                     <SearchIcon className="size-16 text-muted-foreground/50" />
-                    <p className="text-sm text-muted-foreground">Không có video nào phù hợp</p>
+                    <p className="text-sm text-muted-foreground">{t("noVideosMatching")}</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -322,7 +325,7 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                                   <PencilIcon className="size-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent>Chỉnh sửa</TooltipContent>
+                              <TooltipContent>{t("edit")}</TooltipContent>
                             </Tooltip>
 
                             <Tooltip>
@@ -339,7 +342,7 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                                   <BarChart2Icon className="size-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent>Số liệu phân tích</TooltipContent>
+                              <TooltipContent>{t("analytics")}</TooltipContent>
                             </Tooltip>
 
                             <Tooltip>
@@ -356,7 +359,7 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                                   <MessageSquareIcon className="size-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent>Bình luận</TooltipContent>
+                              <TooltipContent>{t("comments")}</TooltipContent>
                             </Tooltip>
 
                             <Tooltip>
@@ -373,7 +376,7 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                                   <YoutubeIcon className="size-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent>Xem trên YouTube</TooltipContent>
+                              <TooltipContent>{t("viewOnYouTube")}</TooltipContent>
                             </Tooltip>
 
                             <DropdownMenu>
@@ -400,21 +403,21 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                                   }}
                                 >
                                   <PencilIcon className="mr-2 size-4" />
-                                  Chỉnh sửa tiêu đề và thông tin mô tả
+                                  {t("editTitleDesc")}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigator.clipboard.writeText(`${window.location.origin}/videos/${video.id}`);
-                                    toast.success("Đã sao chép liên kết");
+                                    toast.success(t("linkCopied"));
                                   }}
                                 >
                                   <Share2Icon className="mr-2 size-4" />
-                                  Lấy đường liên kết có thể chia sẻ
+                                  {t("getShareLink")}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                                   <MegaphoneIcon className="mr-2 size-4" />
-                                  Quảng bá
+                                  {t("promote")}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={(e) => e.stopPropagation()} asChild>
                                   <a 
@@ -423,12 +426,12 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                                     target="_blank"
                                   >
                                     <DownloadIcon className="mr-2 size-4" />
-                                    Tải xuống
+                                    {t("download")}
                                   </a>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                                   <SparklesIcon className="mr-2 size-4" />
-                                  Lên ý tưởng cho video
+                                  {t("videoIdeas")}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   className="text-red-600 focus:text-red-600"
@@ -438,7 +441,7 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                                   }}
                                 >
                                   <Trash2Icon className="mr-2 size-4" />
-                                  Xóa vĩnh viễn
+                                  {t("deletePermanently")}
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -446,7 +449,7 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                         </div>
 
                         <span className="text-xs text-muted-foreground line-clamp-1 group-hover:hidden transition-all">
-                          {video.description || "Không có mô tả"}
+                          {video.description || t("noDescription")}
                         </span>
                       </div>
                     </div>
@@ -458,27 +461,21 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                       ) : (
                         <Globe2Icon className="size-4 mr-2" />
                       )}
-                      {
-                        VISIBILITY_MAP[
-                          video.visibility as keyof typeof VISIBILITY_MAP
-                        ]
-                      }
+                      {t(video.visibility)}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center">
-                      {STATUS_MAP[
-                        video.muxStatus as keyof typeof STATUS_MAP
-                      ] || "Lỗi"}
+                      {t(video.muxStatus || "error")}
                     </div>
                   </TableCell>
                   <TableCell className="text-sm">
                     <div className="flex flex-col">
                       <span>
-                        {format(new Date(video.createdAt), "d 'thg' M, yyyy")}
+                        {format(new Date(video.createdAt), "d MMM, yyyy")}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        Đã đăng
+                        {t("published")}
                       </span>
                     </div>
                   </TableCell>

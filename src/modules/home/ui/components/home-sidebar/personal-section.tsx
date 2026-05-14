@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth, useClerk, useUser } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import {
   HistoryIcon,
   ListVideoIcon,
@@ -25,61 +26,62 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-const items = [
-  {
-    title: "Thông báo",
-    url: "/notifications",
-    icon: BellIcon,
-    auth: true,
-  },
-  {
-    title: "Kênh của bạn",
-    url: "/users/current",
-    icon: UserSquare2Icon,
-    auth: true,
-  },
-  {
-    title: "Video đã xem",
-    url: "/playlists/history",
-    icon: HistoryIcon,
-    auth: true,
-  },
-  {
-    title: "Video của bạn",
-    url: "/studio",
-    icon: PlaySquareIcon,
-    auth: true,
-  },
-  {
-    title: "Video đã thích",
-    url: "/playlists/liked",
-    icon: ThumbsUpIcon,
-    auth: true,
-  },
-  {
-    title: "Tất cả danh sách phát",
-    url: "/playlists",
-    icon: ListVideoIcon,
-    auth: true,
-  },
-  {
-    title: "Nội dung tải xuống",
-    url: "/playlists/download",
-    icon: DownloadIcon,
-    auth: true,
-  },
-];
-
 export const PersonalSection = () => {
+  const t = useTranslations("Sidebar");
   const clerk = useClerk();
   const { user } = useUser();
   const { isSignedIn } = useAuth();
   const pathname = usePathname();
   const isOnline = useIsOnline();
 
+  const items = [
+    {
+      title: t("notifications"),
+      url: "/notifications",
+      icon: BellIcon,
+      auth: true,
+    },
+    {
+      title: t("yourChannel"),
+      url: "/users/current",
+      icon: UserSquare2Icon,
+      auth: true,
+    },
+    {
+      title: t("history"),
+      url: "/playlists/history",
+      icon: HistoryIcon,
+      auth: true,
+    },
+    {
+      title: t("yourVideos"),
+      url: "/studio",
+      icon: PlaySquareIcon,
+      auth: true,
+    },
+    {
+      title: t("likedVideos"),
+      url: "/playlists/liked",
+      icon: ThumbsUpIcon,
+      auth: true,
+    },
+    {
+      title: t("allPlaylists"),
+      url: "/playlists",
+      icon: ListVideoIcon,
+      auth: true,
+    },
+    {
+      title: t("downloads"),
+      url: "/playlists/download",
+      icon: DownloadIcon,
+      auth: true,
+    },
+  ];
+
   let filteredItems = isOnline 
     ? items 
-    : items.filter(item => item.title === "Nội dung tải xuống");
+    : items.filter(item => item.url === "/playlists/download");
 
   const isAdmin = user?.emailAddresses.some(e => e.emailAddress === "vuliztva1@gmail.com");
   
@@ -87,7 +89,7 @@ export const PersonalSection = () => {
     filteredItems = [
       ...filteredItems,
       {
-        title: "Bảng quản trị hệ thống",
+        title: t("systemAdmin"),
         url: "/admin",
         icon: ShieldAlertIcon,
         auth: true,
@@ -97,11 +99,11 @@ export const PersonalSection = () => {
 
   return (
     <SidebarGroup>
-      {isOnline && <SidebarGroupLabel>Bạn</SidebarGroupLabel>}
+      {isOnline && <SidebarGroupLabel>{t("you")}</SidebarGroupLabel>}
       <SidebarGroupContent>
         <SidebarMenu>
           {filteredItems.map((item) => (
-            <SidebarMenuItem key={item.title}>
+            <SidebarMenuItem key={item.url}>
               <SidebarMenuButton
                 tooltip={item.title}
                 asChild

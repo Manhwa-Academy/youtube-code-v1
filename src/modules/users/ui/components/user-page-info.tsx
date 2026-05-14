@@ -12,8 +12,20 @@ import {
   ChevronRightIcon,
   FlagIcon,
 } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 import { format } from "date-fns";
-import { vi } from "date-fns/locale";
+import { enUS, vi, ja, ko, zhCN, de, es, fr } from "date-fns/locale";
+
+const dateFnsLocales = {
+  en: enUS,
+  vi: vi,
+  ja: ja,
+  ko: ko,
+  zh: zhCN,
+  de: de,
+  es: es,
+  fr: fr,
+};
 
 import { toast } from "sonner";
 
@@ -58,6 +70,10 @@ export const UserPageInfoSkeleton = () => {
 };
 
 export const UserPageInfo = ({ user }: UserPageInfoProps) => {
+  const t = useTranslations("Profile");
+  const locale = useLocale();
+  const dateLocale = dateFnsLocales[locale as keyof typeof dateFnsLocales] || vi;
+
   const { userId, isLoaded } = useAuth();
   const clerk = useClerk();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -72,7 +88,7 @@ export const UserPageInfo = ({ user }: UserPageInfoProps) => {
   const handleCopyChannelLink = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
-    toast.success("Đã sao chép liên kết kênh!");
+    toast.success(t("copySuccess"));
   };
 
   const userHandle = user.handle ? `@${user.handle}` : `@${user.name.toLowerCase().replace(/\s+/g, "-")}`;
@@ -102,9 +118,9 @@ export const UserPageInfo = ({ user }: UserPageInfoProps) => {
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-muted-foreground mt-2 font-medium">
             <span className="text-foreground font-semibold">{userHandle}</span>
             <span>&bull;</span>
-            <span>{user.subscriberCount} người đăng ký</span>
+            <span>{t("subscribers", { count: user.subscriberCount })}</span>
             <span>&bull;</span>
-            <span>{user.videoCount} video</span>
+            <span>{t("videos", { count: user.videoCount })}</span>
           </div>
 
           {/* Bio / About Dialog */}
@@ -112,28 +128,28 @@ export const UserPageInfo = ({ user }: UserPageInfoProps) => {
             <DialogTrigger asChild>
               <div className="group cursor-pointer mt-3 max-w-[600px]">
                  <p className="text-sm text-muted-foreground line-clamp-1 group-hover:text-foreground transition-colors flex items-center gap-1">
-                    {user.bio || "Tìm hiểu thêm về kênh này"}
+                    {user.bio || t("learnMore")}
                     <ChevronRightIcon className="size-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                  </p>
-                 <span className="text-sm font-bold text-foreground">...xem thêm</span>
+                 <span className="text-sm font-bold text-foreground">{t("showMore")}</span>
               </div>
             </DialogTrigger>
             <DialogContent className="max-w-md rounded-2xl border-none bg-neutral-100 dark:bg-neutral-900 p-0 overflow-hidden">
                <div className="p-6 space-y-6">
                   <div className="flex items-center justify-between">
-                     <h2 className="text-xl font-bold">Thông tin</h2>
+                     <h2 className="text-xl font-bold">{t("about")}</h2>
                   </div>
 
                   <div className="space-y-4">
                      <div className="space-y-1">
-                        <h3 className="text-base font-bold">Mô tả</h3>
+                        <h3 className="text-base font-bold">{t("description")}</h3>
                         <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                           {user.bio || "Chưa có mô tả cho kênh này."}
+                           {user.bio || t("noDescription")}
                         </p>
                      </div>
 
                      <div className="space-y-3">
-                        <h3 className="text-base font-bold">Chi tiết về kênh</h3>
+                        <h3 className="text-base font-bold">{t("channelDetails")}</h3>
                         <div className="space-y-4">
                            <div className="flex items-center gap-3 text-sm min-w-0">
                               <GlobeIcon className="size-5 text-muted-foreground shrink-0" />
@@ -148,19 +164,19 @@ export const UserPageInfo = ({ user }: UserPageInfoProps) => {
                            </div>
                            <div className="flex items-center gap-3 text-sm">
                               <UsersIcon className="size-5 text-muted-foreground shrink-0" />
-                              <span>{user.subscriberCount} người đăng ký</span>
+                              <span>{t("subscribers", { count: user.subscriberCount })}</span>
                            </div>
                            <div className="flex items-center gap-3 text-sm">
                               <VideoIcon className="size-5 text-muted-foreground shrink-0" />
-                              <span>{user.videoCount} video</span>
+                              <span>{t("videos", { count: user.videoCount })}</span>
                            </div>
                            <div className="flex items-center gap-3 text-sm">
                               <TrendingUpIcon className="size-5 text-muted-foreground shrink-0" />
-                              <span>{user.viewCount || 0} lượt xem</span>
+                              <span>{t("views", { count: user.viewCount || 0 })}</span>
                            </div>
                            <div className="flex items-center gap-3 text-sm">
                               <CalendarIcon className="size-5 text-muted-foreground shrink-0" />
-                              <span>Đã tham gia {format(new Date(user.createdAt), "d 'thg' M, yyyy", { locale: vi })}</span>
+                              <span>{t("joinedDate", { date: format(new Date(user.createdAt), "d 'thg' M, yyyy", { locale: dateLocale }) })}</span>
                            </div>
                         </div>
                      </div>
@@ -173,7 +189,7 @@ export const UserPageInfo = ({ user }: UserPageInfoProps) => {
                        onClick={handleCopyChannelLink}
                     >
                        <Share2Icon className="size-5" />
-                       Chia sẻ kênh
+                       {t("shareChannel")}
                     </Button>
                   </div>
                </div>
@@ -186,12 +202,12 @@ export const UserPageInfo = ({ user }: UserPageInfoProps) => {
               <>
                 <Button variant="secondary" asChild className="rounded-full font-bold px-6">
                   <Link prefetch href="/studio/customization" target="_blank">
-                    Tùy chỉnh kênh
+                    {t("customizeChannel")}
                   </Link>
                 </Button>
                 <Button variant="secondary" asChild className="rounded-full font-bold px-6">
                   <Link prefetch href="/studio" target="_blank">
-                    Quản lý video
+                    {t("manageVideos")}
                   </Link>
                 </Button>
               </>
@@ -209,7 +225,7 @@ export const UserPageInfo = ({ user }: UserPageInfoProps) => {
                 size="icon" 
                 className="rounded-full"
                 onClick={() => setIsReportModalOpen(true)}
-                title="Báo cáo người dùng"
+                title={t("reportUser")}
               >
                 <FlagIcon className="size-5" />
               </Button>

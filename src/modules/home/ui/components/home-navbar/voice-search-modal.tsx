@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { MicIcon, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/responsive-modal";
 import { APP_URL } from "@/constants";
@@ -11,6 +12,17 @@ interface VoiceSearchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+ 
+const speechLocales: Record<string, string> = {
+  vi: "vi-VN",
+  en: "en-US",
+  ja: "ja-JP",
+  ko: "ko-KR",
+  zh: "zh-CN",
+  de: "de-DE",
+  es: "es-ES",
+  fr: "fr-FR",
+};
 
 export const VoiceSearchModal = ({ open, onOpenChange }: VoiceSearchModalProps) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -19,12 +31,14 @@ export const VoiceSearchModal = ({ open, onOpenChange }: VoiceSearchModalProps) 
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
   const router = useRouter();
+  const t = useTranslations("VoiceSearch");
+  const locale = useLocale();
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
-      setError("Trình duyệt của bạn không hỗ trợ tìm kiếm bằng giọng nói.");
+      setError(t("unsupported"));
       return;
     }
 
@@ -35,7 +49,7 @@ export const VoiceSearchModal = ({ open, onOpenChange }: VoiceSearchModalProps) 
       const recognition = new SpeechRecognition();
       recognition.continuous = false; // Tắt continuous để giảm lỗi network
       recognition.interimResults = true;
-      recognition.lang = "vi-VN";
+      recognition.lang = speechLocales[locale] || "en-US";
 
       recognition.onstart = () => {
         setIsRecording(true);
@@ -66,12 +80,12 @@ export const VoiceSearchModal = ({ open, onOpenChange }: VoiceSearchModalProps) 
         // Mạng đôi khi bị lỗi tạm thời, chúng ta sẽ không báo lỗi ngay lập tức nếu đã có kết quả
         if (event.error === "network") {
           if (!transcript && !interimTranscript) {
-            setError("Lỗi kết nối mạng. Hãy thử nói lại hoặc kiểm tra Internet.");
+            setError(t("networkError"));
           }
         } else if (event.error === "not-allowed") {
-          setError("Micro bị chặn. Vui lòng cấp quyền.");
+          setError(t("micBlocked"));
         } else if (event.error !== "no-speech") {
-          setError("Đã xảy ra lỗi. Hãy thử lại.");
+          setError(t("genericError"));
         }
         setIsRecording(false);
       };
@@ -109,13 +123,13 @@ export const VoiceSearchModal = ({ open, onOpenChange }: VoiceSearchModalProps) 
 
   return (
     <ResponsiveModal
-      title="Tìm kiếm bằng giọng nói"
+      title={t("title")}
       open={open}
       onOpenChange={onOpenChange}
     >
       <div className="flex flex-col items-center justify-center p-8 min-h-[300px] gap-8">
         <div className={`text-2xl font-medium text-center min-h-[3rem] px-4 ${error ? "text-red-500" : ""}`}>
-          {error || transcript || interimTranscript || (isRecording ? "Đang nghe..." : "Nhấn vào micro để thử lại")}
+          {error || transcript || interimTranscript || (isRecording ? t("listening") : t("tryAgain"))}
         </div>
 
         <div className="relative">
@@ -144,7 +158,7 @@ export const VoiceSearchModal = ({ open, onOpenChange }: VoiceSearchModalProps) 
             className="flex-1 rounded-full"
             onClick={() => onOpenChange(false)}
           >
-            Hủy
+            {t("cancel")}
           </Button>
           <Button 
             variant="default" 
@@ -152,7 +166,7 @@ export const VoiceSearchModal = ({ open, onOpenChange }: VoiceSearchModalProps) 
             onClick={handleDone}
             disabled={!(transcript || interimTranscript)}
           >
-            Xong
+            {t("done")}
           </Button>
         </div>
       </div>

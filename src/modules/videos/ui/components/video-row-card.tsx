@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -82,20 +83,24 @@ export const VideoRowCard = ({
   progress = 0,
   menu, // ✅ nhận menu
 }: VideoRowCardProps) => {
+  const locale = useLocale();
+  const t = useTranslations("Video");
+  const tCard = useTranslations("VideoCard");
+
   const compactViews = useMemo(
     () =>
-      Intl.NumberFormat("vi-VN", {
+      Intl.NumberFormat(locale, {
         notation: "compact",
       }).format(data.viewCount),
-    [data.viewCount],
+    [data.viewCount, locale],
   );
 
   const compactLikes = useMemo(
     () =>
-      Intl.NumberFormat("vi-VN", {
+      Intl.NumberFormat(locale, {
         notation: "compact",
       }).format(data.likeCount),
-    [data.likeCount],
+    [data.likeCount, locale],
   );
 
   return (
@@ -134,7 +139,7 @@ export const VideoRowCard = ({
             </h3>
 
             <p className="text-xs text-muted-foreground mt-1">
-              {compactViews} lượt xem • {compactLikes} lượt thích
+              {compactViews} {t("views")} • {compactLikes} {t("likes")}
             </p>
 
             {size === "default" && (
@@ -150,7 +155,7 @@ export const VideoRowCard = ({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <p className="text-xs text-muted-foreground w-fit line-clamp-2">
-                      {data.description ?? "Không có mô tả"}
+                      {data.description ?? tCard("noDescription")}
                     </p>
                   </TooltipTrigger>
                   <TooltipContent
@@ -158,7 +163,7 @@ export const VideoRowCard = ({
                     align="center"
                     className="bg-black/70"
                   >
-                    <p>Từ mô tả video</p>
+                    <p>{tCard("fromDescription")}</p>
                   </TooltipContent>
                 </Tooltip>
               </>

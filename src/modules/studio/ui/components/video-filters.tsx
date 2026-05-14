@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ListFilterIcon, XIcon, SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +36,8 @@ export const VideoFilters = ({ onFilterChange }: VideoFiltersProps) => {
     viewCount?: number;
     visibility?: "public" | "private";
   }>({});
+  const t = useTranslations("Studio");
+  const tGeneral = useTranslations("General");
 
   const [currentFilterType, setCurrentFilterType] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState("");
@@ -68,13 +71,13 @@ export const VideoFilters = ({ onFilterChange }: VideoFiltersProps) => {
   const getFilterLabel = (key: string, value: any) => {
     switch (key) {
       case "title":
-        return `Tiêu đề có chứa "${value}"`;
+        return t("titleContains", { value });
       case "description":
-        return `Mô tả có chứa "${value}"`;
+        return t("descriptionContains", { value });
       case "viewCount":
-        return `Lượt xem >= ${value}`;
+        return t("viewsGreaterEqual", { value });
       case "visibility":
-        return `Quyền riêng tư: ${value === "public" ? "Công khai" : "Riêng tư"}`;
+        return t("visibilityLabel", { value: value === "public" ? t("public") : t("private") });
       default:
         return `${key}: ${value}`;
     }
@@ -87,21 +90,21 @@ export const VideoFilters = ({ onFilterChange }: VideoFiltersProps) => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-x-2 text-sm font-medium">
               <ListFilterIcon className="size-5" />
-              Lọc
+              {t("filter")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48">
             <DropdownMenuItem onClick={() => setCurrentFilterType("title")}>
-              Tiêu đề
+              {t("title")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setCurrentFilterType("viewCount")}>
-              Lượt xem
+              {t("views")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setCurrentFilterType("description")}>
-              Mô tả
+              {t("description")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setCurrentFilterType("visibility")}>
-              Quyền riêng tư
+              {t("visibility")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -125,11 +128,11 @@ export const VideoFilters = ({ onFilterChange }: VideoFiltersProps) => {
                 }}
               >
                 <SelectTrigger className="w-[180px] h-9">
-                  <SelectValue placeholder="Chọn quyền riêng tư" />
+                  <SelectValue placeholder={t("selectVisibility")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="public">Công khai</SelectItem>
-                  <SelectItem value="private">Riêng tư</SelectItem>
+                  <SelectItem value="public">{t("public")}</SelectItem>
+                  <SelectItem value="private">{t("private")}</SelectItem>
                 </SelectContent>
               </Select>
             ) : (
@@ -137,10 +140,10 @@ export const VideoFilters = ({ onFilterChange }: VideoFiltersProps) => {
                 <Input
                   placeholder={
                     currentFilterType === "title" 
-                      ? "Nhập tiêu đề..." 
+                      ? t("enterTitle")
                       : currentFilterType === "viewCount" 
-                      ? "Nhập số lượt xem tối thiểu..." 
-                      : "Nhập mô tả..."
+                      ? t("enterMinViews")
+                      : t("enterDescription")
                   }
                   value={inputValue}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
@@ -152,7 +155,7 @@ export const VideoFilters = ({ onFilterChange }: VideoFiltersProps) => {
                   autoFocus
                 />
                 <Button size="sm" onClick={handleApplyFilter}>
-                  Áp dụng
+                  {t("apply")}
                 </Button>
                 <Button size="icon" variant="ghost" className="size-8" onClick={() => setCurrentFilterType(null)}>
                   <XIcon className="size-4" />
@@ -187,7 +190,7 @@ export const VideoFilters = ({ onFilterChange }: VideoFiltersProps) => {
               onFilterChange({});
             }}
           >
-            Xóa tất cả
+            {t("clearAll")}
           </Button>
         </div>
       )}

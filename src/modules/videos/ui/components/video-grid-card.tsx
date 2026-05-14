@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { VideoInfo, VideoInfoSkeleton } from "./video-info";
 import { VideoThumbnail, VideoThumbnailSkeleton } from "./video-thumbnail";
 import { VideoGetManyOutput } from "../../types";
@@ -37,9 +38,10 @@ export const VideoGridCard = ({
   onRemove,
   playlist,
   currentIndex = 0,
-  menu, // nhận menu
+   menu, // nhận menu
   hideAvatar,
 }: VideoGridCardProps) => {
+  const t = useTranslations("Video");
   const [showPlaylist, setShowPlaylist] = useState(false);
 
   const handleTogglePlaylist = () => setShowPlaylist((prev) => !prev);
@@ -72,7 +74,7 @@ export const VideoGridCard = ({
           className="text-sm text-blue-400 hover:underline"
           onClick={handleTogglePlaylist}
         >
-          {showPlaylist ? "Ẩn danh sách kết hợp" : "Xem danh sách kết hợp"}
+          {showPlaylist ? t("hidePlaylist") : t("showPlaylist")}
         </button>
       )}
       {/* Playlist toggle */}

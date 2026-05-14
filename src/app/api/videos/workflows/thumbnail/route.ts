@@ -7,7 +7,7 @@ import { users, videos } from "@/db/schema";
 
 interface InputType {
   videoId: string;
-  clerkId: string; // từ frontend
+  clerkId: string; // from frontend
   fileUrl?: string;
   useVideoFrame?: boolean;
 }
@@ -18,41 +18,41 @@ export async function POST(req: NextRequest) {
       (await req.json()) as InputType;
     const utapi = new UTApi();
 
-    // Lấy user từ clerkId
+    // Get user from clerkId
     const [user] = await db
       .select()
       .from(users)
       .where(eq(users.clerkId, clerkId));
     if (!user) throw new Error("User not found");
 
-    // Lấy video của user
+    // Get user's video
     const [video] = await db
       .select()
       .from(videos)
       .where(and(eq(videos.id, videoId), eq(videos.userId, user.id)));
     if (!video) throw new Error("Video not found");
 
-    // Xác định URL thumbnail tạm thời
+    // Determine temporary thumbnail URL
     let tempThumbnailUrl: string;
     if (fileUrl) {
       tempThumbnailUrl = fileUrl;
     } else if (useVideoFrame) {
       if (!video.muxPlaybackId)
-        throw new Error("Video chưa có Mux playback ID");
+        throw new Error("Video does not have a Mux playback ID");
       const width = 1280;
       const height = 720;
       
-      // Tính toán giây thực tế thay vì dùng phần trăm trực tiếp
+      // Calculate actual seconds instead of using percentage directly
       const durationInSeconds = (video.duration || 0) / 1000;
       const randomPercent = Math.floor(Math.random() * 90) + 5;
       const startSeconds = Math.floor(durationInSeconds * (randomPercent / 100));
 
       tempThumbnailUrl = `https://image.mux.com/${video.muxPlaybackId}/thumbnail.png?width=${width}&height=${height}&time=${startSeconds}`;
     } else {
-      throw new Error("Chưa có nguồn thumbnail hợp lệ");
+      throw new Error("No valid thumbnail source provided");
     }
 
-    // Xóa thumbnail cũ nếu có
+    // Delete old thumbnail if exists
     if (video.thumbnailKey) {
       try {
         await utapi.deleteFiles(video.thumbnailKey);
@@ -63,18 +63,18 @@ export async function POST(req: NextRequest) {
         .where(and(eq(videos.id, videoId), eq(videos.userId, user.id)));
     }
 
-    // Upload thumbnail mới
+    // Upload new thumbnail
     const files = await utapi.uploadFilesFromUrl([{ url: tempThumbnailUrl }]);
     if (!files || !files[0]?.data) throw new Error("Upload thumbnail failed");
     const uploaded = files[0].data;
 
-    // Cập nhật DB với thumbnail mới
+    // Update DB with new thumbnail
     await db
       .update(videos)
       .set({ thumbnailKey: uploaded.key, thumbnailUrl: uploaded.url })
       .where(and(eq(videos.id, videoId), eq(videos.userId, user.id)));
 
-    // Trả về URL cho frontend
+    // Return URL to frontend
     return NextResponse.json({ thumbnailUrl: uploaded.url });
   } catch (err: unknown) {
     const message =

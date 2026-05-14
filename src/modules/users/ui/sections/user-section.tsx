@@ -8,15 +8,17 @@ import { Separator } from "@/components/ui/separator";
 
 import { UserPageInfo, UserPageInfoSkeleton } from "../components/user-page-info";
 import { UserPageBanner, UserPageBannerSkeleton } from "../components/user-page-banner";
+import { useTranslations } from "next-intl";
 
 interface UserSectionProps {
   userId: string;
 };
 
 export const UserSection = (props: UserSectionProps) => {
+  const t = useTranslations("Users");
   return (
     <Suspense fallback={<UserSectionSkeleton />}>
-      <ErrorBoundary fallback={<p>Lỗi khi tải thông tin người dùng</p>}>
+      <ErrorBoundary fallback={<p>{t("errorLoadingUser")}</p>}>
         <UserSectionSuspense {...props} />
       </ErrorBoundary>
     </Suspense>

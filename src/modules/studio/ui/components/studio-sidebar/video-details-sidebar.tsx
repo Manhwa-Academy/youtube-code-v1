@@ -11,6 +11,7 @@ import {
   TypeIcon,
   ExternalLinkIcon
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import {
   SidebarGroup,
@@ -22,6 +23,7 @@ import { trpc } from "@/trpc/client";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const VideoDetailsSidebar = () => {
+  const t = useTranslations("Studio");
   const pathname = usePathname();
   const videoId = pathname.split("/studio/videos/")[1]?.split("/")[0];
   
@@ -54,7 +56,7 @@ export const VideoDetailsSidebar = () => {
           <SidebarMenuButton asChild>
             <Link href="/studio?tab=videos">
               <ArrowLeftIcon className="size-5" />
-              <span className="text-sm">Nội dung của kênh</span>
+              <span className="text-sm">{t("channelContent")}</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -77,12 +79,12 @@ export const VideoDetailsSidebar = () => {
             >
               <ExternalLinkIcon className="size-5 text-white" />
               <span className="text-[10px] text-white font-medium px-2 py-0.5 bg-black/40 rounded-sm">
-                Xem video trên YouTube
+                {t("viewOnYouTube")}
               </span>
             </Link>
           </div>
           <div className="space-y-1">
-            <p className="text-xs text-neutral-400 font-medium">Video của bạn</p>
+            <p className="text-xs text-neutral-400 font-medium">{t("yourVideo")}</p>
             <p className="text-sm font-bold line-clamp-2">{video.title}</p>
           </div>
         </div>
@@ -91,11 +93,11 @@ export const VideoDetailsSidebar = () => {
           <SidebarMenuButton 
             isActive={activeTab === videoId} 
             asChild
-            tooltip="Chi tiết"
+            tooltip={t("details")}
           >
             <Link href={`/studio/videos/${videoId}`}>
               <PencilIcon className="size-5" />
-              <span className="text-sm">Chi tiết</span>
+              <span className="text-sm">{t("details")}</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -104,11 +106,11 @@ export const VideoDetailsSidebar = () => {
           <SidebarMenuButton 
             isActive={activeTab === "analytics"} 
             asChild
-            tooltip="Số liệu phân tích"
+            tooltip={t("analytics")}
           >
             <Link href={`/studio/videos/${videoId}/analytics`}>
               <BarChart3Icon className="size-5" />
-              <span className="text-sm">Số liệu phân tích</span>
+              <span className="text-sm">{t("analytics")}</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -117,11 +119,11 @@ export const VideoDetailsSidebar = () => {
           <SidebarMenuButton 
             isActive={activeTab === "comments"} 
             asChild
-            tooltip="Bình luận"
+            tooltip={t("comments")}
           >
             <Link href={`/studio/videos/${videoId}/comments`}>
               <MessageSquareIcon className="size-5" />
-              <span className="text-sm">Bình luận</span>
+              <span className="text-sm">{t("comments")}</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>

@@ -9,6 +9,7 @@ import { InfiniteScroll } from "@/components/infinite-scroll";
 import { VideoRowCard, VideoRowCardSkeleton } from "@/modules/videos/ui/components/video-row-card";
 import { VideoGridCard, VideoGridCardSkeleton } from "@/modules/videos/ui/components/video-grid-card";
 import { UserSearchCard } from "@/modules/users/ui/components/user-search-card";
+import { useTranslations } from "next-intl";
 
 interface ResultsSectionProps {
   query: string | undefined;
@@ -19,12 +20,13 @@ interface ResultsSectionProps {
 };
 
 export const ResultsSection = (props: ResultsSectionProps) => {
+  const t = useTranslations("Search");
   return (
     <Suspense 
       key={`${props.query}-${props.categoryId}-${props.type}-${props.duration}-${props.uploadDate}`}  
       fallback={<ResultsSectionSkeleton />}
     >
-      <ErrorBoundary fallback={<p className="text-center py-10">Đã xảy ra lỗi khi tìm kiếm.</p>}>
+      <ErrorBoundary fallback={<p className="text-center py-10">{t("errorSearch")}</p>}>
         <ResultsSectionSuspense {...props} />
       </ErrorBoundary>
     </Suspense>
@@ -55,6 +57,7 @@ const ResultsSectionSuspense = ({
   duration,
   uploadDate,
 }: ResultsSectionProps) => {
+  const t = useTranslations("Search");
   const [results, resultsQuery] = trpc.search.getMany.useSuspenseInfiniteQuery(
     { 
       query, 
@@ -72,7 +75,7 @@ const ResultsSectionSuspense = ({
   const items = results.pages.flatMap((page) => page.items);
 
   if (items.length === 0) {
-    return <div className="text-center py-20 text-muted-foreground">Không tìm thấy kết quả nào phù hợp.</div>;
+    return <div className="text-center py-20 text-muted-foreground">{t("noMatchingResults")}</div>;
   }
 
   // 🔥 map progress cho mỗi video, default = 0

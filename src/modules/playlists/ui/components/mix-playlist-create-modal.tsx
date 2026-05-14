@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,16 +26,17 @@ interface MixPlaylistCreateModalProps {
   initialVideoIds: string[];
 }
 
-const formSchema = z.object({
-  name: z.string().min(1, "Vui lòng nhập tên danh sách"),
-  visibility: z.enum(["public", "private"]).default("public"),
-});
-
 export const MixPlaylistCreateModal = ({
   open,
   onOpenChange,
   initialVideoIds,
 }: MixPlaylistCreateModalProps) => {
+  const t = useTranslations("Playlists");
+
+  const formSchema = z.object({
+    name: z.string().min(1, t("playlistNameRequired")),
+    visibility: z.enum(["public", "private"]).default("public"),
+  });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,12 +51,12 @@ export const MixPlaylistCreateModal = ({
     onSuccess: () => {
       utils.playlists.getPublicMixPlaylists.invalidate();
       utils.playlists.getManyForVideo.invalidate();
-      toast.success("Tạo danh sách kết hợp thành công!");
+      toast.success(t("playlistCreatedSuccess"));
       form.reset();
       onOpenChange(false);
     },
     onError: (err) => {
-      toast.error(err.message || "Đã xảy ra lỗi");
+      toast.error(err.message || t("errorOccurred"));
     },
   });
 
@@ -77,7 +79,7 @@ export const MixPlaylistCreateModal = ({
 
   return (
     <ResponsiveModal
-      title="Tạo danh sách kết hợp"
+      title={t("createMixPlaylist")}
       open={open}
       onOpenChange={onOpenChange}
     >
@@ -91,9 +93,9 @@ export const MixPlaylistCreateModal = ({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tên danh sách</FormLabel>
+                <FormLabel>{t("playlistName")}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Ví dụ: Series Noa" />
+                  <Input {...field} placeholder={t("playlistNamePlaceholder")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -105,14 +107,14 @@ export const MixPlaylistCreateModal = ({
             name="visibility"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Quyền riêng tư</FormLabel>
+                <FormLabel>{t("privacy")}</FormLabel>
                 <FormControl>
                   <select
                     {...field}
                     className="border rounded px-2 py-2 w-full"
                   >
-                    <option value="public">Công khai</option>
-                    <option value="private">Riêng tư</option>
+                    <option value="public">{t("public")}</option>
+                    <option value="private">{t("private")}</option>
                   </select>
                 </FormControl>
                 <FormMessage />
@@ -122,7 +124,7 @@ export const MixPlaylistCreateModal = ({
 
           <div className="flex justify-end">
             <Button type="submit" disabled={createMixPlaylist.isPending}>
-              Tạo
+              {t("create")}
             </Button>
           </div>
         </form>

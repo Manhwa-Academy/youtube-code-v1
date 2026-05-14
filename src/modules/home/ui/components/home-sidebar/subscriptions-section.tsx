@@ -12,6 +12,7 @@ import {
   SidebarMenuButton, 
   SidebarMenuItem
 } from "@/components/ui/sidebar";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/trpc/client";
 import { DEFAULT_LIMIT } from "@/constants";
 import { UserAvatar } from "@/components/user-avatar";
@@ -33,6 +34,7 @@ export const LoadingSkeleton = () => {
 };
 
 export const SubscriptionsSection = () => {
+  const t = useTranslations("Sidebar");
   const pathname = usePathname();
   const { data, isLoading } = trpc.subscriptions.getMany.useInfiniteQuery(
     {
@@ -45,7 +47,7 @@ export const SubscriptionsSection = () => {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Kênh đã đăng ký</SidebarGroupLabel>
+      <SidebarGroupLabel>{t("subscribedChannelsHeader")}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {isLoading && <LoadingSkeleton />}
@@ -75,7 +77,7 @@ export const SubscriptionsSection = () => {
               >
                 <Link prefetch href="/subscriptions" className="flex items-center gap-4">
                   <ListIcon className="size-4" />
-                  <span className="text-sm">Tất cả kênh đã đăng ký</span>
+                  <span className="text-sm">{t("allSubscribedChannels")}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

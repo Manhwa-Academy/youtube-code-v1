@@ -6,6 +6,7 @@ import MuxPlayer from "@mux/mux-player-react";
 import { THUMBNAIL_FALLBACK } from "../../constants";
 import { trpc } from "@/trpc/client";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { usePlayerStore } from "@/modules/videos/store/use-player-store";
 import { cn } from "@/lib/utils";
@@ -58,6 +59,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     ref,
   ) => {
     const router = useRouter();
+    const t = useTranslations("Video");
     const internalRef = useRef<any>(null);
     const playerRef = (ref as React.RefObject<any>) || internalRef;
     const utils = trpc.useContext();
@@ -83,7 +85,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         });
       },
       onError: () => {
-        toast.error("Không thể tăng view");
+        toast.error(t("cannotIncrementView"));
       },
     });
 
@@ -413,7 +415,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         {autoNextEnabled && showNext && nextVideo && (
           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white px-4">
             <p className="mb-2 text-xs sm:text-sm opacity-80 text-center w-full">
-              Video tiếp theo sau {countdown}
+              {t("nextVideo", { countdown })}
             </p>
             <div className="w-full max-w-md flex items-center gap-3 mb-4">
               <div className="relative flex-shrink-0 w-24 aspect-video rounded-lg overflow-hidden -translate-y-2">

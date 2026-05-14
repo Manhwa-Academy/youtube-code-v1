@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useClerk } from "@clerk/nextjs";
 
 import { trpc } from "@/trpc/client";
@@ -16,10 +17,12 @@ export const useSubscription = ({
 }: UseSubscriptionProps) => {
   const clerk = useClerk();
   const utils = trpc.useUtils();
+  const t = useTranslations("Video");
+  const tGeneral = useTranslations("General");
 
   const subscribe = trpc.subscriptions.create.useMutation({
     onSuccess: () => {
-      toast.success("Đã đăng ký");
+      toast.success(t("subscribeSuccess"));
       utils.subscriptions.getMany.invalidate();
       utils.videos.getManySubscribed.invalidate();
       utils.users.getOne.invalidate({ id: userId });
@@ -29,7 +32,7 @@ export const useSubscription = ({
       }
     },
     onError: (error) => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(tGeneral("error"));
 
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
@@ -39,7 +42,7 @@ export const useSubscription = ({
 
   const unsubscribe = trpc.subscriptions.remove.useMutation({
     onSuccess: () => {
-      toast.success("Đã đăng ký");
+      toast.success(t("unsubscribeSuccess"));
       utils.subscriptions.getMany.invalidate();
       utils.videos.getManySubscribed.invalidate();
       utils.users.getOne.invalidate({ id: userId });
@@ -49,7 +52,7 @@ export const useSubscription = ({
       }
     },
     onError: (error) => {
-      toast.error("Đã xảy ra lỗi");
+      toast.error(tGeneral("error"));
 
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
