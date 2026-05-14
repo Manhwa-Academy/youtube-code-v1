@@ -889,5 +889,12 @@
     "removeDownload": "Eliminar descarga",
     "queueSuccess": "Añadido a la cola",
     "queueError": "No se pudo añadir a la cola: Falta información"
+  },
+  "Playback": {
+    "autoPlay": "Reproducción automática",
+    "loop": "Bucle",
+    "download": "Descargar",
+    "downloading": "Descargando...",
+    "speed": "Velocidad de reproducción"
   }
 }

@@ -636,9 +636,9 @@
     "off": "Off"
   },
   "Playback": {
-    "autoPlay": "Auto play",
+    "autoPlay": "Autoplay",
     "loop": "Loop",
-    "download": "Download video",
+    "download": "Download",
     "downloading": "Downloading...",
     "speed": "Playback speed"
   },

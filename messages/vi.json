@@ -636,10 +636,10 @@
     "off": "Tắt"
   },
   "Playback": {
-    "autoPlay": "Tự chuyển",
+    "autoPlay": "Tự động phát",
     "loop": "Lặp lại",
-    "download": "Tải video",
-    "downloading": "Đang tải...",
+    "download": "Tải xuống",
+    "downloading": "Đang tải xuống...",
     "speed": "Tốc độ phát"
   },
   "VideoMenu": {

@@ -52,7 +52,7 @@ export default async function RootLayout({
           <meta name="theme-color" content="#ff0000" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-          <meta name="apple-mobile-web-app-title" content="NewTube" />
+          <meta name="apple-mobile-web-app-title" content="Hayase Yuuka" />
         </head>
         <body className={`${inter.className} h-full overflow-hidden`} suppressHydrationWarning>
           <ThemeProvider

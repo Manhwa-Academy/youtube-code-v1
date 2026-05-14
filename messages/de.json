@@ -914,5 +914,12 @@
     "removeDownload": "Download entfernen",
     "queueSuccess": "Zur Warteschlange hinzugefügt",
     "queueError": "Konnte nicht zur Warteschlange hinzugefügt werden: Informationen fehlen"
+  },
+  "Playback": {
+    "autoPlay": "Autoplay",
+    "loop": "Schleife",
+    "download": "Herunterladen",
+    "downloading": "Herunterladen...",
+    "speed": "Wiedergabegeschwindigkeit"
   }
 }

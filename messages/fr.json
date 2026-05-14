@@ -830,5 +830,12 @@
     "removeDownload": "Supprimer le téléchargement",
     "queueSuccess": "Ajouté à la file d'attente",
     "queueError": "Impossible d'ajouter à la file d'attente : informations manquantes"
+  },
+  "Playback": {
+    "autoPlay": "Lecture automatique",
+    "loop": "Boucle",
+    "download": "Télécharger",
+    "downloading": "Téléchargement...",
+    "speed": "Vitesse de lecture"
   }
 }

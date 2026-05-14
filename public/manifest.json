@@ -1,6 +1,6 @@
 {
-  "name": "NewTube",
-  "short_name": "NewTube",
+  "name": "Hayase Yuuka",
+  "short_name": "Hayase Yuuka",
   "description": "A YouTube clone with offline support",
   "start_url": "/vi",
   "display": "standalone",

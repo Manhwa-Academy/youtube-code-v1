@@ -1,4 +1,4 @@
-# 📺 NewTube — YouTube Clone
+# 📺 Hayase Yuuka — YouTube Clone
 
 Một bản clone YouTube hiện đại được xây dựng bằng **Next.js 15 & React 19**, kết hợp tRPC, Drizzle ORM và nhiều dịch vụ đám mây, mang lại trải nghiệm xem & chia sẻ video gần giống YouTube thật.
 

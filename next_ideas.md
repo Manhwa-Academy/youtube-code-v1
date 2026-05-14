@@ -1,4 +1,4 @@
-# 🚀 NewTube — Ý Tưởng Phát Triển Tiếp Theo
+# 🚀 Hayase Yuuka — Ý Tưởng Phát Triển Tiếp Theo
 
 > Phân tích dựa trên codebase hiện tại (May 2026).  
 > Project đã có: Video/Shorts, Studio Analytics, Community Posts (text/image/poll/quiz), Playlists, Comments (heart/pin/reply), Notifications, Reports, Moderation, i18n (8 ngôn ngữ), Admin panel, Hashtag pages.

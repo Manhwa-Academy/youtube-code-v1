@@ -851,5 +851,12 @@
     "removeDownload": "오프라인 동영상 삭제",
     "queueSuccess": "대기열에 추가됨",
     "queueError": "대기열에 추가할 수 없습니다: 정보 누락"
+  },
+  "Playback": {
+    "autoPlay": "다음 동영상 자동 재생",
+    "loop": "연속 재생",
+    "download": "오프라인 저장",
+    "downloading": "오프라인 저장 중...",
+    "speed": "재생 속도"
   }
 }

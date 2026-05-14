@@ -932,5 +932,12 @@
     "removeDownload": "オフライン動画を削除",
     "queueSuccess": "キューに追加しました",
     "queueError": "キューに追加できませんでした：情報が不足しています"
+  },
+  "Playback": {
+    "autoPlay": "自動再生",
+    "loop": "ループ",
+    "download": "ダウンロード",
+    "downloading": "ダウンロード中...",
+    "speed": "再生速度"
   }
 }
