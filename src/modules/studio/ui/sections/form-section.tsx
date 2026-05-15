@@ -732,7 +732,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                       value={field.value ?? "none"}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="[&_[data-description]]:hidden">
                           <SelectValue placeholder={t("moderation")} />
                         </SelectTrigger>
                       </FormControl>
@@ -740,25 +740,25 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                         <SelectItem value="none">
                           <div className="flex flex-col">
                             <span>{t("none")}</span>
-                            <span className="text-xs text-muted-foreground">{t("noneDesc")}</span>
+                            <span data-description className="text-xs text-muted-foreground">{t("noneDesc")}</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="basic">
                           <div className="flex flex-col">
                             <span>{t("basic")}</span>
-                            <span className="text-xs text-muted-foreground">{t("basicDesc")}</span>
+                            <span data-description className="text-xs text-muted-foreground">{t("basicDesc")}</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="strict">
                           <div className="flex flex-col">
                             <span>{t("strict")}</span>
-                            <span className="text-xs text-muted-foreground">{t("strictDesc")}</span>
+                            <span data-description className="text-xs text-muted-foreground">{t("strictDesc")}</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="hold_all">
                           <div className="flex flex-col">
                             <span>{t("holdAll")}</span>
-                            <span className="text-xs text-muted-foreground">{t("holdAllDesc")}</span>
+                            <span data-description className="text-xs text-muted-foreground">{t("holdAllDesc")}</span>
                           </div>
                         </SelectItem>
                       </SelectContent>
