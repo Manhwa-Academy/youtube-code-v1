@@ -14,8 +14,9 @@ import {
 } from "drizzle-orm";
 
 import { db } from "@/db";
+import { getTranslations } from "next-intl/server";
 import { TRPCError } from "@trpc/server";
-import { commentReactions, comments, users, videos, posts, notifications, channelModerations } from "@/db/schema";
+import { commentReactions, comments, users, videos, posts, notifications, channelModerations, subscriptions } from "@/db/schema";
 import {
   baseProcedure,
   createTRPCRouter,
@@ -223,25 +224,56 @@ export const commentsRouter = createTRPCRouter({
       // 1. Get content owner and moderation settings
       let contentOwnerId: string | undefined;
       let commentModeration = "none";
+      let commentPermission = "anyone";
 
       if (videoId) {
         const [video] = await db
-          .select({ userId: videos.userId, commentModeration: videos.commentModeration })
+          .select({ 
+            userId: videos.userId, 
+            commentModeration: videos.commentModeration,
+            commentPermission: videos.commentPermission
+          })
           .from(videos)
           .where(eq(videos.id, videoId));
         contentOwnerId = video?.userId;
         commentModeration = video?.commentModeration || "none";
+        commentPermission = video?.commentPermission || "anyone";
       } else if (postId) {
         const [post] = await db
-          .select({ userId: posts.userId, commentModeration: posts.commentModeration })
+          .select({ 
+            userId: posts.userId, 
+            commentModeration: posts.commentModeration
+          })
           .from(posts)
           .where(eq(posts.id, postId));
         contentOwnerId = post?.userId;
         commentModeration = post?.commentModeration || "none";
+        commentPermission = "anyone"; // Posts always allow everyone to comment for now
       }
 
       if (!contentOwnerId) {
         throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      // 1.5 Check comment permission (subscribers only)
+      if (commentPermission === "subscribers" && userId !== contentOwnerId) {
+        const [subscription] = await db
+          .select()
+          .from(subscriptions)
+          .where(
+            and(
+              eq(subscriptions.viewerId, userId),
+              eq(subscriptions.creatorId, contentOwnerId)
+            )
+          );
+        
+        if (!subscription) {
+          const t = await getTranslations("Comments");
+          throw new TRPCError({ 
+            code: "FORBIDDEN", 
+            message: t("onlySubscribers") 
+          });
+        }
       }
 
       // 2. Check viewer's moderation status with the creator

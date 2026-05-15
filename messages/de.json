@@ -83,7 +83,8 @@
     "addTimestamp": "Aktuellen Zeitstempel hinzufügen",
     "addSuccess": "Kommentar hinzugefügt",
     "userPlaceholder": "Nutzer",
-    "loadMore": "Mehr anzeigen"
+    "loadMore": "Mehr anzeigen",
+    "onlySubscribers": "Nur Abonnenten können diesen Inhalt kommentieren"
   },
   "Home": {
     "search": "Suche",

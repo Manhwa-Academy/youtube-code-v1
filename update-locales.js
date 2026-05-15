@@ -597,6 +597,18 @@ const translationsToAdd = {
       zh: "{count} 条评论",
     },
   },
+  Comments: {
+    onlySubscribers: {
+      en: "Only subscribers can comment on this content",
+      vi: "Chỉ người đăng ký mới có thể bình luận về nội dung này",
+      de: "Nur Abonnenten können diesen Inhalt kommentieren",
+      es: "Solo los suscriptores pueden comentar en este contenido",
+      fr: "Seuls les abonnés peuvent commenter ce contenu",
+      ja: "このコンテンツにコメントできるのは登録者のみです",
+      ko: "구독자만 이 콘텐츠에 댓글을 달 수 있습니다",
+      zh: "只有订阅者才能对此内容发表评论",
+    },
+  },
   Reports: {
     selectReason: {
       en: "Please select a reason",
@@ -1597,6 +1609,16 @@ const translationsToAdd = {
       ja: "混合",
       ko: "결합됨",
       zh: "组合",
+    },
+    on: {
+      en: "On",
+      vi: "Bật",
+      de: "Ein",
+      es: "Activado",
+      fr: "Activé",
+      ja: "オン",
+      ko: "사용",
+      zh: "开启",
     },
     standard: {
       en: "Standard",

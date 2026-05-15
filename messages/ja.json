@@ -83,7 +83,8 @@
     "addTimestamp": "現在のタイムスタンプを追加",
     "addSuccess": "コメントを追加しました",
     "userPlaceholder": "ユーザー",
-    "loadMore": "さらに表示"
+    "loadMore": "さらに表示",
+    "onlySubscribers": "このコンテンツにコメントできるのは登録者のみです"
   },
   "Home": {
     "search": "検索",

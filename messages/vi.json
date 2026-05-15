@@ -87,7 +87,8 @@
     "addTimestamp": "Thêm mốc thời gian hiện tại",
     "addSuccess": "Đã thêm bình luận",
     "userPlaceholder": "Người dùng",
-    "loadMore": "Xem thêm"
+    "loadMore": "Xem thêm",
+    "onlySubscribers": "Chỉ người đăng ký mới có thể bình luận về nội dung này"
   },
   "Home": {
     "search": "Tìm kiếm",

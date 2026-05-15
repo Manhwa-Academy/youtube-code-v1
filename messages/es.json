@@ -83,7 +83,8 @@
     "addTimestamp": "Añadir marca de tiempo actual",
     "addSuccess": "Comentario añadido",
     "userPlaceholder": "Usuario",
-    "loadMore": "Mostrar más"
+    "loadMore": "Mostrar más",
+    "onlySubscribers": "Solo los suscriptores pueden comentar en este contenido"
   },
   "Home": {
     "search": "Buscar",

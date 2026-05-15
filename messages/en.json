@@ -87,7 +87,8 @@
     "addTimestamp": "Add current timestamp",
     "addSuccess": "Comment added",
     "userPlaceholder": "User",
-    "loadMore": "Show more"
+    "loadMore": "Show more",
+    "onlySubscribers": "Only subscribers can comment on this content"
   },
   "Home": {
     "search": "Search",

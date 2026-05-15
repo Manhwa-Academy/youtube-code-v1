@@ -83,7 +83,8 @@
     "addTimestamp": "Ajouter l'horodatage actuel",
     "addSuccess": "Commentaire ajouté",
     "userPlaceholder": "Utilisateur",
-    "loadMore": "Afficher plus"
+    "loadMore": "Afficher plus",
+    "onlySubscribers": "Seuls les abonnés peuvent commenter ce contenu"
   },
   "Home": {
     "search": "Rechercher",

@@ -83,7 +83,8 @@
     "addTimestamp": "添加当前时间戳",
     "addSuccess": "评论已添加",
     "userPlaceholder": "用户",
-    "loadMore": "查看更多"
+    "loadMore": "查看更多",
+    "onlySubscribers": "只有订阅者才能对此内容发表评论"
   },
   "Home": {
     "search": "搜索",
