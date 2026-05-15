@@ -1,20 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSub,
-  DropdownMenuSubTrigger,
   DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Loader2Icon, ClockIcon, DownloadIcon, RepeatIcon, SkipForwardIcon, SettingsIcon } from "lucide-react";
-import { toast } from "sonner";
-import { useTranslations } from "next-intl";
 import { downloadManager } from "@/lib/download-manager";
+import { ClockIcon, DownloadIcon, Loader2Icon, RepeatIcon, SettingsIcon, SkipForwardIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { VideoGetOneOutput } from "../../types";
 
 interface Props {
@@ -33,6 +33,41 @@ interface Props {
 
 const SPEED_OPTIONS = [0.5, 1, 1.5, 2];
 
+type PlayerRef = React.RefObject<any>;
+
+function scheduleStopTimer(
+  playerRef: PlayerRef,
+  secs: number,
+  setScheduledStopSeconds: (n: number | null) => void,
+  stopTimerRef: React.MutableRefObject<number | null>,
+  scheduledAtRef: React.MutableRefObject<number | null>
+) {
+  if (stopTimerRef.current) {
+    clearTimeout(stopTimerRef.current);
+  }
+  setScheduledStopSeconds(secs);
+  scheduledAtRef.current = Date.now();
+  stopTimerRef.current = window.setTimeout(() => {
+    if (playerRef.current && typeof playerRef.current.pause === "function") playerRef.current.pause();
+    setScheduledStopSeconds(null);
+    stopTimerRef.current = null;
+    scheduledAtRef.current = null;
+  }, secs * 1000);
+}
+
+function cancelStopTimer(
+  stopTimerRef: React.MutableRefObject<number | null>,
+  setScheduledStopSeconds: (n: number | null) => void,
+  scheduledAtRef: React.MutableRefObject<number | null>
+) {
+  if (stopTimerRef.current) {
+    clearTimeout(stopTimerRef.current);
+    stopTimerRef.current = null;
+  }
+  setScheduledStopSeconds(null);
+  scheduledAtRef.current = null;
+}
+
 export const VideoPlaybackMenu = ({
   video,
   playerRef,
@@ -46,6 +81,9 @@ export const VideoPlaybackMenu = ({
   setPlaybackRate,
 }: Props) => {
   const [downloading, setDownloading] = useState(false);
+  const [scheduledStopSeconds, setScheduledStopSeconds] = useState<number | null>(null);
+  const stopTimerRef = useRef<number | null>(null);
+  const scheduledAtRef = useRef<number | null>(null);
   const t = useTranslations("Playback");
   const tGeneral = useTranslations("General");
   const tShorts = useTranslations("Shorts");
@@ -173,11 +211,12 @@ export const VideoPlaybackMenu = ({
           )}
           <span>{downloading ? t("downloading") : t("download")}</span>
         </DropdownMenuItem>
-        {/* SPEED Submenu */}
+        {/*
+          SPEED Submenu (commented out per request)
+        
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {/* Icon giống Tự chuyển/Lặp lại */}
               <ClockIcon className="w-4 h-4 text-gray-500" />
               <span>{t("speed")}</span>
             </div>
@@ -195,6 +234,43 @@ export const VideoPlaybackMenu = ({
                 {s}x
               </DropdownMenuItem>
             ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        */}
+
+        {/* STOP-TIMER Submenu */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ClockIcon className="w-4 h-4 text-gray-500" />
+              <span>Stop after</span>
+            </div>
+          </DropdownMenuSubTrigger>
+
+          <DropdownMenuSubContent className="w-36 p-2">
+            {scheduledStopSeconds ? (
+              <>
+                <DropdownMenuItem onClick={() => cancelStopTimer(stopTimerRef, setScheduledStopSeconds, scheduledAtRef)}>
+                  Cancel scheduled stop
+                </DropdownMenuItem>
+              </>
+            ) : null}
+
+            <DropdownMenuItem onClick={() => scheduleStopTimer(playerRef, 15, setScheduledStopSeconds, stopTimerRef, scheduledAtRef)}>
+              15s
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={() => scheduleStopTimer(playerRef, 30, setScheduledStopSeconds, stopTimerRef, scheduledAtRef)}>
+              30s
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={() => scheduleStopTimer(playerRef, 60, setScheduledStopSeconds, stopTimerRef, scheduledAtRef)}>
+              1m
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={() => scheduleStopTimer(playerRef, 300, setScheduledStopSeconds, stopTimerRef, scheduledAtRef)}>
+              5m
+            </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
       </DropdownMenuContent>
