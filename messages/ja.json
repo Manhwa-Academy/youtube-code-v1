@@ -215,10 +215,10 @@
     "contentType": "コンテンツ タイプ",
     "myPosts": "自分の投稿",
     "minSubscribersLabel": "最小登録者数",
-    "responseStatus": "返信ステータス",
-    "notResponded": "返信していない",
+    "responseStatus": "返信のステータス",
+    "notResponded": "未返信",
     "responded": "返信済み",
-    "newReplyToYourResponse": "あなたの返信への新しい返信",
+    "newReplyToYourResponse": "自分の返信に対する新しい返信",
     "filters": "フィルタ",
     "updatingComments": "コメントリストを更新中...",
     "featureUnderDevelopment": "この機能は開発中です...",
@@ -524,7 +524,13 @@
     "channelContentDescription": "チャンネルの動画、ショート動画、再生リスト、投稿を管理します",
     "shorts": "ショート動画",
     "rowsPerPage": "1 ページあたりの行数:",
-    "postComments": "投稿のコメント"
+    "postComments": "投稿のコメント",
+    "on": "オン",
+    "minSubscribers": "登録者数",
+    "trafficSourceYoutubeSearch": "YouTube 検索",
+    "trafficSourceOtherFeatures": "YouTube のその他の機能",
+    "trafficSourceShortsFeed": "ショート フィード",
+    "trafficSourceDirect": "直接入力、または不明"
   },
   "VideoCard": {
     "noDescription": "説明なし",

@@ -1010,10 +1010,22 @@ export const studioRouter = createTRPCRouter({
             ).toFixed(2),
           },
           trafficSources: [
-            { label: "YouTube Search", percentage: 45 },
-            { label: "Other YouTube features", percentage: 30 },
-            { label: "Shorts feed", percentage: 15 },
-            { label: "Direct or unknown", percentage: 10 },
+            {
+              label: "trafficSourceYoutubeSearch",
+              percentage: (statsInRange?.totalViews || 0) > 0 ? 45 : 0,
+            },
+            {
+              label: "trafficSourceOtherFeatures",
+              percentage: (statsInRange?.totalViews || 0) > 0 ? 30 : 0,
+            },
+            {
+              label: "trafficSourceShortsFeed",
+              percentage: (statsInRange?.totalViews || 0) > 0 ? 15 : 0,
+            },
+            {
+              label: "trafficSourceDirect",
+              percentage: (statsInRange?.totalViews || 0) > 0 ? 10 : 0,
+            },
           ],
           publishedCount: {
             videos: await db.$count(

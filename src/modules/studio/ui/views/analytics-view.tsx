@@ -1504,7 +1504,7 @@ const ReachTab = ({ days, videoId }: { days: number, videoId?: string }) => {
                <div className="space-y-3">
                   {data.contentBreakdown.trafficSources.map((source: any, i: number) => (
                     <div key={i} className="flex justify-between items-center text-xs">
-                       <span className="text-muted-foreground">{source.label}</span>
+                       <span className="text-muted-foreground">{t(source.label)}</span>
                        <div className="flex items-center gap-x-4 w-1/2 justify-end">
                           <div className="h-2 bg-blue-500 rounded-full" style={{ width: `${source.percentage}%` }} />
                           <span className="font-bold w-10 text-right">{source.percentage}%</span>

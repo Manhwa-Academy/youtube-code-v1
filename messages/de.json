@@ -216,9 +216,9 @@
     "myPosts": "Meine Posts",
     "minSubscribersLabel": "Mindestanzahl an Abonnenten",
     "responseStatus": "Antwortstatus",
-    "notResponded": "Ich habe nicht geantwortet",
+    "notResponded": "Ich habe không geantwortet",
     "responded": "Ich habe geantwortet",
-    "newReplyToYourResponse": "Neue Antwort auf deine Antwort",
+    "newReplyToYourResponse": "Neue Antwort auf deine Reaktion",
     "filters": "Filter",
     "updatingComments": "Kommentarliste wird aktualisiert...",
     "featureUnderDevelopment": "Diese Funktion befindet sich in der Entwicklung...",
@@ -506,7 +506,13 @@
     "channelContentDescription": "Verwalten Sie Ihre Videos, Kurzvideos, Playlists und Beiträge auf Ihrem Kanal",
     "shorts": "Kurzvideos",
     "rowsPerPage": "Zeilen pro Seite:",
-    "postComments": "Beitragskommentare"
+    "postComments": "Beitragskommentare",
+    "on": "Ein",
+    "minSubscribers": "Abonnentenanzahl",
+    "trafficSourceYoutubeSearch": "YouTube-Suche",
+    "trafficSourceOtherFeatures": "Andere YouTube-Funktionen",
+    "trafficSourceShortsFeed": "Shorts-Feed",
+    "trafficSourceDirect": "Direkt oder unbekannt"
   },
   "VideoCard": {
     "noDescription": "Keine Beschreibung",

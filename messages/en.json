@@ -223,7 +223,7 @@
     "minSubscribersLabel": "Minimum subscribers",
     "responseStatus": "Response status",
     "notResponded": "I haven't responded",
-    "responded": "Responded",
+    "responded": "I responded",
     "newReplyToYourResponse": "New reply to your response",
     "filters": "Filters",
     "updatingComments": "Updating comments list...",
@@ -530,7 +530,11 @@
     "loadingComments": "Loading comments...",
     "errorLoadingComments": "Error loading comments",
     "name": "Name",
-    "shorts": "Shorts"
+    "shorts": "Shorts",
+    "trafficSourceYoutubeSearch": "YouTube Search",
+    "trafficSourceOtherFeatures": "Other YouTube features",
+    "trafficSourceShortsFeed": "Shorts feed",
+    "trafficSourceDirect": "Direct or unknown"
   },
   "VideoCard": {
     "noDescription": "No description",
