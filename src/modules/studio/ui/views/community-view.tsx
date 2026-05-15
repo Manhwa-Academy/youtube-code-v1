@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, ChangeEvent } from "react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { trpc } from "@/trpc/client";
@@ -41,7 +41,8 @@ import {
   ShieldAlertIcon,
   ShieldCheckIcon,
   UserMinusIcon,
-  ShieldMinusIcon
+  ShieldMinusIcon,
+  Loader2Icon
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -59,6 +60,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { FormLabel } from "@/components/ui/form";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
@@ -146,6 +149,12 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
             className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-black dark:data-[state=active]:border-white bg-transparent data-[state=active]:bg-transparent font-medium capitalize text-muted-foreground whitespace-nowrap"
           >
             {t("mentions")}
+          </TabsTrigger>
+          <TabsTrigger 
+            value="settings" 
+            className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-black dark:data-[state=active]:border-white bg-transparent data-[state=active]:bg-transparent font-medium capitalize text-muted-foreground whitespace-nowrap"
+          >
+            {t("moderationSettings")}
           </TabsTrigger>
         </TabsList>
 
@@ -731,7 +740,70 @@ export const CommunityView = ({ videoId }: CommunityViewProps) => {
               {t("featureUnderDevelopment")}
            </div>
         </TabsContent>
+        
+        <TabsContent value="settings">
+           <Suspense fallback={<div className="p-8 text-center">{t("loading")}</div>}>
+              <ModerationSettings />
+           </Suspense>
+        </TabsContent>
       </Tabs>
+    </div>
+  );
+};
+
+const ModerationSettings = () => {
+  const t = useTranslations("Studio");
+  const [settings] = trpc.studio.getModerationSettings.useSuspenseQuery();
+  const [blacklist, setBlacklist] = useState(settings.blacklistKeywords);
+  const utils = trpc.useUtils();
+
+  const updateSettings = trpc.studio.updateModerationSettings.useMutation({
+    onSuccess: () => {
+      toast.success(t("settingsUpdated"));
+      utils.studio.getModerationSettings.invalidate();
+    },
+    onError: () => toast.error(t("settingsUpdateError")),
+  });
+
+  return (
+    <div className="max-w-3xl mt-6 space-y-8">
+      <div className="space-y-2">
+        <h3 className="text-lg font-bold">{t("automatedFilters")}</h3>
+        <p className="text-sm text-muted-foreground">{t("automatedFiltersDesc")}</p>
+      </div>
+
+      <div className="space-y-4 bg-white dark:bg-white/5 p-6 rounded-xl border border-neutral-200 dark:border-white/10">
+        <div className="space-y-2">
+          <FormLabel className="text-sm font-bold uppercase text-muted-foreground">{t("blockedWords")}</FormLabel>
+          <p className="text-xs text-muted-foreground mb-4">{t("blockedWordsDesc")}</p>
+          <Textarea 
+            value={blacklist}
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setBlacklist(e.target.value)}
+            placeholder={t("blockedWordsPlaceholder")}
+            rows={5}
+            className="bg-transparent border-neutral-300 dark:border-white/20 focus-visible:ring-0 focus-visible:border-blue-500"
+          />
+        </div>
+        
+        <div className="flex justify-end">
+          <Button 
+            onClick={() => updateSettings.mutate({ blacklistKeywords: blacklist })}
+            disabled={updateSettings.isPending || blacklist === settings.blacklistKeywords}
+            className="rounded-full px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold"
+          >
+            {updateSettings.isPending && <Loader2Icon className="size-4 mr-2 animate-spin" />}
+            {t("save")}
+          </Button>
+        </div>
+      </div>
+
+      <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl flex gap-x-4">
+        <InfoIcon className="size-5 text-blue-500 shrink-0" />
+        <div className="space-y-1">
+           <p className="text-sm font-bold text-blue-500">{t("autoModInfo")}</p>
+           <p className="text-xs text-neutral-400">{t("autoModDesc")}</p>
+        </div>
+      </div>
     </div>
   );
 };
@@ -846,6 +918,22 @@ const CommunityCommentsList = ({
       utils.studio.getCommunityComments.invalidate();
     },
     onError: () => toast.error(t("updateUserStatusError")),
+  });
+
+  const approveMutation = trpc.studio.approveComment.useMutation({
+    onSuccess: () => {
+      toast.success(t("commentApproved"));
+      utils.studio.getCommunityComments.invalidate();
+    },
+    onError: () => toast.error(t("commentApprovedError")),
+  });
+
+  const rejectMutation = trpc.studio.rejectComment.useMutation({
+    onSuccess: () => {
+      toast.success(t("commentRejected"));
+      utils.studio.getCommunityComments.invalidate();
+    },
+    onError: () => toast.error(t("commentRejectedError")),
   });
 
   const [data, query] = trpc.studio.getCommunityComments.useSuspenseInfiniteQuery({
@@ -1049,17 +1137,42 @@ const CommunityCommentsList = ({
                 )}
 
                 <div className="flex items-center gap-x-4 text-xs font-medium text-black dark:text-white mb-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="rounded-full h-8 px-4 bg-transparent border-neutral-300 dark:border-white/20 hover:bg-neutral-200 dark:hover:bg-white/10"
-                      onClick={() => {
-                        setReplyingTo(comment.id);
-                        setReplyText("");
-                      }}
-                    >
-                      {t("reply")}
-                    </Button>
+                    {statusFilter === "held" ? (
+                      <div className="flex items-center gap-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="rounded-full h-8 px-4 border-neutral-300 dark:border-white/20 hover:bg-neutral-200 dark:hover:bg-white/10 text-green-500 font-bold"
+                          onClick={() => approveMutation.mutate({ id: comment.id })}
+                          disabled={approveMutation.isPending}
+                        >
+                          <ShieldCheckIcon className="size-4 mr-1" />
+                          {t("approve")}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="rounded-full h-8 px-4 border-neutral-300 dark:border-white/20 hover:bg-neutral-200 dark:hover:bg-white/10 text-rose-500 font-bold"
+                          onClick={() => rejectMutation.mutate({ id: comment.id })}
+                          disabled={rejectMutation.isPending}
+                        >
+                          <Trash2Icon className="size-4 mr-1" />
+                          {t("reject")}
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="rounded-full h-8 px-4 bg-transparent border-neutral-300 dark:border-white/20 hover:bg-neutral-200 dark:hover:bg-white/10"
+                        onClick={() => {
+                          setReplyingTo(comment.id);
+                          setReplyText("");
+                        }}
+                      >
+                        {t("reply")}
+                      </Button>
+                    )}
                     {comment.replyCount > 0 ? (
                       <button 
                         onClick={() => toggleReplies(comment.id)}

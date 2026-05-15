@@ -40,6 +40,12 @@ export const moderationType = pgEnum("moderation_type", [
   "standard_mod"
 ]);
 
+export const commentStatus = pgEnum("comment_status", [
+  "published",
+  "held_for_review",
+  "hidden",
+]);
+
 export const notificationType = pgEnum("notification_type", [
   "video_like",
   "video_comment",
@@ -61,7 +67,7 @@ export const posts = pgTable("posts", {
   scheduledAt: timestamp("scheduled_at"),
   isEdited: boolean("is_edited").default(false).notNull(),
   canComment: boolean("can_comment").default(true).notNull(),
-  commentModeration: text("comment_moderation").default("none").notNull(),
+  commentModeration: text("comment_moderation", { enum: ["none", "basic", "strict", "hold_all"] }).default("none").notNull(),
   commentSort: text("comment_sort").default("top").notNull(),
   showLikeCount: boolean("show_like_count").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -205,6 +211,7 @@ export const users = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
     banned: boolean("banned").default(false).notNull(),
+    blacklistKeywords: text("blacklist_keywords"),
   },
   (t) => [uniqueIndex("clerk_id_idx").on(t.clerkId)],
 );
@@ -276,7 +283,7 @@ export const videos = pgTable("videos", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   viewsCount: integer("views_count").default(0).notNull(),
   canComment: boolean("can_comment").default(true).notNull(),
-  commentModeration: text("comment_moderation").default("none").notNull(),
+  commentModeration: text("comment_moderation", { enum: ["none", "basic", "strict", "hold_all"] }).default("none").notNull(),
   commentPermission: text("comment_permission").default("anyone").notNull(),
   commentSort: text("comment_sort").default("top").notNull(),
   showLikeCount: boolean("show_like_count").default(true).notNull(),
@@ -435,6 +442,7 @@ export const comments = pgTable(
     timestamp: integer("timestamp"),
     isPinned: boolean("is_pinned").default(false).notNull(),
     creatorHearted: boolean("creator_hearted").default(false).notNull(),
+    moderationStatus: commentStatus("moderation_status").default("published").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

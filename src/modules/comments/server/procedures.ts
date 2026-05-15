@@ -220,6 +220,78 @@ export const commentsRouter = createTRPCRouter({
         throw new TRPCError({ code: "BAD_REQUEST", message: "videoId or postId is required" });
       }
 
+      // 1. Get content owner and moderation settings
+      let contentOwnerId: string | undefined;
+      let commentModeration = "none";
+
+      if (videoId) {
+        const [video] = await db
+          .select({ userId: videos.userId, commentModeration: videos.commentModeration })
+          .from(videos)
+          .where(eq(videos.id, videoId));
+        contentOwnerId = video?.userId;
+        commentModeration = video?.commentModeration || "none";
+      } else if (postId) {
+        const [post] = await db
+          .select({ userId: posts.userId, commentModeration: posts.commentModeration })
+          .from(posts)
+          .where(eq(posts.id, postId));
+        contentOwnerId = post?.userId;
+        commentModeration = post?.commentModeration || "none";
+      }
+
+      if (!contentOwnerId) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      // 2. Check viewer's moderation status with the creator
+      const [modStatus] = await db
+        .select({ type: channelModerations.type })
+        .from(channelModerations)
+        .where(
+          and(
+            eq(channelModerations.creatorId, contentOwnerId),
+            eq(channelModerations.viewerId, userId)
+          )
+        );
+
+      const isApproved = modStatus?.type === "approved";
+      const isHidden = modStatus?.type === "hidden";
+
+      if (isHidden) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "You are hidden from this channel" });
+      }
+
+      // 3. Check blacklist keywords
+      const [creator] = await db
+        .select({ blacklistKeywords: users.blacklistKeywords })
+        .from(users)
+        .where(eq(users.id, contentOwnerId));
+
+      const blacklist = creator?.blacklistKeywords 
+        ? creator.blacklistKeywords.split(",").map(k => k.trim().toLowerCase()).filter(Boolean)
+        : [];
+      
+      const containsBlacklist = blacklist.some(keyword => value.toLowerCase().includes(keyword));
+
+      // 4. Determine initial moderation status
+      let moderationStatus: "published" | "held_for_review" | "hidden" = "published";
+
+      if (userId === contentOwnerId) {
+        moderationStatus = "published";
+      } else if (isApproved) {
+        moderationStatus = "published";
+      } else if (containsBlacklist) {
+        moderationStatus = "hidden"; // User requested auto-hide for blacklist
+      } else if (commentModeration === "hold_all") {
+        moderationStatus = "held_for_review";
+      } else if (commentModeration === "strict" || commentModeration === "basic") {
+        // Simple heuristic: if it has a link, hold it for review
+        if (value.includes("http://") || value.includes("https://") || value.includes("www.")) {
+          moderationStatus = "held_for_review";
+        }
+      }
+
       const [existingComment] = await db
         .select()
         .from(comments)
@@ -235,10 +307,10 @@ export const commentsRouter = createTRPCRouter({
 
       const [createdComment] = await db
         .insert(comments)
-        .values({ userId, videoId, postId, parentId, value, imageUrl, timestamp })
+        .values({ userId, videoId, postId, parentId, value, imageUrl, timestamp, moderationStatus })
         .returning();
 
-      if (createdComment) {
+      if (createdComment && moderationStatus === "published") {
         // 1. If it's a reply, notify the parent comment owner
         if (parentId) {
           const [parentComment] = await db
@@ -259,22 +331,6 @@ export const commentsRouter = createTRPCRouter({
         } 
         // 2. If it's a new comment, notify the content owner
         else {
-          let contentOwnerId: string | undefined;
-
-          if (videoId) {
-            const [video] = await db
-              .select({ userId: videos.userId })
-              .from(videos)
-              .where(eq(videos.id, videoId));
-            contentOwnerId = video?.userId;
-          } else if (postId) {
-            const [post] = await db
-              .select({ userId: posts.userId })
-              .from(posts)
-              .where(eq(posts.id, postId));
-            contentOwnerId = post?.userId;
-          }
-
           if (contentOwnerId && contentOwnerId !== userId) {
             await db.insert(notifications).values({
               userId: contentOwnerId,
@@ -368,6 +424,10 @@ export const commentsRouter = createTRPCRouter({
         ? eq(comments.parentId, parentId)
         : isNull(comments.parentId),
       or(
+        eq(comments.moderationStatus, "published"),
+        userId ? eq(comments.userId, userId) : sql<boolean>`FALSE`
+      ),
+      or(
         userId ? eq(comments.userId, userId) : sql<boolean>`FALSE`,
         or(
           isNull(channelModerations.type),
@@ -401,6 +461,10 @@ export const commentsRouter = createTRPCRouter({
           and(
             videoId ? eq(comments.videoId, videoId) : eq(comments.postId, postId!),
             isNull(comments.parentId),
+            or(
+              eq(comments.moderationStatus, "published"),
+              userId ? eq(comments.userId, userId) : sql<boolean>`FALSE`
+            ),
             or(
               userId ? eq(comments.userId, userId) : sql<boolean>`FALSE`,
               or(

@@ -737,9 +737,30 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="none">{t("none")}</SelectItem>
-                        <SelectItem value="basic">{t("basic")}</SelectItem>
-                        <SelectItem value="strict">{t("strict")}</SelectItem>
+                        <SelectItem value="none">
+                          <div className="flex flex-col">
+                            <span>{t("none")}</span>
+                            <span className="text-xs text-muted-foreground">{t("noneDesc")}</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="basic">
+                          <div className="flex flex-col">
+                            <span>{t("basic")}</span>
+                            <span className="text-xs text-muted-foreground">{t("basicDesc")}</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="strict">
+                          <div className="flex flex-col">
+                            <span>{t("strict")}</span>
+                            <span className="text-xs text-muted-foreground">{t("strictDesc")}</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="hold_all">
+                          <div className="flex flex-col">
+                            <span>{t("holdAll")}</span>
+                            <span className="text-xs text-muted-foreground">{t("holdAllDesc")}</span>
+                          </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

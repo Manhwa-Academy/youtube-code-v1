@@ -1190,10 +1190,9 @@ export const studioRouter = createTRPCRouter({
         )
       `;
 
-      // Giả lập trạng thái "Bị giữ lại" bằng cách trả về rỗng nếu status === 'held' (chưa có cột này trong DB)
-      if (status === "held") {
-        return { totalCount: 0, items: [], nextCursor: null };
-      }
+      const moderationStatusFilter = status === "held" 
+        ? eq(comments.moderationStatus, "held_for_review")
+        : eq(comments.moderationStatus, "published");
 
       // Base filters
       const conditions = [
@@ -1215,6 +1214,7 @@ export const studioRouter = createTRPCRouter({
                   .where(eq(posts.userId, userId)),
               ),
             ),
+        moderationStatusFilter,
         isNull(comments.parentId),
       ];
 
@@ -1539,6 +1539,87 @@ export const studioRouter = createTRPCRouter({
             set: { type, updatedAt: new Date() },
           });
       }
+
+      return { success: true };
+    }),
+
+  approveComment: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+      const { id } = input;
+
+      const [comment] = await db
+        .select({
+          contentOwnerId: sql<string>`COALESCE(${videos.userId}, ${posts.userId})`,
+        })
+        .from(comments)
+        .leftJoin(videos, eq(comments.videoId, videos.id))
+        .leftJoin(posts, eq(comments.postId, posts.id))
+        .where(eq(comments.id, id));
+
+      if (!comment || comment.contentOwnerId !== userId) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
+      await db.update(comments)
+        .set({ moderationStatus: "published" })
+        .where(eq(comments.id, id));
+
+      return { success: true };
+    }),
+
+  rejectComment: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+      const { id } = input;
+
+      const [comment] = await db
+        .select({
+          contentOwnerId: sql<string>`COALESCE(${videos.userId}, ${posts.userId})`,
+        })
+        .from(comments)
+        .leftJoin(videos, eq(comments.videoId, videos.id))
+        .leftJoin(posts, eq(comments.postId, posts.id))
+        .where(eq(comments.id, id));
+
+      if (!comment || comment.contentOwnerId !== userId) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
+      await db.update(comments)
+        .set({ moderationStatus: "hidden" })
+        .where(eq(comments.id, id));
+
+      return { success: true };
+    }),
+
+  getModerationSettings: protectedProcedure
+    .query(async ({ ctx }) => {
+      const { id: userId } = ctx.user;
+
+      const [user] = await db
+        .select({ blacklistKeywords: users.blacklistKeywords })
+        .from(users)
+        .where(eq(users.id, userId));
+
+      return {
+        blacklistKeywords: user?.blacklistKeywords || "",
+      };
+    }),
+
+  updateModerationSettings: protectedProcedure
+    .input(z.object({
+      blacklistKeywords: z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+      const { blacklistKeywords } = input;
+
+      await db.update(users)
+        .set({ blacklistKeywords })
+        .where(eq(users.id, userId));
 
       return { success: true };
     }),
