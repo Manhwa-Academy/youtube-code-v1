@@ -9,7 +9,8 @@
     "light": "밝은 테마",
     "dark": "어두운 테마",
     "signIn": "로그인",
-    "systemAdmin": "시스템 관리 패널"
+    "systemAdmin": "시스템 관리 패널",
+    "fireworkEffect": "불꽃놀이 효과"
   },
   "Sidebar": {
     "home": "홈",
@@ -864,7 +865,9 @@
     "removeFromHistory": "기록에서 삭제",
     "removeDownload": "오프라인 동영상 삭제",
     "queueSuccess": "대기열에 추가됨",
-    "queueError": "대기열에 추가할 수 없습니다: 정보 누락"
+    "queueError": "대기열에 추가할 수 없습니다: 정보 누락",
+    "embed": "퍼가기",
+    "embedCopied": "소스 코드가 클립보드에 복사되었습니다"
   },
   "Playback": {
     "autoPlay": "다음 동영상 자동 재생",

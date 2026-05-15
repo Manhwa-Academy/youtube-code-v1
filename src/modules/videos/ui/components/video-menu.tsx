@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useState } from "react";
 import {
   ListPlusIcon,
@@ -9,6 +9,7 @@ import {
   PlusIcon,
   ListVideoIcon,
   FlagIcon,
+  CodeIcon,
 } from "lucide-react";
 
 import { useIsOnline } from "@/hooks/use-is-online";
@@ -49,6 +50,7 @@ export const VideoMenu = ({
   const isOnline = useIsOnline();
   const t = useTranslations("VideoMenu");
   const tGeneral = useTranslations("General");
+  const locale = useLocale();
   const [isOpenPlaylistAddModal, setIsOpenPlaylistAddModal] = useState(false);
   const [isOpenCreateModal, setIsOpenCreateModal] = useState(false);
   const [isOpenMixAddModal, setIsOpenMixAddModal] = useState(false);
@@ -72,6 +74,12 @@ export const VideoMenu = ({
     const fullUrl = `${APP_URL}/videos/${videoId}`;
     navigator.clipboard.writeText(fullUrl);
     toast.success(tGeneral("copySuccess"));
+  };
+
+  const onEmbed = () => {
+    const embedCode = `<iframe width="560" height="315" src="${APP_URL}/${locale}/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+    navigator.clipboard.writeText(embedCode);
+    toast.success(t("embedCopied"));
   };
 
   const handleAddToQueue = () => {
@@ -132,6 +140,11 @@ export const VideoMenu = ({
               <DropdownMenuItem onClick={onShare}>
                 <ShareIcon className="mr-2 size-4" />
                 {t("share")}
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={onEmbed}>
+                <CodeIcon className="mr-2 size-4" />
+                {t("embed")}
               </DropdownMenuItem>
 
               <DropdownMenuItem onClick={() => setIsOpenPlaylistAddModal(true)}>

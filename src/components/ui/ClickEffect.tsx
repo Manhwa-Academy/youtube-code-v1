@@ -1,73 +1,247 @@
 "use client";
 
-import { useState } from "react";
-
+import { animate, random } from "animejs";
+import { useTheme } from "next-themes";
+import React, { useEffect, useRef } from "react";
+import { useUIStore } from "@/hooks/use-ui-store";
 interface ClickEffectProps {
-  imageSrc: string;
+  imageSrc?: string;
   children: React.ReactNode;
 }
-
-interface ClickItem {
-  id: string;
+interface Particle {
   x: number;
   y: number;
+  color?: string;
+  radius?: number;
+  alpha?: number;
+  angle?: number;
+  lineWidth?: number;
+  endPos?: { x: number; y: number };
+  draw?: () => void;
 }
 
 export default function ClickEffect({ imageSrc, children }: ClickEffectProps) {
-  const [clicks, setClicks] = useState<ClickItem[]>([]);
+  const { resolvedTheme } = useTheme();
+  const { isFireworkEnabled } = useUIStore();
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const handleMouseDownRef = useRef<((e: MouseEvent) => void) | null>(null);
+  const handleResizeRef = useRef<(() => void) | null>(null);
+  const cleanupRef = useRef<() => void>(() => {});
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const id = `${Date.now()}-${Math.random()}`;
-    setClicks((prev) => [...prev, { id, x, y }]);
+  function cleanup() {
+    cleanupRef.current();
+  }
 
-    // remove after animation
-    setTimeout(() => setClicks((prev) => prev.filter((c) => c.id !== id)), 800);
-  };
+  function createFireworks() {
+    cleanup();
+
+    const lightColors = ["102, 167, 221", "62, 131, 225", "33, 78, 194"];
+    const darkColors = ["252, 146, 174", "202, 180, 190", "207, 198, 255"];
+    const colors = resolvedTheme === "dark" ? darkColors : lightColors;
+
+    const defaultConfig = {
+      numberOfParticles: 20,
+      orbitRadius: { min: 50, max: 100 },
+      circleRadius: { min: 10, max: 20 },
+      diffuseRadius: { min: 50, max: 100 },
+      animeDuration: { min: 900, max: 1500 },
+    };
+
+    let pointerX = 0;
+    let pointerY = 0;
+
+    const canvasEl = canvasRef.current!;
+    const ctx = canvasEl.getContext("2d")!;
+
+    function setCanvasSize(canvasEl: HTMLCanvasElement) {
+      canvasEl.width = window.innerWidth;
+      canvasEl.height = window.innerHeight;
+      canvasEl.style.width = `${window.innerWidth}px`;
+      canvasEl.style.height = `${window.innerHeight}px`;
+    }
+
+    function updateCoords(e: MouseEvent | TouchEvent) {
+      pointerX =
+        e instanceof MouseEvent
+          ? e.clientX
+          : (e as TouchEvent).touches[0]?.clientX ||
+            (e as TouchEvent).changedTouches[0]?.clientX;
+      pointerY =
+        e instanceof MouseEvent
+          ? e.clientY
+          : (e as TouchEvent).touches[0]?.clientY ||
+            (e as TouchEvent).changedTouches[0]?.clientY;
+    }
+
+    function setParticleDirection(p: Particle) {
+      const angle = (random(0, 360) * Math.PI) / 180;
+      const value = random(
+        defaultConfig.diffuseRadius.min,
+        defaultConfig.diffuseRadius.max,
+      );
+      const radius = value;
+      return {
+        x: p.x + radius * Math.cos(angle),
+        y: p.y + radius * Math.sin(angle),
+      };
+    }
+
+    function createParticle(x: number, y: number): Particle {
+      const p: Particle = {
+        x,
+        y,
+        color: `rgba(${colors[Math.floor(random(0, colors.length - 1))]},${random(0.2, 0.8, 2)})`,
+        radius: random(
+          defaultConfig.circleRadius.min,
+          defaultConfig.circleRadius.max,
+        ),
+        angle: random(0, 360),
+        endPos: setParticleDirection({ x, y } as Particle),
+        draw() {
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(((this.angle || 0) * Math.PI) / 180);
+          ctx.beginPath();
+          ctx.moveTo(0, -this.radius!);
+          ctx.lineTo(
+            this.radius! * Math.sin(Math.PI / 3),
+            this.radius! * Math.cos(Math.PI / 3),
+          );
+          ctx.lineTo(
+            -this.radius! * Math.sin(Math.PI / 3),
+            this.radius! * Math.cos(Math.PI / 3),
+          );
+          ctx.closePath();
+          ctx.fillStyle = this.color!;
+          ctx.fill();
+          ctx.restore();
+        },
+      };
+      return p;
+    }
+
+    function createCircle(x: number, y: number): Particle {
+      const p: Particle = {
+        x,
+        y,
+        color:
+          resolvedTheme === "dark"
+            ? "rgb(207, 198, 255)"
+            : "rgb(106, 159, 255)",
+        radius: 0.1,
+        alpha: 0.35,
+        lineWidth: 4,
+        draw() {
+          ctx.globalAlpha = this.alpha!;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius!, 0, 2 * Math.PI, true);
+          ctx.lineWidth = this.lineWidth!;
+          ctx.strokeStyle = this.color!;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        },
+      };
+      return p;
+    }
+
+    function drawParticles(particles: Particle[], circle: Particle) {
+      ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+      particles.forEach((particle) => particle.draw?.());
+      circle.draw?.();
+    }
+
+    function animateParticles(x: number, y: number) {
+      const circle = createCircle(x, y);
+      const particles: Particle[] = Array.from(
+        { length: defaultConfig.numberOfParticles },
+        () => createParticle(x, y),
+      );
+      let finishedAnimations = 0;
+
+      const renderScene = () => {
+        ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+        particles.forEach((particle) => particle.draw?.());
+        circle.draw?.();
+      };
+
+      const handleComplete = () => {
+        finishedAnimations += 1;
+        if (finishedAnimations >= 2) {
+          ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+        }
+      };
+
+      animate(particles, {
+        x(p: Particle) {
+          return (p.endPos as { x: number }).x;
+        },
+        y(p: Particle) {
+          return (p.endPos as { y: number }).y;
+        },
+        radius: 0,
+        duration: random(
+          defaultConfig.animeDuration.min,
+          defaultConfig.animeDuration.max,
+        ),
+        ease: "outExpo",
+        onRender: renderScene,
+        onComplete: handleComplete,
+      });
+
+      animate(circle, {
+        radius: random(
+          defaultConfig.orbitRadius.min,
+          defaultConfig.orbitRadius.max,
+        ),
+        lineWidth: 0,
+        alpha: 0,
+        duration: random(1000, 1500),
+        ease: "outExpo",
+        onRender: renderScene,
+        onComplete: handleComplete,
+      });
+    }
+
+    handleResizeRef.current = () => setCanvasSize(canvasEl);
+    handleMouseDownRef.current = (e: MouseEvent) => {
+      updateCoords(e);
+      animateParticles(pointerX, pointerY);
+    };
+
+    document.addEventListener("mousedown", handleMouseDownRef.current);
+    window.addEventListener("resize", handleResizeRef.current);
+    cleanupRef.current = () => {
+      if (handleMouseDownRef.current)
+        document.removeEventListener("mousedown", handleMouseDownRef.current);
+      if (handleResizeRef.current)
+        window.removeEventListener("resize", handleResizeRef.current);
+    };
+    setCanvasSize(canvasEl);
+  }
+
+  useEffect(() => {
+    if (isFireworkEnabled) {
+      createFireworks();
+    } else {
+      cleanup();
+    }
+    return () => cleanup();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolvedTheme, isFireworkEnabled]);
 
   return (
-    <div
-      className="relative w-full h-full"
-      onClick={handleClick}
-      style={{ cursor: "pointer" }}
-    >
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {children}
-
-      {clicks.map((click) => (
-        <img
-          key={click.id}
-          src={imageSrc}
-          style={{
-            position: "absolute",
-            left: click.x - 25,
-            top: click.y - 25,
-            width: 50,
-            height: 50,
-            pointerEvents: "none",
-            animation: "pop 0.8s ease-out forwards",
-            zIndex: 50,
-          }}
-        />
-      ))}
-
-      <style jsx>{`
-        @keyframes pop {
-          0% {
-            transform: scale(0) translateY(0);
-            opacity: 1;
-          }
-          50% {
-            transform: scale(1.2) translateY(-20px); /* bay lên 20px */
-            opacity: 1;
-          }
-          100% {
-            transform: scale(1) translateY(-40px); /* kết thúc lên cao hơn */
-            opacity: 0;
-          }
-        }
-      `}</style>
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: "fixed",
+          left: 0,
+          top: 0,
+          zIndex: 999,
+          pointerEvents: "none",
+        }}
+      />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import {
   ChevronRightIcon,
   CheckIcon,
   ShieldAlertIcon,
+  SparklesIcon,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { SignInButton, SignedIn, SignedOut, useClerk, useUser } from "@clerk/nextjs";
@@ -20,6 +21,8 @@ import { useTranslations, useLocale } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/routing";
 
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { useUIStore } from "@/hooks/use-ui-store";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,6 +54,7 @@ export const AuthButton = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { setTheme } = useTheme();
+  const { isFireworkEnabled, toggleFirework } = useUIStore();
   const [mounted, setMounted] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
 
@@ -147,6 +151,20 @@ export const AuthButton = () => {
               <div className="flex flex-1 items-center justify-between">
                 <span>{t("theme")}: {currentTheme === "dark" ? t("dark") : t("light")}</span>
                 <ChevronRightIcon className="size-4 text-muted-foreground" />
+              </div>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onSelect={(e) => e.preventDefault()}
+              className="cursor-default"
+            >
+              <SparklesIcon className="mr-3 size-4" />
+              <div className="flex flex-1 items-center justify-between">
+                <span>{t("fireworkEffect")}</span>
+                <Switch 
+                  checked={isFireworkEnabled} 
+                  onCheckedChange={toggleFirework} 
+                  className="scale-75 origin-right"
+                />
               </div>
             </DropdownMenuItem>
             <DropdownMenuSub>

@@ -9,7 +9,8 @@
     "light": "Sáng",
     "dark": "Tối",
     "signIn": "Đăng nhập",
-    "systemAdmin": "Bảng quản trị hệ thống"
+    "systemAdmin": "Bảng quản trị hệ thống",
+    "fireworkEffect": "Hiệu ứng pháo hoa"
   },
   "Sidebar": {
     "home": "Trang chủ",
@@ -680,7 +681,9 @@
     "removeFromHistory": "Xóa khỏi nhật ký xem",
     "removeDownload": "Xóa nội dung tải xuống",
     "queueSuccess": "Đã thêm vào hàng chờ",
-    "queueError": "Không thể thêm vào hàng chờ: Thiếu thông tin"
+    "queueError": "Không thể thêm vào hàng chờ: Thiếu thông tin",
+    "embed": "Nhúng",
+    "embedCopied": "Đã sao chép mã nhúng"
   },
   "Tabs": {
     "home": "Trang chủ",

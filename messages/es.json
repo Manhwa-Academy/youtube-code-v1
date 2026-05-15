@@ -9,7 +9,8 @@
     "light": "Tema claro",
     "dark": "Tema oscuro",
     "signIn": "Iniciar sesión",
-    "systemAdmin": "Panel de administración"
+    "systemAdmin": "Panel de administración",
+    "fireworkEffect": "Efecto de fuegos artificiales"
   },
   "Sidebar": {
     "home": "Inicio",
@@ -902,7 +903,9 @@
     "removeFromHistory": "Eliminar del historial",
     "removeDownload": "Eliminar descarga",
     "queueSuccess": "Añadido a la cola",
-    "queueError": "No se pudo añadir a la cola: Falta información"
+    "queueError": "No se pudo añadir a la cola: Falta información",
+    "embed": "Insertar",
+    "embedCopied": "Código de inserción copiado al portapapeles"
   },
   "Playback": {
     "autoPlay": "Reproducción automática",

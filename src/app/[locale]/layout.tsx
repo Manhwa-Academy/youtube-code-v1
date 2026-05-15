@@ -64,7 +64,7 @@ export default async function RootLayout({
             <TRPCProvider>
               <NextIntlClientProvider messages={messages}>
                 <Toaster />
-                <ClickEffect imageSrc="/toTop.Cuiv4RfP.svg">{children}</ClickEffect>
+                 <ClickEffect>{children}</ClickEffect>
                 <ScrollToTopCharacter />
                 <GlobalPlayer />
               </NextIntlClientProvider>

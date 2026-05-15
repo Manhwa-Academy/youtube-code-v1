@@ -9,7 +9,8 @@
     "light": "Light",
     "dark": "Dark",
     "signIn": "Sign in",
-    "systemAdmin": "System administration"
+    "systemAdmin": "System administration",
+    "fireworkEffect": "Firework Effect"
   },
   "Sidebar": {
     "home": "Home",
@@ -680,7 +681,9 @@
     "removeFromHistory": "Remove from history",
     "removeDownload": "Remove download",
     "queueSuccess": "Added to queue",
-    "queueError": "Could not add to queue: Missing information"
+    "queueError": "Could not add to queue: Missing information",
+    "embed": "Embed",
+    "embedCopied": "Embed code copied to clipboard"
   },
   "Tabs": {
     "home": "Home",

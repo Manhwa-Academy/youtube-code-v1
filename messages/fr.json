@@ -9,7 +9,8 @@
     "light": "Thème clair",
     "dark": "Thème sombre",
     "signIn": "Se connecter",
-    "systemAdmin": "Panneau d'administration"
+    "systemAdmin": "Panneau d'administration",
+    "fireworkEffect": "Effet de feu d'artifice"
   },
   "Sidebar": {
     "home": "Accueil",
@@ -843,7 +844,9 @@
     "removeFromHistory": "Supprimer de l'historique",
     "removeDownload": "Supprimer le téléchargement",
     "queueSuccess": "Ajouté à la file d'attente",
-    "queueError": "Impossible d'ajouter à la file d'attente : informations manquantes"
+    "queueError": "Impossible d'ajouter à la file d'attente : informations manquantes",
+    "embed": "Intégrer",
+    "embedCopied": "Code d'intégration copié dans le presse-papiers"
   },
   "Playback": {
     "autoPlay": "Lecture automatique",

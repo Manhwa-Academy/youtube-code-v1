@@ -9,7 +9,8 @@
     "light": "ライト",
     "dark": "ダーク",
     "signIn": "ログイン",
-    "systemAdmin": "システム管理パネル"
+    "systemAdmin": "システム管理パネル",
+    "fireworkEffect": "花火エフェクト"
   },
   "Sidebar": {
     "home": "ホーム",
@@ -962,7 +963,9 @@
     "removeFromHistory": "再生履歴から削除",
     "removeDownload": "オフライン動画を削除",
     "queueSuccess": "キューに追加しました",
-    "queueError": "キューに追加できませんでした：情報が不足しています"
+    "queueError": "キューに追加できませんでした：情報が不足しています",
+    "embed": "埋め込み",
+    "embedCopied": "埋め込みコードをクリップボードにコピーしました"
   },
   "Playback": {
     "autoPlay": "自動再生",

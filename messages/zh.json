@@ -9,7 +9,8 @@
     "light": "浅色主题",
     "dark": "深色主题",
     "signIn": "登录",
-    "systemAdmin": "系统管理面板"
+    "systemAdmin": "系统管理面板",
+    "fireworkEffect": "烟花效果"
   },
   "Sidebar": {
     "home": "首页",
@@ -865,7 +866,9 @@
     "removeFromHistory": "从历史记录中移除",
     "removeDownload": "删除下载内容",
     "queueSuccess": "已添加到播放队列",
-    "queueError": "无法添加到播放队列：缺少信息"
+    "queueError": "无法添加到播放队列：缺少信息",
+    "embed": "嵌入",
+    "embedCopied": "嵌入代码已复制到剪贴板"
   },
   "Playback": {
     "autoPlay": "自动播放",

@@ -9,7 +9,8 @@
     "light": "Helles Design",
     "dark": "Dunkles Design",
     "signIn": "Anmelden",
-    "systemAdmin": "Administrationsbereich"
+    "systemAdmin": "Administrationsbereich",
+    "fireworkEffect": "Feuerwerk-Effekt"
   },
   "Sidebar": {
     "home": "Startseite",
@@ -928,7 +929,9 @@
     "removeFromHistory": "Aus Verlauf entfernen",
     "removeDownload": "Download entfernen",
     "queueSuccess": "Zur Warteschlange hinzugefügt",
-    "queueError": "Konnte nicht zur Warteschlange hinzugefügt werden: Informationen fehlen"
+    "queueError": "Konnte nicht zur Warteschlange hinzugefügt werden: Informationen fehlen",
+    "embed": "Einbetten",
+    "embedCopied": "Einbettungscode in die Zwischenablage kopiert"
   },
   "Playback": {
     "autoPlay": "Autoplay",
