@@ -115,7 +115,7 @@ export const searchRouter = createTRPCRouter({
           .select({
             ...getTableColumns(videos),
             user: users,
-            viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
+            viewCount: videos.viewsCount,
             likeCount: db.$count(videoReactions, and(
               eq(videoReactions.videoId, videos.id),
               eq(videoReactions.type, "like"),
@@ -344,7 +344,7 @@ export const searchRouter = createTRPCRouter({
         .select({
           ...getTableColumns(videos),
           user: users,
-          viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
+          viewCount: videos.viewsCount,
           likeCount: db.$count(videoReactions, and(
             eq(videoReactions.videoId, videos.id),
             eq(videoReactions.type, "like"),
