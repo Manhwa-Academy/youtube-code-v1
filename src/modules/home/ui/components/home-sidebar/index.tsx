@@ -15,7 +15,7 @@ export const HomeSidebar = () => {
   const isOnline = useIsOnline();
 
   return (
-    <Sidebar className="pt-16 z-40 border-none" collapsible="icon">
+    <Sidebar className="z-40 border-none" collapsible="icon">
       <SidebarContent className="bg-background">
         {isOnline && (
           <>

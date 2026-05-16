@@ -109,7 +109,7 @@ export const StudioSidebar = () => {
   const isVideoDetails = pathname.includes("/studio/videos/");
 
   return (
-    <Sidebar className="pt-16 z-40" collapsible="icon">
+    <Sidebar className="z-40" collapsible="icon">
       <SidebarContent className="bg-background">
         {isPostDetails && <PostDetailsSidebar />}
         {isVideoDetails && <VideoDetailsSidebar />}

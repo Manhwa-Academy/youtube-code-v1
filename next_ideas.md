@@ -182,19 +182,6 @@ live_chat_messages (id, streamId, userId, message, createdAt)
 
 ---
 
-## 📅 Roadmap Đề Xuất
-
-```
-Tháng 1: Notification real-time + Hashtag system hoàn chỉnh
-Tháng 2: Playlist nâng cao (reorder + player mode) + Search nâng cao
-Tháng 3: Live streaming MVP + Studio Analytics phase 2
-Tháng 4: Monetization + Channel Membership
-Tháng 5: Mobile app (React Native)
-Tháng 6: AI enhancements + Course mode
-```
-
----
-
 ## 💡 Quick Wins (Dưới 1 ngày mỗi cái)
 
 | Feature | Effort | Impact |

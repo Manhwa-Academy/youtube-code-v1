@@ -25,7 +25,7 @@ export const HomeNavbar = () => {
   const isOnline = useIsOnline();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-black/80 backdrop-blur-md flex items-center px-2 pr-5 z-50 border-b border-transparent transition-all">
+    <nav className="w-full h-16 bg-white/80 dark:bg-black/80 backdrop-blur-md flex items-center px-2 pr-5 z-50 border-b border-transparent transition-all flex-shrink-0">
       <VoiceSearchModal
         open={isVoiceSearchOpen}
         onOpenChange={setIsVoiceSearchOpen}

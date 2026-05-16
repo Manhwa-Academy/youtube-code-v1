@@ -10,11 +10,11 @@ interface StudioLayoutProps {
 export const StudioLayout = ({ children }: StudioLayoutProps) => {
   return (
     <SidebarProvider>
-      <div className="w-full h-screen overflow-hidden">
+      <div className="w-full h-[100dvh] flex flex-col overflow-hidden">
         <StudioNavbar />
-        <div className="flex h-full pt-[4rem] overflow-hidden">
+        <div className="flex flex-1 overflow-hidden">
           <StudioSidebar />
-          <main className="flex-1 overflow-y-auto">
+          <main id="main-scroll-container" className="flex-1 overflow-y-auto">
             {children}
           </main>
         </div>

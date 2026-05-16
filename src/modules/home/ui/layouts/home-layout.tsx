@@ -10,9 +10,9 @@ interface HomeLayoutProps {
 export const HomeLayout = ({ children }: HomeLayoutProps) => {
   return (
     <SidebarProvider>
-      <div className="w-full h-screen overflow-hidden flex flex-col relative">
+      <div className="w-full h-[100dvh] overflow-hidden flex flex-col relative">
         <HomeNavbar />
-        <div className="flex flex-1 pt-16 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden">
           <HomeSidebar />
           <main id="main-scroll-container" className="flex-1 overflow-y-auto bg-background">
             {children}
