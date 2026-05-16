@@ -28,6 +28,7 @@ export async function generateMetadata(
       title: videos.title,
       description: videos.description,
       thumbnailUrl: videos.thumbnailUrl,
+      duration: videos.duration,
       createdAt: videos.createdAt,
       user: {
         name: users.name,
@@ -52,6 +53,9 @@ export async function generateMetadata(
   return {
     title: video.title,
     description: video.description || `Watch ${video.title} on Hayase-Yuuka`,
+    alternates: {
+      canonical: videoUrl,
+    },
     openGraph: {
       title: video.title,
       description: video.description || undefined,
@@ -62,10 +66,18 @@ export async function generateMetadata(
           url: thumbnailUrl,
           width: 1280,
           height: 720,
+          alt: video.title,
         },
       ],
       locale: locale === 'vi' ? 'vi_VN' : 'en_US',
       type: 'video.other',
+      videos: [
+        {
+          url: `${baseUrl}/${locale}/embed/${videoId}`,
+          width: 1280,
+          height: 720,
+        }
+      ],
     },
     twitter: {
       card: 'summary_large_image',
@@ -74,6 +86,11 @@ export async function generateMetadata(
       images: [thumbnailUrl],
       creator: video.user.handle ? `@${video.user.handle}` : undefined,
     },
+    other: {
+      "video:duration": Math.floor(video.duration / 1000).toString(),
+      "video:release_date": video.createdAt.toISOString(),
+      "video:tag": "video",
+    }
   };
 }
 

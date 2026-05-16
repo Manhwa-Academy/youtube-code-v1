@@ -106,17 +106,6 @@ live_chat_messages (id, streamId, userId, message, createdAt)
 - Offline mode: Download video để xem offline
 - Shorts feed với swipe gesture
 
----
-
-### 12. 🌐 SEO & Discovery
-- **Sitemap.xml** động cho video public, channel, playlist
-- **Open Graph** + **Twitter Card** đầy đủ cho mỗi video (thumbnail, duration, author)
-- **Structured Data** (schema.org VideoObject) cho Google rich results
-- **RSS Feed** cho channel (subscriber dùng RSS reader)
-- **Embed player**: `<iframe>` embed video ra ngoài website khác
-
----
-
 ## 🟢 Ưu Tiên Thấp — Dài Hạn (3–6 tháng+)
 
 ### 13. 🎓 Learning / Course Mode
@@ -156,47 +145,3 @@ live_chat_messages (id, streamId, userId, message, createdAt)
 - **Digest email** hàng tuần tự động: "Video mới từ kênh bạn theo dõi"
 - **Re-engagement email**: Gửi cho user chưa login 30+ ngày
 
----
-
-## 🔧 Cải Thiện Kỹ Thuật (Technical Debt)
-
-### Performance
-- [ ] `videoViews` N+1 trong `getMany` → join 1 query với `AVG(progress)`
-- [ ] Redis cache cho `getStats`, `getAnalytics` (TTL 5 phút)
-- [ ] `viewEvents` table sẽ rất lớn → thêm **partitioning theo tháng**
-- [ ] Image optimization: thumbnail dùng **Mux image API** thay UploadThing (auto-resize)
-- [ ] **ISR (Incremental Static Regeneration)** cho video page public
-
-### Developer Experience
-- [ ] **Storybook** cho UI components
-- [ ] **E2E tests** với Playwright (critical paths: upload, subscribe, comment)
-- [ ] **CI/CD pipeline**: GitHub Actions → Vercel preview → production
-- [ ] **Error tracking**: Sentry integration
-- [ ] **Feature flags**: Bật/tắt tính năng không cần deploy
-
-### Security
-- [ ] **Content Security Policy** headers
-- [ ] Rate limiting chi tiết hơn (per-endpoint, per-user)
-- [ ] **CORS** config cẩn thận cho API routes
-- [ ] Audit log: Ai làm gì, khi nào (quan trọng cho admin)
-
----
-
-## 💡 Quick Wins (Dưới 1 ngày mỗi cái)
-
-| Feature | Effort | Impact |
-|---|---|---|
-| `robots.txt` + `sitemap.xml` | 2h | SEO tăng đáng kể |
-| Video embed `<iframe>` | 4h | Viral growth |
-| RSS feed cho channel | 3h | Power users |
-| Keyboard shortcuts cho player | 4h | UX tốt hơn |
-| Dark/Light mode toggle | 2h | User preference |
-| `Ctrl+K` Command palette | 6h | Navigation nhanh |
-| Video speed memory | 1h | UX nhỏ nhưng hữu ích |
-| Playlist autoplay next | 3h | Engagement tăng |
-| Copy link to timestamp | 2h | Sharing |
-| "Not interested" history | 3h | Feed quality |
-
----
-
-*Cập nhật lần cuối: 2026-05-14*
