@@ -80,8 +80,11 @@ Rules:
 - Max 10 words
 - No explanation
 - No quotes
-- Match the actual content of the video
-- Do NOT assume genre (manhwa, anime, etc.) unless clear
+- STICK STRICTLY to the actual content provided in the transcript.
+- BE SPECIFIC: Mention key events, characters, or topics from the transcript.
+- AVOID generic clickbait like "Amazing", "Shocking", "Must Watch".
+- Do NOT hallucinate details not present in the transcript.
+- Respond in the SAME LANGUAGE as the transcript or video information (de, es, en, vi, fr, ja, ko, zh).
 `;
 
   const aiResponse = await fetch(

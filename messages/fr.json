@@ -115,6 +115,8 @@
     "change": "Modifier",
     "generateThumbnail": "Générer une miniature",
     "delete": "Supprimer",
+    "saving": "Enregistrement...",
+    "allChangesSaved": "Toutes les modifications ont été enregistrées",
     "videoName": "Titre de la vidéo",
     "videoDesc": "Description de la vidéo",
     "videoPlaceholder": "Saisissez le titre de la vidéo",

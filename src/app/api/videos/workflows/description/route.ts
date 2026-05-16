@@ -86,8 +86,11 @@ Rules:
 - No explanation
 - No hashtags
 - No emojis
-- Match actual content
-- Do NOT assume genre if unclear
+- STICK STRICTLY to the facts provided in the transcript.
+- BE SPECIFIC: Describe actual events or information from the video.
+- AVOID generic filler or buzzwords.
+- Do NOT hallucinate or imagine details.
+- Respond in the SAME LANGUAGE as the transcript or video title (de, es, en, vi, fr, ja, ko, zh).
 `;
 
   const aiResponse = await fetch(

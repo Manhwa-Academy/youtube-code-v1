@@ -113,6 +113,8 @@
     "save": "Guardar",
     "revalidate": "Actualizar",
     "delete": "Eliminar",
+    "saving": "Guardando...",
+    "allChangesSaved": "Todos los cambios guardados",
     "videoName": "Título del vídeo",
     "videoDesc": "Descripción del vídeo",
     "videoPlaceholder": "Introduce el título del vídeo",

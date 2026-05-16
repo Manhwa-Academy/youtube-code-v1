@@ -521,7 +521,7 @@ export const videosRouter = createTRPCRouter({
       return existingVideo;
     }),
   generateDescription: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.string().uuid(), locale: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
       const { id: userId } = ctx.user;
 
@@ -544,7 +544,7 @@ export const videosRouter = createTRPCRouter({
       }
 
       // 2. Gọi AI
-      const SYSTEM_PROMPT = `Write ONLY a YouTube video description. Rules: Max 200 characters, no explanation, no hashtags, match actual content.`;
+      const SYSTEM_PROMPT = `Write ONLY a YouTube video description. Rules: Max 200 characters, no hashtags, STICK STRICTLY to the facts in the transcript. Describe actual events from the video. NO hallucinations. Respond in the language: ${input.locale || "the same as transcript"} (Support: de, es, en, vi, fr, ja, ko, zh).`;
       const inputText = transcript.length > 200 ? `Transcript: ${transcript}` : `Title: ${video.title}. Generate description.`;
 
       const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -616,7 +616,7 @@ export const videosRouter = createTRPCRouter({
       return { success: true };
     }),
   generateTitle: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.string().uuid(), locale: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
       const { id: userId } = ctx.user;
 
@@ -639,7 +639,7 @@ export const videosRouter = createTRPCRouter({
       }
 
       // 2. Gọi AI
-      const SYSTEM_PROMPT = `Generate ONLY a YouTube title. Max 10 words, no quotes, match content.`;
+      const SYSTEM_PROMPT = `Generate ONLY a YouTube title. Rules: Max 10 words, no quotes, STICK STRICTLY to the facts in the transcript. Mention specific events/characters. NO clickbait or hallucinations. Respond in the language: ${input.locale || "the same as transcript"} (Support: de, es, en, vi, fr, ja, ko, zh).`;
       const inputText = transcript.length > 200 ? `Transcript: ${transcript}` : `Video info: ${video.thumbnailUrl}. Generate title.`;
 
       const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {

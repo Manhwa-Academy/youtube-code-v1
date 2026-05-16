@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   ChevronDownIcon,
   CopyCheckIcon,
@@ -37,6 +37,7 @@ import {
   TrashIcon,
 } from "lucide-react";
 
+import { useDebounce } from "@/hooks/use-debounce";
 import { trpc } from "@/trpc/client";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -144,6 +145,7 @@ export const FormSectionSkeleton = () => {
 
 const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   const t = useTranslations("Studio");
+  const locale = useLocale();
   const router = useRouter();
   const utils = trpc.useUtils();
 
@@ -164,10 +166,10 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   });
 
   const update = trpc.videos.update.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       utils.studio.getMany.invalidate();
       utils.studio.getOne.invalidate({ id: videoId });
-      toast.success(t("success"));
+      form.reset(data, { keepValues: true });
     },
     onError: () => {
       toast.error(t("error"));
@@ -259,6 +261,15 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     update.mutate(data);
   };
 
+  const values = form.watch();
+  const debouncedValues = useDebounce(values, 1000);
+
+  useEffect(() => {
+    if (form.formState.isDirty) {
+      update.mutate(debouncedValues);
+    }
+  }, [debouncedValues, update, form.formState.isDirty]);
+
   const fullUrl = `${APP_URL}/videos/${videoId}`;
   const [isCopied, setIsCopied] = useState(false);
 
@@ -290,37 +301,52 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
               <h1 className="text-2xl font-bold">{t("title")}</h1>
               <p className="text-xs text-muted-foreground">{t("desc")}</p>
             </div>
-            <div className="flex items-center gap-x-2">
-              <Button
-                type="submit"
-                disabled={update.isPending || !form.formState.isDirty}
-              >
-                {t("save")}
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <MoreVerticalIcon />
+              <div className="flex flex-col items-end gap-y-1">
+                <div className="flex items-center gap-x-2">
+                  <Button
+                    type="submit"
+                    disabled={update.isPending || !form.formState.isDirty}
+                  >
+                    {t("save")}
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => revalidate.mutate({ id: videoId })}
-                  >
-                    <RotateCcwIcon className="size-4 mr-2" />
-                    {t("revalidate")}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => remove.mutate({ id: videoId })}
-                    className="text-red-500 focus:text-red-500"
-                  >
-                    <TrashIcon className="size-4 mr-2" />
-                    {t("delete")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreVerticalIcon />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => revalidate.mutate({ id: videoId })}
+                      >
+                        <RotateCcwIcon className="size-4 mr-2" />
+                        {t("revalidate")}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => remove.mutate({ id: videoId })}
+                        className="text-red-500 focus:text-red-500"
+                      >
+                        <TrashIcon className="size-4 mr-2" />
+                        {t("delete")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="flex items-center gap-x-1 text-[#555] dark:text-[#aaa] text-[11px]">
+                  {update.isPending ? (
+                    <>
+                      <Loader2Icon className="size-3 animate-spin" />
+                      <span>{t("saving")}...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CopyCheckIcon className="size-3" />
+                      <span>{t("allChangesSaved")}</span>
+                    </>
+                  )}
+                </div>
+              </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <div className="space-y-8 lg:col-span-3">
@@ -338,7 +364,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                           type="button"
                           className="rounded-full size-6 [&_svg]:size-3"
                           onClick={() => {
-                            generateTitle.mutate({ id: videoId });
+                            generateTitle.mutate({ id: videoId, locale });
                           }}
                           disabled={
                             generateTitle.isPending || !video.muxTrackId
@@ -373,7 +399,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                           type="button"
                           className="rounded-full size-6 [&_svg]:size-3"
                           onClick={() =>
-                            generateDescription.mutate({ id: videoId })
+                            generateDescription.mutate({ id: videoId, locale })
                           }
                           disabled={
                             generateDescription.isPending || !video.muxTrackId

@@ -113,6 +113,8 @@
     "save": "保存",
     "revalidate": "更新",
     "delete": "削除",
+    "saving": "保存中...",
+    "allChangesSaved": "変更をすべて保存しました",
     "videoName": "動画のタイトル",
     "videoDesc": "動画の説明",
     "videoPlaceholder": "動画のタイトルを入力してください",

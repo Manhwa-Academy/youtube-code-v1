@@ -117,6 +117,8 @@
     "save": "Save",
     "revalidate": "Refresh",
     "delete": "Delete",
+    "saving": "Saving",
+    "allChangesSaved": "All changes saved",
     "videoName": "Video title",
     "videoDesc": "Video description",
     "videoPlaceholder": "Enter video title",

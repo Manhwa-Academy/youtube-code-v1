@@ -116,6 +116,8 @@
     "save": "Lưu",
     "revalidate": "Tải lại",
     "delete": "Xóa",
+    "saving": "Đang lưu",
+    "allChangesSaved": "Đã lưu tất cả thay đổi",
     "videoName": "Tiêu đề video",
     "videoDesc": "Mô tả video",
     "videoPlaceholder": "Nhập tiêu đề video",

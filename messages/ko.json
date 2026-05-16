@@ -113,6 +113,8 @@
     "save": "저장",
     "revalidate": "새로고침",
     "delete": "삭제",
+    "saving": "저장 중...",
+    "allChangesSaved": "모든 변경사항이 저장되었습니다",
     "videoName": "동영상 제목",
     "videoDesc": "동영상 설명",
     "videoPlaceholder": "동영상 제목을 입력하세요",

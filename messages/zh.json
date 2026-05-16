@@ -113,6 +113,8 @@
     "save": "保存",
     "revalidate": "刷新",
     "delete": "删除",
+    "saving": "正在保存...",
+    "allChangesSaved": "所有更改已保存",
     "videoName": "视频标题",
     "videoDesc": "视频描述",
     "videoPlaceholder": "输入视频标题",

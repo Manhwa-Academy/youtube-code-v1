@@ -113,6 +113,8 @@
     "save": "Speichern",
     "revalidate": "Aktualisieren",
     "delete": "Löschen",
+    "saving": "Speichern...",
+    "allChangesSaved": "Alle Änderungen gespeichert",
     "videoName": "Videotitel",
     "videoDesc": "Videobeschreibung",
     "videoPlaceholder": "Videotitel eingeben",
