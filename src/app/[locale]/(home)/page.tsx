@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { HydrateClient, trpc } from "@/trpc/server";
 
 import { DEFAULT_LIMIT } from "@/constants";
@@ -11,6 +13,19 @@ interface PageProps {
     categoryId?: string;
   }>
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Sidebar" });
+
+  return {
+    title: t("home"),
+  };
+}
 
 const Page = async ({ searchParams }: PageProps) => {
   const { categoryId } = await searchParams;

@@ -30,8 +30,10 @@
     "subscriptionsDescription": "Video từ các kênh bạn đã đăng ký",
     "notifications": "Thông báo",
     "systemAdmin": "Bảng quản trị hệ thống",
-    "allSubscribedChannels": "Tất cả kênh đã đăng ký",
-    "subscribedChannelsHeader": "Kênh đã đăng ký"
+    "allSubscribedChannels": "Tất cả kênh đăng ký",
+    "subscribedChannelsHeader": "Kênh đăng ký",
+    "noSubscriptions": "Chưa có kênh đăng ký nào",
+    "noSubscriptionsDescription": "Hãy đăng ký những kênh yêu thích để xem các video mới nhất tại đây."
   },
   "Video": {
     "subscribe": "Đăng ký",
@@ -100,15 +102,24 @@
     "search": "Tìm kiếm",
     "all": "Tất cả",
     "noPlaylists": "Không tìm thấy danh sách phát nào",
+    "noPlaylistsDescription": "Hãy tạo danh sách phát đầu tiên để sắp xếp các video yêu thích của bạn.",
     "endOfFeed": "Bạn đã xem hết nội dung",
     "offline": "Đang ngoại tuyến",
     "youAreOffline": "Bạn đang ngoại tuyến",
     "downloadToWatch": "Hãy tải video xuống để có thể xem chúng ở đây bất cứ khi nào không có kết nối mạng.",
     "downloads": "Nội dung tải xuống",
-    "readyToWatchOffline": "Sẵn sàng để xem ngoại tuyến",
-    "suggestedDownloadedVideos": "Video đã tải xuống đề xuất",
-    "basedOnYourDownloads": "(Dựa trên nội dung bạn đã tải về máy)",
-    "trending": "Thịnh hành"
+    "readyToWatchOffline": "Sẵn sàng xem ngoại tuyến",
+    "suggestedDownloadedVideos": "Video ngoại tuyến gợi ý",
+    "basedOnYourDownloads": "(Dựa trên nội dung bạn đã tải xuống)",
+    "trending": "Thịnh hành",
+    "noTrending": "Hiện chưa có video thịnh hành",
+    "noTrendingDescription": "Hãy quay lại sau để xem những nội dung phổ biến nhất.",
+    "noHistory": "Bạn chưa xem video nào",
+    "noHistoryDescription": "Lịch sử xem sẽ hiển thị tại đây khi bạn bắt đầu xem video.",
+    "noHashtag": "Không tìm thấy nội dung nào",
+    "noHashtagDescription": "Hãy thử tìm kiếm với từ khóa khác.",
+    "noLikedVideos": "Chưa có video nào đã thích",
+    "noLikedVideosDescription": "Các video bạn đã thích sẽ xuất hiện tại đây."
   },
   "Studio": {
     "title": "Chi tiết video",
@@ -861,7 +872,9 @@
     "title": "Kênh đã đăng ký",
     "allSubscriptions": "Tất cả kênh đã đăng ký",
     "manageSubscriptions": "Xem và quản lý tất cả kênh bạn đã đăng ký",
-    "unsubscribedSuccess": "Đã hủy đăng ký"
+    "unsubscribedSuccess": "Đã hủy đăng ký",
+    "noSubscriptions": "Chưa có kênh đăng ký nào",
+    "noSubscriptionsDescription": "Hãy đăng ký những kênh yêu thích để xem các video mới nhất tại đây."
   },
   "Users": {
     "errorLoadingUser": "Lỗi khi tải thông tin người dùng",

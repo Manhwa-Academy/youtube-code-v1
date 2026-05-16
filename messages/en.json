@@ -31,7 +31,9 @@
     "notifications": "Notifications",
     "systemAdmin": "System administration",
     "allSubscribedChannels": "All subscribed channels",
-    "subscribedChannelsHeader": "Subscriptions"
+    "subscribedChannelsHeader": "Subscriptions",
+    "noSubscriptions": "No subscriptions yet",
+    "noSubscriptionsDescription": "Subscribe to your favorite channels to see their latest videos here."
   },
   "Video": {
     "subscribe": "Subscribe",
@@ -101,6 +103,7 @@
     "search": "Search",
     "all": "All",
     "noPlaylists": "No playlists found",
+    "noPlaylistsDescription": "Create your first playlist to organize your favorite videos.",
     "endOfFeed": "You've reached the end",
     "offline": "Offline",
     "youAreOffline": "You are offline",
@@ -109,7 +112,15 @@
     "readyToWatchOffline": "Ready to watch offline",
     "suggestedDownloadedVideos": "Suggested downloaded videos",
     "basedOnYourDownloads": "(Based on content you've downloaded)",
-    "trending": "Trending"
+    "trending": "Trending",
+    "noTrending": "No trending videos right now",
+    "noTrendingDescription": "Try checking back later for more popular content.",
+    "noHistory": "Your watch history is empty",
+    "noHistoryDescription": "Videos you watch will appear here.",
+    "noHashtag": "No content found",
+    "noHashtagDescription": "Try searching for a different keyword.",
+    "noLikedVideos": "No liked videos",
+    "noLikedVideosDescription": "Videos you like will appear here."
   },
   "Studio": {
     "title": "Video details",
@@ -861,7 +872,9 @@
     "title": "Subscriptions",
     "allSubscriptions": "All subscribed channels",
     "manageSubscriptions": "View and manage all channels you're subscribed to",
-    "unsubscribedSuccess": "Unsubscribed successfully"
+    "unsubscribedSuccess": "Unsubscribed successfully",
+    "noSubscriptions": "No subscriptions yet",
+    "noSubscriptionsDescription": "Subscribe to your favorite channels to see the latest videos here."
   },
   "Users": {
     "errorLoadingUser": "Error loading user information",

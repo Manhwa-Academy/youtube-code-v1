@@ -15,6 +15,8 @@ import { ErrorFallback } from "@/components/error-fallback";
 import { ErrorBoundary } from "react-error-boundary";
 import { Suspense } from "react";
 
+import { EmptyState } from "@/components/empty-state";
+
 const locales: Record<string, any> = {
   vi,
   en: enUS,
@@ -123,15 +125,11 @@ const NotificationsSectionSuspense = () => {
       </div>
 
       {notifications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed rounded-3xl bg-muted/10 border-muted-foreground/20">
-          <div className="p-4 bg-muted rounded-full mb-4">
-            <BellIcon className="size-12 text-muted-foreground/50" />
-          </div>
-          <h2 className="text-xl font-semibold">{t("noNotifications")}</h2>
-          <p className="text-muted-foreground mt-2 max-w-[400px]">
-            {t("noNotificationsDesc")}
-          </p>
-        </div>
+        <EmptyState
+          icon={BellIcon}
+          title={t("noNotifications")}
+          description={t("noNotificationsDesc")}
+        />
       ) : (
         <div className="space-y-4">
           {notifications.map((notification) => (

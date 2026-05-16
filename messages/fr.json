@@ -97,7 +97,8 @@
     "search": "Rechercher",
     "all": "Tout",
     "noPlaylists": "Aucune playlist trouvée",
-    "endOfFeed": "Vous avez tout vu",
+    "noPlaylistsDescription": "Créez votre première playlist pour organiser vos vidéos préférées.",
+    "endOfFeed": "Vous êtes arrivé à la fin",
     "offline": "Hors ligne",
     "youAreOffline": "Vous êtes hors ligne",
     "downloadToWatch": "Téléchargez des vidéos pour les regarder ici à tout moment sans connexion Internet.",
@@ -886,5 +887,13 @@
     "startTimer": "Démarrer",
     "invalidMinutes": "Veuillez entrer un nombre de minutes valide",
     "minutesUnit": "min"
+  },
+  "Subscriptions": {
+    "title": "Abonnements",
+    "allSubscriptions": "Toutes các kênh đã đăng ký",
+    "manageSubscriptions": "Voir et gérer tất cả các kênh bạn đã đăng ký",
+    "unsubscribedSuccess": "Désabonnement réussi",
+    "noSubscriptions": "Pas encore d'abonnements",
+    "noSubscriptionsDescription": "Abonnez-vous à vos chaînes préférées pour voir les dernières vidéos ici."
   }
 }

@@ -11,6 +11,8 @@ import { DEFAULT_LIMIT } from "@/constants";
 import { InfiniteScroll } from "@/components/infinite-scroll";
 import { useTranslations } from "next-intl";
 
+import { UsersIcon } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import {
   SubscriptionItem,
   SubscriptionItemSkeleton,
@@ -70,11 +72,22 @@ const SubscriptionsSectionSuspense = () => {
     },
   });
 
+  const items = subscriptions.pages.flatMap((page) => page.items);
+
+  if (items.length === 0) {
+    return (
+      <EmptyState
+        icon={UsersIcon}
+        title={tSub("noSubscriptions")}
+        description={tSub("noSubscriptionsDescription")}
+      />
+    );
+  }
+
   return (
     <>
       <div className="flex flex-col gap-4">
-        {subscriptions.pages
-          .flatMap((page) => page.items)
+        {items
           .map((subscription) => (
             <Link
               prefetch

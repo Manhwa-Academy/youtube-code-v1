@@ -97,7 +97,8 @@
     "search": "검색",
     "all": "전체",
     "noPlaylists": "재생목록을 찾을 수 없습니다",
-    "endOfFeed": "피드의 끝입니다",
+    "noPlaylistsDescription": "좋아하는 동영상을 정리하려면 첫 번째 재생목록을 만드세요.",
+    "endOfFeed": "끝까지 도달했습니다",
     "offline": "오프라인",
     "youAreOffline": "오프라인 상태입니다",
     "downloadToWatch": "인터넷 연결 없이도 언제 어디서나 시청할 수 있도록 동영상을 다운로드하세요.",
@@ -905,5 +906,13 @@
     "startTimer": "시작",
     "invalidMinutes": "유효한 분 단위를 입력해주세요",
     "minutesUnit": "분"
+  },
+  "Subscriptions": {
+    "title": "구독",
+    "allSubscriptions": "모든 구독 채널",
+    "manageSubscriptions": "구독 중인 모든 채널을 보고 관리하세요",
+    "unsubscribedSuccess": "구독이 취소되었습니다",
+    "noSubscriptions": "구독 중인 채널이 없습니다",
+    "noSubscriptionsDescription": "좋아하는 채널을 구독하여 최신 동영상을 여기서 확인하세요."
   }
 }

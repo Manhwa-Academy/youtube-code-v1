@@ -9,6 +9,8 @@ import { InfiniteScroll } from "@/components/infinite-scroll";
 import { VideoRowCard, VideoRowCardSkeleton } from "@/modules/videos/ui/components/video-row-card";
 import { VideoGridCard, VideoGridCardSkeleton } from "@/modules/videos/ui/components/video-grid-card";
 import { useTranslations } from "next-intl";
+import { HashIcon } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 
 interface HashtagResultsSectionProps {
   tag: string;
@@ -49,6 +51,7 @@ const HashtagResultsSectionSuspense = ({
   tag,
 }: HashtagResultsSectionProps) => {
   const t = useTranslations("Search");
+  const tHome = useTranslations("Home");
   const [results, resultsQuery] = trpc.search.getHashtagMany.useSuspenseInfiniteQuery(
     { 
       tag, 
@@ -62,7 +65,13 @@ const HashtagResultsSectionSuspense = ({
   const items = results.pages.flatMap((page) => page.items);
 
   if (items.length === 0) {
-    return <div className="text-center py-20 text-muted-foreground">{t("noVideosHashtag")}</div>;
+    return (
+      <EmptyState
+        icon={HashIcon}
+        title={tHome("noHashtag")}
+        description={tHome("noHashtagDescription")}
+      />
+    );
   }
 
   return (

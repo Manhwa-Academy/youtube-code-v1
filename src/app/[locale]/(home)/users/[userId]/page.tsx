@@ -38,7 +38,7 @@ export async function generateMetadata(
   const imageUrl = user.imageUrl || `${baseUrl}/og-image.png`;
 
   return {
-    title: `${user.name} - Hayase-Yuuka`,
+    title: user.name,
     description: user.bio || `Check out ${user.name}'s channel on Hayase-Yuuka`,
     openGraph: {
       title: user.name,

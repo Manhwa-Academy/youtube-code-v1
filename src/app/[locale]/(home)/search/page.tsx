@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { HydrateClient, trpc } from "@/trpc/server";
 
 import { DEFAULT_LIMIT } from "@/constants";
@@ -14,6 +15,16 @@ interface PageProps {
     duration: "any" | "under_3" | "3_to_20" | "over_20" | undefined;
     uploadDate: "any" | "today" | "this_week" | "this_month" | "this_year" | undefined;
   }>
+}
+
+export async function generateMetadata({
+  searchParams,
+}: PageProps): Promise<Metadata> {
+  const { query } = await searchParams;
+
+  return {
+    title: query || "Search",
+  };
 }
 
 const Page = async ({ searchParams }: PageProps) => {

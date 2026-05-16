@@ -97,7 +97,8 @@
     "search": "搜索",
     "all": "全部",
     "noPlaylists": "未找到播放列表",
-    "endOfFeed": "没有更多内容了",
+    "noPlaylistsDescription": "创建您的第一个播放列表以整理您喜欢的视频。",
+    "endOfFeed": "您已到达底部",
     "offline": "离线",
     "youAreOffline": "您已离线",
     "downloadToWatch": "下载视频，以便随时在没有互联网连接的情况下观看。",
@@ -906,5 +907,13 @@
     "startTimer": "开始",
     "invalidMinutes": "请输入有效的分钟数",
     "minutesUnit": "分钟"
+  },
+  "Subscriptions": {
+    "title": "订阅",
+    "allSubscriptions": "所有订阅频道",
+    "manageSubscriptions": "查看和管理您订阅的所有频道",
+    "unsubscribedSuccess": "已成功取消订阅",
+    "noSubscriptions": "暂无订阅",
+    "noSubscriptionsDescription": "订阅您喜欢的频道，在此查看最新视频。"
   }
 }

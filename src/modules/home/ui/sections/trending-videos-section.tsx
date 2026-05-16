@@ -9,6 +9,9 @@ import { DEFAULT_LIMIT } from "@/constants";
 import { InfiniteScroll } from "@/components/infinite-scroll";
 
 import { VideoGridCard, VideoGridCardSkeleton } from "@/modules/videos/ui/components/video-grid-card";
+import { TrendingUpIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { EmptyState } from "@/components/empty-state";
 
 export const TrendingVideosSection = () => {
   return (
@@ -32,6 +35,7 @@ const TrendingVideosSectionSkeleton = () => {
 }
 
 const TrendingVideosSectionSuspense = () => {
+  const t = useTranslations("Home");
   const [videos, query] = trpc.videos.getManyTrending.useSuspenseInfiniteQuery(
     { limit: DEFAULT_LIMIT },
     {
@@ -39,11 +43,22 @@ const TrendingVideosSectionSuspense = () => {
     }
   );
 
+  const items = videos.pages.flatMap((page) => page.items);
+
+  if (items.length === 0) {
+    return (
+      <EmptyState
+        icon={TrendingUpIcon}
+        title={t("noTrending")}
+        description={t("noTrendingDescription")}
+      />
+    );
+  }
+
   return (
     <div>
       <div className="gap-4 gap-y-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 [@media(min-width:1920px)]:grid-cols-5 [@media(min-width:2200px)]:grid-cols-6">
-        {videos.pages
-          .flatMap((page) => page.items)
+        {items
           .filter((video) => !(video.videoHeight && video.videoWidth && video.videoHeight > video.videoWidth))
           .map((video) => (
             <VideoGridCard key={video.id} data={video} />

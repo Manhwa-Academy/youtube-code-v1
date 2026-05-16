@@ -21,6 +21,9 @@ import { PauseIcon, Trash2Icon, PlayIcon } from "lucide-react";
 import { usePlayerStore } from "@/modules/videos/store/use-player-store";
 import { useTranslations } from "next-intl";
 
+import { HistoryIcon } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
+
 export const HistoryVideosSection = () => {
   return (
     <Suspense fallback={<HistoryVideosSectionSkeleton />}>
@@ -49,6 +52,7 @@ const HistoryVideosSectionSkeleton = () => (
 
 const HistoryVideosSectionSuspense = () => {
   const t = useTranslations("History");
+  const tHome = useTranslations("Home");
   const [searchTerm, setSearchTerm] = useState("");
   const [isTracking, setIsTracking] = useState<boolean>(true);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -165,9 +169,19 @@ const HistoryVideosSectionSuspense = () => {
     progress: video.progress ?? 0,
   });
 
-  const filteredVideos = videos.pages
-    .flatMap((page) => page.items)
-    .filter((video) =>
+  const allItems = videos.pages.flatMap((page) => page.items);
+
+  if (allItems.length === 0) {
+    return (
+      <EmptyState
+        icon={HistoryIcon}
+        title={tHome("noHistory")}
+        description={tHome("noHistoryDescription")}
+      />
+    );
+  }
+
+  const filteredVideos = allItems.filter((video) =>
       video.title.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 

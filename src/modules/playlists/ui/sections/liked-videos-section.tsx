@@ -8,6 +8,9 @@ import { trpc } from "@/trpc/client";
 import { DEFAULT_LIMIT } from "@/constants";
 import { InfiniteScroll } from "@/components/infinite-scroll";
 
+import { ThumbsUpIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { EmptyState } from "@/components/empty-state";
 import { VideoGridCard, VideoGridCardSkeleton } from "@/modules/videos/ui/components/video-grid-card";
 import { VideoRowCard, VideoRowCardSkeleton } from "@/modules/videos/ui/components/video-row-card";
 
@@ -42,12 +45,25 @@ const LikedVideosSectionSkeleton = () => {
 };
 
 const LikedVideosSectionSuspense = () => {
+  const t = useTranslations("Home");
   const [videos, query] = trpc.playlists.getLiked.useSuspenseInfiniteQuery(
     { limit: DEFAULT_LIMIT },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
+
+  const items = videos.pages.flatMap((page) => page.items);
+
+  if (items.length === 0) {
+    return (
+      <EmptyState
+        icon={ThumbsUpIcon}
+        title={t("noLikedVideos")}
+        description={t("noLikedVideosDescription")}
+      />
+    );
+  }
 
   // 🔥 map progress cho mỗi video, default = 0 nếu chưa có
   const mapVideoWithProgress = (video: any) => ({
@@ -59,8 +75,7 @@ const LikedVideosSectionSuspense = () => {
     <>
       {/* Mobile / Grid */}
       <div className="flex flex-col gap-4 gap-y-10 md:hidden">
-        {videos.pages
-          .flatMap((page) => page.items)
+        {items
           .map((video) => (
             <VideoGridCard
               key={video.id}

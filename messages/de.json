@@ -97,7 +97,8 @@
     "search": "Suche",
     "all": "Alle",
     "noPlaylists": "Keine Playlists gefunden",
-    "endOfFeed": "Das war's für heute",
+    "noPlaylistsDescription": "Erstellen Sie Ihre erste Playlist, um Ihre Lieblingsvideos zu organisieren.",
+    "endOfFeed": "Sie haben das Ende erreicht",
     "offline": "Offline",
     "youAreOffline": "Sie sind offline",
     "downloadToWatch": "Laden Sie Videos herunter, um sie jederzeit auch ohne Internetverbindung anzusehen.",
@@ -969,5 +970,13 @@
     "startTimer": "Starten",
     "invalidMinutes": "Bitte geben Sie eine gültige Anzahl von Minuten ein",
     "minutesUnit": "Min."
+  },
+  "Subscriptions": {
+    "title": "Abonnements",
+    "allSubscriptions": "Alle abonnierten Kanäle",
+    "manageSubscriptions": "Alle Kanäle anzeigen und verwalten, die Sie abonniert haben",
+    "unsubscribedSuccess": "Erfolgreich deabonniert",
+    "noSubscriptions": "Noch keine Abonnements",
+    "noSubscriptionsDescription": "Abonnieren Sie Ihre Lieblingskanäle, um hier die neuesten Videos zu sehen."
   }
 }

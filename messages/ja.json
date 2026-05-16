@@ -97,7 +97,8 @@
     "search": "検索",
     "all": "すべて",
     "noPlaylists": "プレイリストが見つかりません",
-    "endOfFeed": "これ以上動画はありません",
+    "noPlaylistsDescription": "お気に入りの動画を整理するために、最初のプレイリストを作成しましょう。",
+    "endOfFeed": "最後に到達しました",
     "offline": "オフライン",
     "youAreOffline": "オフラインです",
     "downloadToWatch": "インターネットに接続していなくてもいつでも視聴できるように、動画をダウンロードしてください。",
@@ -1007,5 +1008,13 @@
     "startTimer": "開始",
     "invalidMinutes": "有効な分数を入力してください",
     "minutesUnit": "分"
+  },
+  "Subscriptions": {
+    "title": "登録チャンネル",
+    "allSubscriptions": "すべての登録チャンネル",
+    "manageSubscriptions": "登録しているすべてのチャンネルを表示・管理します",
+    "unsubscribedSuccess": "チャンネル登録を解除しました",
+    "noSubscriptions": "チャンネル登録はまだありません",
+    "noSubscriptionsDescription": "お気に入りのチャンネルを登録して、最新の動画をここでチェックしましょう。"
   }
 }

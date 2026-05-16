@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { HydrateClient, trpc } from "@/trpc/server";
 
 import { DEFAULT_LIMIT } from "@/constants";
@@ -9,6 +10,16 @@ interface PageProps {
   params: Promise<{
     tag: string;
   }>;
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { tag } = await params;
+
+  return {
+    title: `#${tag}`,
+  };
 }
 
 const Page = async ({ params }: PageProps) => {

@@ -12,7 +12,6 @@
 - Tích hợp **Server-Sent Events (SSE)** hoặc **WebSocket** cho real-time notification stream
 - **Web Push API** + service worker để nhận thông báo khi tab bị đóng (như YouTube thật)
 - Bảng `notification_preferences` — user chọn loại thông báo muốn nhận (new video, comment reply, subscription...)
-- **Email digest** qua Resend/Postmark: "5 thứ bạn bỏ lỡ tuần này"
 
 ```
 Schema cần thêm:

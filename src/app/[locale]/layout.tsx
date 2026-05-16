@@ -19,8 +19,11 @@ import {notFound} from 'next/navigation';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "YouTube",
-  description: "YouTube clone project", // Default fallback
+  title: {
+    default: "Hayase Yuuka",
+    template: "%s - Hayase Yuuka",
+  },
+  description: "A premium YouTube clone experience",
   manifest: "/manifest.json",
 };
 
