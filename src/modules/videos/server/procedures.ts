@@ -889,7 +889,7 @@ export const videosRouter = createTRPCRouter({
           commentPermission: input.commentPermission,
           commentSort: input.commentSort,
           showLikeCount: input.showLikeCount,
-          tags: input.tags ?? extractHashtags(input.description),
+          tags: input.tags ?? extractHashtags(`${input.title || ""} ${input.description || ""}`),
           updatedAt: new Date(),
         })
         .where(and(eq(videos.id, input.id), eq(videos.userId, userId)))

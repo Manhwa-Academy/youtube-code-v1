@@ -116,7 +116,7 @@ export const VideoRowCard = ({
           previewUrl={data.previewUrl}
           title={data.title}
           duration={data.duration}
-          progress={progress} // 🔥 truyền progress
+          progress={progress || data.progress || 0} // 🔥 truyền progress
           videoWidth={data.videoWidth ?? undefined}
           videoHeight={data.videoHeight ?? undefined}
         />

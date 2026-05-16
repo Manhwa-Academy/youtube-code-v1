@@ -336,9 +336,20 @@ export const searchRouter = createTRPCRouter({
         limit: z.number().min(1).max(100),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const { tag, cursor, limit } = input;
+      const { clerkUserId } = ctx;
       const offset = cursor || 0;
+
+      let userId = null;
+      if (clerkUserId) {
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.clerkId, clerkUserId))
+          .limit(1);
+        userId = user?.id;
+      }
 
       const data = await db
         .select({
@@ -353,9 +364,22 @@ export const searchRouter = createTRPCRouter({
             eq(videoReactions.videoId, videos.id),
             eq(videoReactions.type, "dislike"),
           )),
+          progress: sql<number>`COALESCE(user_progress.progress, 0)`.as("progress"),
         })
         .from(videos)
         .innerJoin(users, eq(videos.userId, users.id))
+        .leftJoin(
+          db.select({
+            videoId: videoViews.videoId,
+            userId: videoViews.userId,
+            progress: sql<number>`MAX(${videoViews.progress})`.as("progress")
+          })
+          .from(videoViews)
+          .where(userId ? eq(videoViews.userId, userId) : sql`FALSE`)
+          .groupBy(videoViews.videoId, videoViews.userId)
+          .as("user_progress"),
+          eq(videos.id, sql`user_progress.video_id`)
+        )
         .where(and(
           eq(videos.visibility, "public"),
           arrayOverlaps(videos.tags, [tag])
@@ -374,24 +398,38 @@ export const searchRouter = createTRPCRouter({
     }),
   getTrendingHashtags: baseProcedure
     .query(async () => {
-      // Lấy top 10 tags xuất hiện nhiều nhất trong 7 ngày qua
+      // 1. Lấy top 10 tags trong 7 ngày qua
       const lastWeek = new Date();
       lastWeek.setDate(lastWeek.getDate() - 7);
 
-      // Vì tags là mảng, ta cần unnest để đếm
-      // Drizzle hỗ trợ sql fragment cho unnest
       const trendingTags = await db
         .select({
           tag: sql<string>`unnest(${videos.tags})`.as("tag"),
           count: sql<number>`count(*)`.as("count"),
         })
         .from(videos)
-        .where(gte(videos.createdAt, lastWeek))
+        .where(and(eq(videos.visibility, "public"), gte(videos.createdAt, lastWeek)))
         .groupBy(sql`tag`)
         .orderBy(desc(sql`count`))
         .limit(10);
 
-      return trendingTags.map(t => t.tag);
+      if (trendingTags.length > 0) {
+        return trendingTags.map(t => t.tag);
+      }
+
+      // 2. Nếu không có tag nào trong 7 ngày qua, lấy top 10 tag của mọi thời đại
+      const allTimeTopTags = await db
+        .select({
+          tag: sql<string>`unnest(${videos.tags})`.as("tag"),
+          count: sql<number>`count(*)`.as("count"),
+        })
+        .from(videos)
+        .where(eq(videos.visibility, "public"))
+        .groupBy(sql`tag`)
+        .orderBy(desc(sql`count`))
+        .limit(10);
+
+      return allTimeTopTags.map(t => t.tag);
     }),
   getTagSuggestions: baseProcedure
     .input(z.object({
