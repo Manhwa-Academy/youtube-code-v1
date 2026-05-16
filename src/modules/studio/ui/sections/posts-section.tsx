@@ -4,7 +4,8 @@ import { Link } from "@/i18n/routing";
 import { Suspense, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { format } from "date-fns";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { enUS, vi as viLocale, de, es, fr, ja, ko, zhCN } from "date-fns/locale";
 import { ErrorBoundary } from "react-error-boundary";
 import { 
   BarChart2Icon, 
@@ -117,7 +118,23 @@ interface PostsSectionSuspenseProps {
 
 const PostsSectionSuspense = ({ limit, userId, filters }: PostsSectionSuspenseProps) => {
   const t = useTranslations("Studio");
+  const locale = useLocale();
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const getDateLocale = () => {
+    switch (locale) {
+      case "vi": return viLocale;
+      case "de": return de;
+      case "es": return es;
+      case "fr": return fr;
+      case "ja": return ja;
+      case "ko": return ko;
+      case "zh": return zhCN;
+      default: return enUS;
+    }
+  };
+
+  const dateLocale = getDateLocale();
 
   const [posts, query] = trpc.posts.getMany.useSuspenseInfiniteQuery(
     {
@@ -261,7 +278,7 @@ const PostsSectionSuspense = ({ limit, userId, filters }: PostsSectionSuspensePr
                   <TableCell>
                     <div className="flex flex-col">
                       <span className="text-sm">
-                        {format(new Date(post.createdAt), "d 'thg' M, yyyy")}
+                        {format(new Date(post.createdAt), "d MMM, yyyy", { locale: dateLocale })}
                       </span>
                       <span className="text-xs text-neutral-500">
                         {t("published")}

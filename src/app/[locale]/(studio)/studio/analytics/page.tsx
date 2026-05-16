@@ -1,11 +1,6 @@
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import dynamic from "next/dynamic";
-
-const AnalyticsView = dynamic(
-  () => import("@/modules/studio/ui/views/analytics-view").then((mod) => mod.AnalyticsView),
-  { ssr: false }
-);
+import { AnalyticsViewClient } from "@/modules/studio/ui/components/analytics-view-client";
 
 export async function generateMetadata({
   params,
@@ -21,7 +16,7 @@ export async function generateMetadata({
 }
 
 const AnalyticsPage = () => {
-  return <AnalyticsView />;
+  return <AnalyticsViewClient />;
 };
 
 export default AnalyticsPage;

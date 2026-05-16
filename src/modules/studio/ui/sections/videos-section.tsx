@@ -6,7 +6,8 @@ import { Suspense } from "react";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useRouter } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { enUS, vi as viLocale, de, es, fr, ja, ko, zhCN } from "date-fns/locale";
 import { 
   ArrowDownIcon, 
   ArrowUpIcon, 
@@ -171,7 +172,23 @@ interface VideosSectionSuspenseProps extends VideosSectionProps {
 const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspenseProps) => {
   const t = useTranslations("Studio");
   const router = useRouter();
+  const locale = useLocale();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const getDateLocale = () => {
+    switch (locale) {
+      case "vi": return viLocale;
+      case "de": return de;
+      case "es": return es;
+      case "fr": return fr;
+      case "ja": return ja;
+      case "ko": return ko;
+      case "zh": return zhCN;
+      default: return enUS;
+    }
+  };
+
+  const dateLocale = getDateLocale();
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState<{
@@ -472,7 +489,7 @@ const VideosSectionSuspense = ({ limit, isShorts, filters }: VideosSectionSuspen
                   <TableCell className="text-sm">
                     <div className="flex flex-col">
                       <span>
-                        {format(new Date(video.createdAt), "d MMM, yyyy")}
+                        {format(new Date(video.createdAt), "d MMM, yyyy", { locale: dateLocale })}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {t("published")}
