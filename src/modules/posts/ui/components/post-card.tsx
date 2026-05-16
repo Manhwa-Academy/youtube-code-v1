@@ -223,7 +223,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
 
                 {isCompact && post.images && post.images.length > 0 && (
                   <div className="relative size-20 rounded-xl overflow-hidden shrink-0 border border-neutral-200 dark:border-neutral-800 shadow-sm">
-                    <Image src={post.images[0].imageUrl} alt="" fill className="object-cover" />
+                    <Image src={post.images[0].imageUrl} alt="" fill className="object-contain" />
                   </div>
                 )}
               </div>
@@ -243,7 +243,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
               )}>
                 {post.images.map((img: any) => (
                   <div key={img.id} className="relative w-full h-full">
-                    <Image src={img.imageUrl} alt="" fill className="object-cover" />
+                    <Image src={img.imageUrl} alt="" fill className="object-contain" />
                   </div>
                 ))}
               </div>
@@ -285,7 +285,7 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
                         )}>
                           {post.poll.type === "image" && opt.imageUrl && (
                             <div className="relative h-full aspect-square overflow-hidden flex-shrink-0 border-r border-gray-100 dark:border-neutral-800">
-                              <Image src={opt.imageUrl} alt="" fill className="object-cover" />
+                              <Image src={opt.imageUrl} alt="" fill className="object-contain" />
                             </div>
                           )}
                           

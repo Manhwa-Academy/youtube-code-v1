@@ -295,7 +295,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                            }}
                          >
                            {option.imageUrl ? (
-                             <Image src={option.imageUrl} alt="" fill className="object-cover" />
+                             <Image src={option.imageUrl} alt="" fill className="object-contain" />
                            ) : (
                              <ImageIcon className="size-6 text-gray-400" />
                            )}
@@ -391,7 +391,7 @@ export const PostEditor = ({ userId }: PostEditorProps) => {
                       )}
                       onClick={() => setActiveImageIndex(i)}
                     >
-                       <Image src={img.url} alt="" fill className="object-cover" />
+                       <Image src={img.url} alt="" fill className="object-contain" />
                     </div>
                   ))}
                   

@@ -252,7 +252,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                           src={img.imageUrl} 
                           alt="Post image" 
                           fill 
-                          className="object-cover"
+                          className="object-contain"
                         />
                         <div className="absolute top-2 right-2 bg-black/60 px-1.5 py-0.5 rounded text-[10px] font-bold text-white">
                           1/1
@@ -284,7 +284,7 @@ const PostFormSectionSuspense = ({ postId }: PostFormSectionProps) => {
                                 src={option.imageUrl}
                                 alt={option.text ?? ""}
                                 fill
-                                className="object-cover"
+                                className="object-contain"
                               />
                             </div>
                           )}

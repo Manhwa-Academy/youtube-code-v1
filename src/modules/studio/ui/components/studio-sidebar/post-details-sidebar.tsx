@@ -80,13 +80,13 @@ export const PostDetailsSidebar = () => {
               <img 
                 src={post.images[0].imageUrl} 
                 alt="Post" 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             ) : post.poll?.options && post.poll.options.some((opt: any) => opt.imageUrl) ? (
               <img 
                 src={post.poll.options.find((opt: any) => opt.imageUrl)?.imageUrl ?? undefined} 
                 alt="Poll" 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             ) : (
               <Icon className="size-8 text-neutral-500" />

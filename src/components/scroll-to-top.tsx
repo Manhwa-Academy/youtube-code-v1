@@ -27,7 +27,7 @@ export const ScrollToTopCharacter = () => {
     };
   }, []);
 
-  const scrollToTop = () => {
+  const scrollToTop = (): void => {
     const container = document.getElementById("main-scroll-container");
     if (container) {
       container.scrollTo({ top: 0, behavior: "smooth" });
@@ -37,10 +37,10 @@ export const ScrollToTopCharacter = () => {
   };
 
   return (
-    <div>
+    <div className="pointer-events-none">
       {show && (
         <div
-          className="fixed right-2 cursor-pointer z-0 transition-all duration-300 hover:scale-110 bottom-32 sm:bottom-4 sm:right-4 md:z-30"
+          className="fixed right-2 cursor-pointer z-0 transition-all duration-300 hover:scale-110 bottom-32 sm:bottom-4 sm:right-4 md:z-30 pointer-events-auto"
           onClick={scrollToTop}
         >
           <img
@@ -51,7 +51,7 @@ export const ScrollToTopCharacter = () => {
         </div>
       )}
       {!show && (
-        <div className="fixed right-0 z-0 bottom-24 sm:bottom-0 md:z-30">
+        <div className="fixed right-0 z-0 bottom-24 sm:bottom-0 md:z-30 pointer-events-auto">
           <img
             src="/characters/char_peek.png"
             alt="Character peeking"
