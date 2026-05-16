@@ -1,21 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSub,
-  DropdownMenuSubTrigger,
   DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Loader2Icon, ClockIcon, DownloadIcon, RepeatIcon, SkipForwardIcon, SettingsIcon } from "lucide-react";
-import { toast } from "sonner";
-import { useTranslations } from "next-intl";
 import { downloadManager } from "@/lib/download-manager";
+import {
+  ClockIcon,
+  DownloadIcon,
+  Loader2Icon,
+  RepeatIcon,
+  SettingsIcon,
+  SkipForwardIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { VideoGetOneOutput } from "../../types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 interface Props {
   video: VideoGetOneOutput;
@@ -33,6 +49,42 @@ interface Props {
 
 const SPEED_OPTIONS = [0.5, 1, 1.5, 2];
 
+type PlayerRef = React.RefObject<any>;
+
+function scheduleStopTimer(
+  playerRef: PlayerRef,
+  secs: number,
+  setScheduledStopSeconds: (n: number | null) => void,
+  stopTimerRef: React.MutableRefObject<number | null>,
+  scheduledAtRef: React.MutableRefObject<number | null>,
+) {
+  if (stopTimerRef.current) {
+    clearTimeout(stopTimerRef.current);
+  }
+  setScheduledStopSeconds(secs);
+  scheduledAtRef.current = Date.now();
+  stopTimerRef.current = window.setTimeout(() => {
+    if (playerRef.current && typeof playerRef.current.pause === "function")
+      playerRef.current.pause();
+    setScheduledStopSeconds(null);
+    stopTimerRef.current = null;
+    scheduledAtRef.current = null;
+  }, secs * 1000);
+}
+
+function cancelStopTimer(
+  stopTimerRef: React.MutableRefObject<number | null>,
+  setScheduledStopSeconds: (n: number | null) => void,
+  scheduledAtRef: React.MutableRefObject<number | null>,
+) {
+  if (stopTimerRef.current) {
+    clearTimeout(stopTimerRef.current);
+    stopTimerRef.current = null;
+  }
+  setScheduledStopSeconds(null);
+  scheduledAtRef.current = null;
+}
+
 export const VideoPlaybackMenu = ({
   video,
   playerRef,
@@ -46,9 +98,36 @@ export const VideoPlaybackMenu = ({
   setPlaybackRate,
 }: Props) => {
   const [downloading, setDownloading] = useState(false);
+  const [scheduledStopSeconds, setScheduledStopSeconds] = useState<
+    number | null
+  >(null);
+  const [isCustomTimerOpen, setIsCustomTimerOpen] = useState(false);
+  const [customMinutes, setCustomMinutes] = useState("");
+  
+  const stopTimerRef = useRef<number | null>(null);
+  const scheduledAtRef = useRef<number | null>(null);
   const t = useTranslations("Playback");
   const tGeneral = useTranslations("General");
   const tShorts = useTranslations("Shorts");
+
+  const handleCustomTimerStart = () => {
+    const mins = parseInt(customMinutes);
+    if (isNaN(mins) || mins <= 0) {
+      toast.error(t("invalidMinutes"));
+      return;
+    }
+
+    scheduleStopTimer(
+      playerRef,
+      mins * 60,
+      setScheduledStopSeconds,
+      stopTimerRef,
+      scheduledAtRef,
+    );
+    setIsCustomTimerOpen(false);
+    setCustomMinutes("");
+    toast.success(tGeneral("success") || "Timer started");
+  };
 
   const handleDownload = async () => {
     if (downloading) return;
@@ -68,7 +147,9 @@ export const VideoPlaybackMenu = ({
 
       if (!response.ok) {
         // Fallback to API if direct fetch fails
-        const apiResponse = await fetch(`/api/download-video?assetId=${assetId}`);
+        const apiResponse = await fetch(
+          `/api/download-video?assetId=${assetId}`,
+        );
         if (!apiResponse.ok) throw new Error("Download failed");
         blob = await apiResponse.blob();
       } else {
@@ -79,24 +160,27 @@ export const VideoPlaybackMenu = ({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${video.title || "video"}.mp4`;
+      a.download = `${video.title || tGeneral("video")}.mp4`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
       // 2. Lưu vào mục Nội dung tải xuống (Offline)
-      await downloadManager.saveVideo({
-        id: video.id,
-        title: video.title,
-        thumbnailUrl: video.thumbnailUrl || null,
-        duration: video.duration,
-        authorName: video.user.name,
-        authorImageUrl: video.user.imageUrl,
-        downloadedAt: Date.now(),
-        size: blob.size,
-        playbackId: playbackId,
-      }, blob);
+      await downloadManager.saveVideo(
+        {
+          id: video.id,
+          title: video.title,
+          thumbnailUrl: video.thumbnailUrl || null,
+          duration: video.duration,
+          authorName: video.user.name,
+          authorImageUrl: video.user.imageUrl,
+          downloadedAt: Date.now(),
+          size: blob.size,
+          playbackId: playbackId,
+        },
+        blob,
+      );
 
       toast.success(tShorts("downloadSuccess"));
     } catch (error) {
@@ -173,11 +257,12 @@ export const VideoPlaybackMenu = ({
           )}
           <span>{downloading ? t("downloading") : t("download")}</span>
         </DropdownMenuItem>
-        {/* SPEED Submenu */}
+        {/*
+          SPEED Submenu (commented out per request)
+        
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {/* Icon giống Tự chuyển/Lặp lại */}
               <ClockIcon className="w-4 h-4 text-gray-500" />
               <span>{t("speed")}</span>
             </div>
@@ -195,6 +280,127 @@ export const VideoPlaybackMenu = ({
                 {s}x
               </DropdownMenuItem>
             ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        */}
+
+        {/* STOP-TIMER Submenu */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ClockIcon className="w-4 h-4 text-gray-500" />
+              <span>
+                {t("stopAfter")}
+                {scheduledStopSeconds ? ` (${Math.ceil(scheduledStopSeconds / 60)}m)` : ""}
+              </span>
+            </div>
+          </DropdownMenuSubTrigger>
+
+          <DropdownMenuSubContent className="w-36 p-2">
+            {scheduledStopSeconds ? (
+              <>
+                <DropdownMenuItem
+                  onClick={() =>
+                    cancelStopTimer(
+                      stopTimerRef,
+                      setScheduledStopSeconds,
+                      scheduledAtRef,
+                    )
+                  }
+                >
+                  {t("cancelStop")}
+                </DropdownMenuItem>
+              </>
+            ) : null}
+
+            <DropdownMenuItem
+              onClick={() =>
+                scheduleStopTimer(
+                  playerRef,
+                  600,
+                  setScheduledStopSeconds,
+                  stopTimerRef,
+                  scheduledAtRef,
+                )
+              }
+            >
+              {t("tenMinutes")}
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() =>
+                scheduleStopTimer(
+                  playerRef,
+                  900,
+                  setScheduledStopSeconds,
+                  stopTimerRef,
+                  scheduledAtRef,
+                )
+              }
+            >
+              {t("fifteenMinutes")}
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() =>
+                scheduleStopTimer(
+                  playerRef,
+                  1200,
+                  setScheduledStopSeconds,
+                  stopTimerRef,
+                  scheduledAtRef,
+                )
+              }
+            >
+              {t("twentyMinutes")}
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() =>
+                scheduleStopTimer(
+                  playerRef,
+                  1800,
+                  setScheduledStopSeconds,
+                  stopTimerRef,
+                  scheduledAtRef,
+                )
+              }
+            >
+              {t("thirtyMinutes")}
+            </DropdownMenuItem>
+
+            <Separator className="my-1" />
+
+            <Dialog open={isCustomTimerOpen} onOpenChange={setIsCustomTimerOpen}>
+              <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  {t("custom")}
+                </DropdownMenuItem>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[300px]">
+                <DialogHeader>
+                  <DialogTitle>{t("stopAfter")}</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col gap-4 py-4">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      placeholder={t("customMinutesPlaceholder")}
+                      value={customMinutes}
+                      onChange={(e) => setCustomMinutes(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleCustomTimerStart();
+                      }}
+                      autoFocus
+                    />
+                    <span className="text-sm font-medium">{t("minutesUnit")}</span>
+                  </div>
+                  <Button onClick={handleCustomTimerStart} className="w-full rounded-full">
+                    {t("startTimer")}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
       </DropdownMenuContent>

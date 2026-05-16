@@ -866,6 +866,17 @@
     "loop": "Boucle",
     "download": "Télécharger",
     "downloading": "Téléchargement...",
-    "speed": "Vitesse de lecture"
+    "speed": "Vitesse de lecture",
+    "stopAfter": "Arrêter après",
+    "cancelStop": "Annuler l'arrêt programmé",
+    "tenMinutes": "10 min",
+    "fifteenMinutes": "15 min",
+    "twentyMinutes": "20 min",
+    "thirtyMinutes": "30 min",
+    "custom": "Personnalisé",
+    "customMinutesPlaceholder": "Minutes",
+    "startTimer": "Démarrer",
+    "invalidMinutes": "Veuillez entrer un nombre de minutes valide",
+    "minutesUnit": "min"
   }
 }

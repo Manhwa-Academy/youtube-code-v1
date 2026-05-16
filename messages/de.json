@@ -948,7 +948,18 @@
     "autoPlay": "Autoplay",
     "loop": "Schleife",
     "download": "Herunterladen",
-    "downloading": "Herunterladen...",
-    "speed": "Wiedergabegeschwindigkeit"
+    "downloading": "Wird heruntergeladen...",
+    "speed": "Wiedergabegeschwindigkeit",
+    "stopAfter": "Anhalten nach",
+    "cancelStop": "Geplantes Anhalten abbrechen",
+    "tenMinutes": "10 Min.",
+    "fifteenMinutes": "15 Min.",
+    "twentyMinutes": "20 Min.",
+    "thirtyMinutes": "30 Min.",
+    "custom": "Benutzerdefiniert",
+    "customMinutesPlaceholder": "Minuten",
+    "startTimer": "Starten",
+    "invalidMinutes": "Bitte geben Sie eine gültige Anzahl von Minuten ein",
+    "minutesUnit": "Min."
   }
 }

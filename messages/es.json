@@ -923,6 +923,17 @@
     "loop": "Bucle",
     "download": "Descargar",
     "downloading": "Descargando...",
-    "speed": "Velocidad de reproducción"
+    "speed": "Velocidad de reproducción",
+    "stopAfter": "Detener después de",
+    "cancelStop": "Cancelar parada programada",
+    "tenMinutes": "10 min",
+    "fifteenMinutes": "15 min",
+    "twentyMinutes": "20 min",
+    "thirtyMinutes": "30 min",
+    "custom": "Personalizado",
+    "customMinutesPlaceholder": "Minutos",
+    "startTimer": "Comenzar",
+    "invalidMinutes": "Por favor, introduce un número válido de minutos",
+    "minutesUnit": "min"
   }
 }

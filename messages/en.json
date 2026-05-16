@@ -36,7 +36,7 @@
   "Video": {
     "subscribe": "Subscribe",
     "subscribed": "Subscribed",
-    "subscribers": "subscribers",
+    "subscribers": "{count} subscribers",
     "videos": "videos",
     "views": "views",
     "noViews": "No views",
@@ -672,14 +672,26 @@
     "siteTitle": "Hayase Yuuka",
     "studioTitle": "Hayase Yuuka Studio",
     "on": "On",
-    "off": "Off"
+    "off": "Off",
+    "video": "video"
   },
   "Playback": {
     "autoPlay": "Autoplay",
     "loop": "Loop",
     "download": "Download",
     "downloading": "Downloading...",
-    "speed": "Playback speed"
+    "speed": "Playback speed",
+    "stopAfter": "Stop after",
+    "cancelStop": "Cancel scheduled stop",
+    "tenMinutes": "10m",
+    "fifteenMinutes": "15m",
+    "twentyMinutes": "20m",
+    "thirtyMinutes": "30m",
+    "custom": "Custom",
+    "customMinutesPlaceholder": "Minutes",
+    "startTimer": "Start",
+    "invalidMinutes": "Please enter a valid number of minutes",
+    "minutesUnit": "min"
   },
   "VideoMenu": {
     "addToQueue": "Add to queue",

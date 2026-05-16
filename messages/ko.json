@@ -885,6 +885,17 @@
     "loop": "연속 재생",
     "download": "오프라인 저장",
     "downloading": "오프라인 저장 중...",
-    "speed": "재생 속도"
+    "speed": "재생 속도",
+    "stopAfter": "다음 시간 후 중지",
+    "cancelStop": "예약된 중지 취소",
+    "tenMinutes": "10분",
+    "fifteenMinutes": "15분",
+    "twentyMinutes": "20분",
+    "thirtyMinutes": "30분",
+    "custom": "사용자 설정",
+    "customMinutesPlaceholder": "분",
+    "startTimer": "시작",
+    "invalidMinutes": "유효한 분 단위를 입력해주세요",
+    "minutesUnit": "분"
   }
 }

@@ -673,14 +673,26 @@
     "siteTitle": "Hayase Yuuka",
     "studioTitle": "Hayase Yuuka Studio",
     "on": "Bật",
-    "off": "Tắt"
+    "off": "Tắt",
+    "video": "video"
   },
   "Playback": {
     "autoPlay": "Tự động phát",
     "loop": "Lặp lại",
     "download": "Tải xuống",
     "downloading": "Đang tải xuống...",
-    "speed": "Tốc độ phát"
+    "speed": "Tốc độ phát",
+    "stopAfter": "Dừng sau",
+    "cancelStop": "Hủy hẹn giờ dừng",
+    "tenMinutes": "10 phút",
+    "fifteenMinutes": "15 phút",
+    "twentyMinutes": "20 phút",
+    "thirtyMinutes": "30 phút",
+    "custom": "Tùy chỉnh",
+    "customMinutesPlaceholder": "Số phút",
+    "startTimer": "Bắt đầu",
+    "invalidMinutes": "Vui lòng nhập số phút hợp lệ",
+    "minutesUnit": "phút"
   },
   "VideoMenu": {
     "addToQueue": "Thêm vào hàng chờ",

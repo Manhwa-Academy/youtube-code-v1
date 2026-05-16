@@ -983,6 +983,17 @@
     "loop": "ループ",
     "download": "ダウンロード",
     "downloading": "ダウンロード中...",
-    "speed": "再生速度"
+    "speed": "再生速度",
+    "stopAfter": "指定時間後に停止",
+    "cancelStop": "停止予約をキャンセル",
+    "tenMinutes": "10分",
+    "fifteenMinutes": "15分",
+    "twentyMinutes": "20分",
+    "thirtyMinutes": "30分",
+    "custom": "カスタム",
+    "customMinutesPlaceholder": "分",
+    "startTimer": "開始",
+    "invalidMinutes": "有効な分数を入力してください",
+    "minutesUnit": "分"
   }
 }

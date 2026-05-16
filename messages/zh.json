@@ -885,7 +885,18 @@
     "autoPlay": "自动播放",
     "loop": "循环播放",
     "download": "下载",
-    "downloading": "正在下载...",
-    "speed": "播放速度"
+    "downloading": "下载中...",
+    "speed": "播放速度",
+    "stopAfter": "定时停止",
+    "cancelStop": "取消定时停止",
+    "tenMinutes": "10分钟",
+    "fifteenMinutes": "15分钟",
+    "twentyMinutes": "20分钟",
+    "thirtyMinutes": "30分钟",
+    "custom": "自定义",
+    "customMinutesPlaceholder": "分钟",
+    "startTimer": "开始",
+    "invalidMinutes": "请输入有效的分钟数",
+    "minutesUnit": "分钟"
   }
 }
