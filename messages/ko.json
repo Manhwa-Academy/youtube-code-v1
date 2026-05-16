@@ -36,6 +36,11 @@
   "Video": {
     "subscribe": "구독",
     "subscribed": "구독중",
+    "unsubscribeSuccess": "구독이 취소되었습니다",
+    "all": "전체",
+    "personalized": "맞춤 설정",
+    "none": "없음",
+    "unsubscribe": "구독 취소",
     "subscribers": "구독자 {count}명",
     "videos": "동영상",
     "views": "회",
@@ -52,7 +57,8 @@
     "emptyQueue": "대기열이 비어 있습니다",
     "playing": "재생 중",
     "editVideo": "동영상 수정",
-    "videoProcessing": "동영상이 처리 중입니다."
+    "videoProcessing": "동영상이 처리 중입니다.",
+    "minutesShortcut": "{count}분"
   },
   "Comments": {
     "disabled": "댓글 기능이 사용 중지되었습니다.",

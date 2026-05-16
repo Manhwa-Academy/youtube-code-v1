@@ -112,4 +112,29 @@ export const subscriptionsRouter = createTRPCRouter({
 
       return deletedSubscription;
     }),
+  updateLevel: protectedProcedure
+    .input(z.object({ 
+      userId: z.string().uuid(),
+      level: z.enum(["all", "personalized", "none"]),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const { userId, level } = input;
+
+      if (userId === ctx.user.id) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      const [updatedSubscription] = await db
+        .update(subscriptions)
+        .set({ level })
+        .where(
+          and(
+            eq(subscriptions.viewerId, ctx.user.id),
+            eq(subscriptions.creatorId, userId)
+          )
+        )
+        .returning();
+
+      return updatedSubscription;
+    }),
 });

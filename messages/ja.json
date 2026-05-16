@@ -51,8 +51,14 @@
     "queue": "待機リスト ({count})",
     "emptyQueue": "待機リストは空です",
     "playing": "再生中",
+    "unsubscribeSuccess": "登録を解除しました",
+    "all": "すべて",
+    "personalized": "パーソナライズ",
+    "none": "なし",
+    "unsubscribe": "登録解除",
     "editVideo": "動画を編集",
-    "videoProcessing": "動画を処理しています。"
+    "videoProcessing": "動画を処理しています。",
+    "minutesShortcut": "{count}分"
   },
   "Comments": {
     "disabled": "コメント機能はオフになっています。",
@@ -762,7 +768,11 @@
     "title": "登録チャンネル",
     "allSubscriptions": "登録済みのすべてのチャンネル",
     "manageSubscriptions": "登録しているすべてのチャンネルを表示・管理する",
-    "unsubscribedSuccess": "登録解除しました"
+    "unsubscribeSuccess": "登録を解除しました",
+    "all": "すべて",
+    "personalized": "パーソナライズ",
+    "none": "なし",
+    "unsubscribe": "登録解除"
   },
   "Users": {
     "errorLoadingUser": "ユーザー情報の読み込みエラー",

@@ -50,9 +50,15 @@
     "goVideoPage": "Zur Videoseite gehen",
     "queue": "Warteschlange ({count})",
     "emptyQueue": "Warteschlange ist leer",
+    "unsubscribeSuccess": "Abbestellt",
+    "all": "Alle",
+    "personalized": "Personalisiert",
+    "none": "Keine",
+    "unsubscribe": "Abbestellen",
     "playing": "Wird abgespielt",
     "editVideo": "Video bearbeiten",
-    "videoProcessing": "Video wird verarbeitet."
+    "videoProcessing": "Video wird verarbeitet.",
+    "minutesShortcut": "{count} Min."
   },
   "Comments": {
     "disabled": "Die Kommentarfunktion wurde deaktiviert.",

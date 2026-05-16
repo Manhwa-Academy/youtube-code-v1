@@ -60,6 +60,16 @@ const SubscriptionsSectionSuspense = () => {
     },
   });
 
+  const updateLevel = trpc.subscriptions.updateLevel.useMutation({
+    onSuccess: () => {
+      toast.success(tGen("success"));
+      utils.subscriptions.getMany.invalidate();
+    },
+    onError: () => {
+      toast.error(tGen("error"));
+    },
+  });
+
   return (
     <>
       <div className="flex flex-col gap-4">
@@ -75,10 +85,14 @@ const SubscriptionsSectionSuspense = () => {
                 name={subscription.user.name}
                 imageUrl={subscription.user.imageUrl}
                 subscriberCount={subscription.user.subscriberCount}
+                level={subscription.level}
                 onUnsubscribe={() => {
                   unsubscribe.mutate({ userId: subscription.creatorId });
                 }}
-                disabled={unsubscribe.isPending}
+                onUpdateLevel={(level) => {
+                  updateLevel.mutate({ userId: subscription.creatorId, level });
+                }}
+                disabled={unsubscribe.isPending || updateLevel.isPending}
               />
             </Link>
           ))}

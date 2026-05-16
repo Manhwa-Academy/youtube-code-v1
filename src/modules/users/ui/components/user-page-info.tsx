@@ -78,9 +78,9 @@ export const UserPageInfo = ({ user }: UserPageInfoProps) => {
   const clerk = useClerk();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
-  const { isPending, onClick } = useSubscription({
+  const { isPending, onClick, updateLevel } = useSubscription({
     userId: user.id,
-    isSubscribed: user.viewerSubscribed,
+    isSubscribed: !!user.viewerSubscriptionLevel,
   });
 
   const isOwner = userId === user.clerkId;
@@ -214,8 +214,10 @@ export const UserPageInfo = ({ user }: UserPageInfoProps) => {
             ) : (
               <SubscriptionButton
                 disabled={isPending || !isLoaded}
-                isSubscribed={user.viewerSubscribed}
+                isSubscribed={!!user.viewerSubscriptionLevel}
+                level={user.viewerSubscriptionLevel}
                 onClick={onClick}
+                onUpdateLevel={(level) => updateLevel.mutate({ userId: user.id, level })}
                 className="rounded-full px-6"
               />
             )}

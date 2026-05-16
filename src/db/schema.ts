@@ -378,6 +378,12 @@ export const playlistVideoRelations = relations(playlistVideos, ({ one }) => ({
   }),
 }));
 
+export const subscriptionLevel = pgEnum("subscription_level", [
+  "all",
+  "personalized",
+  "none",
+]);
+
 // ====================== SUBSCRIPTIONS ======================
 export const subscriptions = pgTable(
   "subscriptions",
@@ -388,6 +394,7 @@ export const subscriptions = pgTable(
     creatorId: uuid("creator_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
+    level: subscriptionLevel("level").default("personalized").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

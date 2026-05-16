@@ -51,8 +51,14 @@
     "queue": "Cola de reproducción ({count})",
     "emptyQueue": "La cola está vacía",
     "playing": "Reproduciendo ahora",
+    "unsubscribeSuccess": "Suscripción cancelada",
+    "all": "Todas",
+    "personalized": "Personalizadas",
+    "none": "Ninguna",
+    "unsubscribe": "Anular suscripción",
     "editVideo": "Editar vídeo",
-    "videoProcessing": "El video se está procesando."
+    "videoProcessing": "El video se está procesando.",
+    "minutesShortcut": "{count} min"
   },
   "Comments": {
     "disabled": "Los comentarios están desactivados.",
@@ -702,7 +708,12 @@
     "title": "Suscripciones",
     "allSubscriptions": "Todos los canales suscritos",
     "manageSubscriptions": "Ver y gestionar todos los canales a los que estás suscrito",
-    "unsubscribedSuccess": "Suscripción cancelada con éxito"
+    "unsubscribeSuccess": "Suscripción cancelada",
+    "all": "Todas",
+    "personalized": "Personalizadas",
+    "none": "Ninguna",
+    "unsubscribe": "Anular suscripción",
+    "editVideo": "Editar vídeo"
   },
   "Users": {
     "errorLoadingUser": "Error al cargar la información del usuario",

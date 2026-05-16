@@ -53,10 +53,16 @@
     "playing": "Now playing",
     "nextVideo": "Next video in {countdown}",
     "cannotIncrementView": "Cannot increment view",
+    "subscribed": "Subscribed",
     "subscribeSuccess": "Subscribed",
     "unsubscribeSuccess": "Unsubscribed",
+    "all": "All",
+    "personalized": "Personalized",
+    "none": "None",
+    "unsubscribe": "Unsubscribe",
     "editVideo": "Edit video",
-    "videoProcessing": "Video is processing."
+    "videoProcessing": "Video is processing.",
+    "minutesShortcut": "{count}m"
   },
   "Comments": {
     "disabled": "Comments are turned off.",

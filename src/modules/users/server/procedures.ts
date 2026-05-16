@@ -39,9 +39,7 @@ export const usersRouter = createTRPCRouter({
         .with(viewerSubscriptions)
         .select({
           ...getTableColumns(users),
-          viewerSubscribed: isNotNull(viewerSubscriptions.viewerId).mapWith(
-            Boolean,
-          ),
+          viewerSubscriptionLevel: viewerSubscriptions.level,
           videoCount: db.$count(videos, eq(videos.userId, users.id)),
           subscriberCount: db.$count(
             subscriptions,

@@ -19,9 +19,9 @@ interface VideoOwnerProps {
 export const VideoOwner = ({ user, videoId }: VideoOwnerProps) => {
   const t = useTranslations("Video");
   const { userId: clerkUserId, isLoaded } = useAuth();
-  const { isPending, onClick } = useSubscription({
+  const { isPending, onClick, updateLevel } = useSubscription({
     userId: user.id,
-    isSubscribed: user.viewerSubscribed,
+    isSubscribed: !!user.viewerSubscriptionLevel,
     fromVideoId: videoId,
   });
 
@@ -51,8 +51,10 @@ export const VideoOwner = ({ user, videoId }: VideoOwnerProps) => {
       ) : (
         <SubscriptionButton
           onClick={onClick}
+          onUpdateLevel={(level) => updateLevel.mutate({ userId: user.id, level })}
           disabled={isPending || !isLoaded}
-          isSubscribed={user.viewerSubscribed}
+          isSubscribed={!!user.viewerSubscriptionLevel}
+          level={user.viewerSubscriptionLevel}
           className="flex-none"
         />
       )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import Image from "next/image";
+
 import { usePathname } from "@/i18n/routing";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
@@ -17,7 +17,7 @@ import {
 
 export const MainSection = () => {
   const t = useTranslations("Sidebar");
-  const tGeneral = useTranslations("General");
+
   const clerk = useClerk();
   const { isSignedIn } = useAuth();
   const pathname = usePathname();
@@ -48,12 +48,6 @@ export const MainSection = () => {
 
   return (
     <SidebarGroup>
-      {/* 🔥 LOGO + TITLE (mobile sidebar header) */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b sm:hidden">
-        <Image src="/yuuka.png" alt="Logo" width={28} height={28} />
-        <span className="font-semibold text-base">{tGeneral("siteTitle")}</span>
-      </div>
-
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
@@ -69,9 +63,9 @@ export const MainSection = () => {
                   }
                 }}
               >
-                <Link href={item.url} className="flex items-center gap-4">
-                  <item.icon />
-                  <span className="text-sm">{item.title}</span>
+                <Link prefetch href={item.url} className="flex items-center gap-4">
+                  <item.icon className="size-5 shrink-0" />
+                  <span className="text-sm font-medium">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

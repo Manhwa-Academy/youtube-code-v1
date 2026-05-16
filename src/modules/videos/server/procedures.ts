@@ -471,9 +471,7 @@ export const videosRouter = createTRPCRouter({
               subscriptions,
               eq(subscriptions.creatorId, users.id),
             ),
-            viewerSubscribed: isNotNull(viewerSubscriptions.viewerId).mapWith(
-              Boolean,
-            ),
+            viewerSubscriptionLevel: viewerSubscriptions.level,
           },
           viewCount: videos.viewsCount,
           progress: sql<number>`user_progress.progress`,

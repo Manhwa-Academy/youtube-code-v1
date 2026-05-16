@@ -8,6 +8,8 @@ interface SubscriptionItemProps {
   imageUrl: string;
   subscriberCount: number;
   onUnsubscribe: () => void;
+  onUpdateLevel: (level: "all" | "personalized" | "none") => void;
+  level: "all" | "personalized" | "none";
   disabled: boolean;
 };
 
@@ -35,6 +37,8 @@ export const SubscriptionItem = ({
   imageUrl,
   subscriberCount,
   onUnsubscribe,
+  onUpdateLevel,
+  level,
   disabled,
 }: SubscriptionItemProps) => {
   return (
@@ -59,9 +63,14 @@ export const SubscriptionItem = ({
           <SubscriptionButton
             size="sm"
             onClick={(e) => {
-              e.preventDefault();
+              if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
               onUnsubscribe();
             }}
+            onUpdateLevel={(level) => onUpdateLevel(level)}
+            level={level}
             disabled={disabled}
             isSubscribed
           />

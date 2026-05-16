@@ -50,9 +50,15 @@
     "goVideoPage": "Aller à la page de la vidéo",
     "queue": "File d'attente ({count})",
     "emptyQueue": "La file d'attente est vide",
+    "unsubscribeSuccess": "Désabonné",
+    "all": "Toutes",
+    "personalized": "Personnalisées",
+    "none": "Aucune",
+    "unsubscribe": "Se désabonner",
     "playing": "Lecture en cours",
     "editVideo": "Modifier la vidéo",
-    "videoProcessing": "La vidéo est en cours de traitement."
+    "videoProcessing": "La vidéo est en cours de traitement.",
+    "minutesShortcut": "{count} min"
   },
   "Comments": {
     "disabled": "Les commentaires sont désactivés.",

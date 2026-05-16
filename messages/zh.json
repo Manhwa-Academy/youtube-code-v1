@@ -50,9 +50,15 @@
     "goVideoPage": "前往视频页面",
     "queue": "播放队列 ({count})",
     "emptyQueue": "播放队列为空",
+    "unsubscribeSuccess": "已取消订阅",
+    "all": "全部",
+    "personalized": "个性化",
+    "none": "无",
+    "unsubscribe": "退订",
     "playing": "正在播放",
     "editVideo": "编辑视频",
-    "videoProcessing": "视频正在处理中。"
+    "videoProcessing": "视频正在处理中。",
+    "minutesShortcut": "{count}分钟"
   },
   "Comments": {
     "disabled": "评论功能已关闭。",

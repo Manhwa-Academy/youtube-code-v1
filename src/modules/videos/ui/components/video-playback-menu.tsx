@@ -291,7 +291,7 @@ export const VideoPlaybackMenu = ({
               <ClockIcon className="w-4 h-4 text-gray-500" />
               <span>
                 {t("stopAfter")}
-                {scheduledStopSeconds ? ` (${Math.ceil(scheduledStopSeconds / 60)}m)` : ""}
+                {scheduledStopSeconds ? ` (${t("minutesShortcut", { count: Math.ceil(scheduledStopSeconds / 60) })})` : ""}
               </span>
             </div>
           </DropdownMenuSubTrigger>

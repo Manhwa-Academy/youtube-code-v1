@@ -52,11 +52,16 @@
     "emptyQueue": "Hàng chờ trống",
     "playing": "Đang phát",
     "nextVideo": "Video tiếp theo sau {countdown}",
-    "cannotIncrementView": "Không thể tăng view",
+    "cannotIncrementView": "Không thể tăng lượt xem",
     "subscribeSuccess": "Đã đăng ký",
     "unsubscribeSuccess": "Đã hủy đăng ký",
+    "all": "Tất cả",
+    "personalized": "Dành riêng cho bạn",
+    "none": "Không nhận thông báo",
+    "unsubscribe": "Hủy đăng ký",
     "editVideo": "Chỉnh sửa video",
-    "videoProcessing": "Video đang được xử lý."
+    "videoProcessing": "Video đang được xử lý.",
+    "minutesShortcut": "{count} phút"
   },
   "Comments": {
     "disabled": "Tính năng bình luận đã bị tắt.",

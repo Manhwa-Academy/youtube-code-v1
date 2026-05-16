@@ -60,7 +60,26 @@ export const useSubscription = ({
     },
   });
 
-  const isPending = subscribe.isPending || unsubscribe.isPending;
+  const updateLevel = trpc.subscriptions.updateLevel.useMutation({
+    onSuccess: () => {
+      toast.success(tGeneral("success"));
+      utils.subscriptions.getMany.invalidate();
+      utils.users.getOne.invalidate({ id: userId });
+
+      if (fromVideoId) {
+        utils.videos.getOne.invalidate({ id: fromVideoId });
+      }
+    },
+    onError: (error) => {
+      toast.error(tGeneral("error"));
+
+      if (error.data?.code === "UNAUTHORIZED") {
+        clerk.openSignIn();
+      }
+    },
+  });
+
+  const isPending = subscribe.isPending || unsubscribe.isPending || updateLevel.isPending;
 
   const onClick = () => {
     if (isSubscribed) {
@@ -73,5 +92,6 @@ export const useSubscription = ({
   return {
     isPending,
     onClick,
+    updateLevel,
   };
 };
