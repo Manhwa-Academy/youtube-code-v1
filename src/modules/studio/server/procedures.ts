@@ -1,7 +1,16 @@
 import { z } from "zod";
 import { format, formatDistanceToNow } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
-import { vi } from "date-fns/locale";
+import { 
+  vi, 
+  enUS, 
+  de, 
+  es, 
+  fr, 
+  ja, 
+  ko, 
+  zhCN 
+} from "date-fns/locale";
 import { TRPCError } from "@trpc/server";
 import {
   eq,
@@ -17,6 +26,7 @@ import {
   getTableColumns,
   sql,
   inArray,
+  aliasedTable,
 } from "drizzle-orm";
 import {
   subscriptions,
@@ -74,6 +84,7 @@ export const studioRouter = createTRPCRouter({
         userAvatar: users.imageUrl,
         videoThumbnail: videos.thumbnailUrl,
         videoTitle: videos.title,
+        imageUrl: comments.imageUrl,
         createdAt: comments.createdAt,
       })
       .from(comments)
@@ -90,10 +101,8 @@ export const studioRouter = createTRPCRouter({
         viewerId: subscriptions.viewerId,
         name: users.name,
         avatarUrl: users.imageUrl,
-        subscriberCount: db.$count(
-          subscriptions,
-          eq(subscriptions.creatorId, users.id),
-        ),
+        createdAt: subscriptions.createdAt,
+        subscriberCount: sql<number>`(SELECT COUNT(*) FROM ${subscriptions} AS s3 WHERE s3.creator_id = ${users.id})`.mapWith(Number),
       })
       .from(subscriptions)
       .innerJoin(users, eq(subscriptions.viewerId, users.id))
@@ -174,6 +183,77 @@ export const studioRouter = createTRPCRouter({
       userAvatar: channelUser?.imageUrl,
     };
   }),
+
+  getRecentSubscribers: protectedProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            viewerId: z.string().uuid(),
+          })
+          .nullish(),
+        limit: z.number().min(1).max(100).default(10),
+        days: z.number().nullish(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+      const { cursor, limit, days } = input;
+
+      const data = await db
+        .select({
+          viewerId: subscriptions.viewerId,
+          name: users.name,
+          avatarUrl: users.imageUrl,
+          createdAt: subscriptions.createdAt,
+          subscriberCount: sql<number>`(SELECT COUNT(*) FROM ${subscriptions} AS s3 WHERE s3.creator_id = ${users.id})`.mapWith(Number),
+          isSubscribedBack: sql<boolean>`EXISTS (
+            SELECT 1 FROM ${subscriptions} AS s2 
+            WHERE s2.viewer_id = ${userId} 
+            AND s2.creator_id = ${subscriptions.viewerId}
+          )`.mapWith(Boolean),
+        })
+        .from(subscriptions)
+        .innerJoin(users, eq(subscriptions.viewerId, users.id))
+        .where(
+          and(
+            eq(subscriptions.creatorId, userId),
+            days 
+              ? gte(subscriptions.createdAt, new Date(Date.now() - days * 24 * 60 * 60 * 1000))
+              : undefined,
+            cursor
+              ? or(
+                  lt(subscriptions.createdAt, cursor.createdAt),
+                  and(
+                    eq(subscriptions.createdAt, cursor.createdAt),
+                    lt(subscriptions.viewerId, cursor.viewerId),
+                  ),
+                )
+              : undefined,
+          ),
+        )
+        .orderBy(desc(subscriptions.createdAt), desc(subscriptions.viewerId))
+        .limit(limit + 1);
+
+      const hasMore = data.length > limit;
+      const items = hasMore ? data.slice(0, -1) : data;
+
+      let nextCursor = null;
+
+      if (hasMore) {
+        const lastItem = items[items.length - 1];
+        nextCursor = {
+          createdAt: lastItem.createdAt,
+          viewerId: lastItem.viewerId,
+        };
+      }
+
+      return {
+        items,
+        nextCursor,
+      };
+    }),
 
   getMany: protectedProcedure
     .input(
@@ -385,11 +465,26 @@ export const studioRouter = createTRPCRouter({
       z.object({
         days: z.number().default(28),
         videoId: z.string().uuid().optional(),
+        locale: z.string().default("en"),
       }),
     )
     .query(async ({ ctx, input }) => {
       const { id: userId } = ctx.user;
-      const { days, videoId } = input;
+      const { days, videoId, locale } = input;
+
+      const localeMap = {
+        vi: { locale: vi, ongoing: "Đang diễn ra", today: "Hôm nay", yesterday: "Hôm qua", dateFormat: "d 'thg' M", fullDateFormat: "d 'thg' M, yyyy" },
+        en: { locale: enUS, ongoing: "Ongoing", today: "Today", yesterday: "Yesterday", dateFormat: "MMM d", fullDateFormat: "MMM d, yyyy" },
+        de: { locale: de, ongoing: "Laufend", today: "Heute", yesterday: "Gestern", dateFormat: "d. MMM", fullDateFormat: "d. MMM yyyy" },
+        es: { locale: es, ongoing: "En curso", today: "Hoy", yesterday: "Ayer", dateFormat: "d MMM", fullDateFormat: "d MMM yyyy" },
+        fr: { locale: fr, ongoing: "En cours", today: "Aujourd'hui", yesterday: "Hier", dateFormat: "d MMM", fullDateFormat: "d MMM yyyy" },
+        ja: { locale: ja, ongoing: "進行中", today: "今日", yesterday: "昨日", dateFormat: "M月d日", fullDateFormat: "yyyy年M月d日" },
+        ko: { locale: ko, ongoing: "진행 중", today: "오늘", yesterday: "어제", dateFormat: "M월 d일", fullDateFormat: "yyyy년 M월 d일" },
+        zh: { locale: zhCN, ongoing: "进行中", today: "今天", yesterday: "昨天", dateFormat: "M月d日", fullDateFormat: "yyyy年M月d日" },
+      };
+
+      const currentLocale = localeMap[locale as keyof typeof localeMap] || localeMap.en;
+      const dateLocale = currentLocale.locale;
       const userTz = "Asia/Ho_Chi_Minh";
 
       // 1. Chạy tất cả các câu truy vấn cơ bản song song
@@ -688,13 +783,13 @@ export const studioRouter = createTRPCRouter({
           let dayLabel = "";
 
           if (i === 0) {
-            dayLabel = "Ongoing";
+            dayLabel = currentLocale.ongoing;
           } else if (dateStr === todayStr) {
-            dayLabel = "Today";
+            dayLabel = currentLocale.today;
           } else if (dateStr === yesterdayStr) {
-            dayLabel = "Yesterday";
+            dayLabel = currentLocale.yesterday;
           } else {
-            dayLabel = formatInTimeZone(d, userTz, "MMM d");
+            dayLabel = formatInTimeZone(d, userTz, currentLocale.dateFormat, { locale: dateLocale });
           }
 
           const startHour = formatInTimeZone(d, userTz, "HH:00");
@@ -905,10 +1000,10 @@ export const studioRouter = createTRPCRouter({
           return Array.from({ length: days }).map((_, i) => {
             const d = new Date();
             d.setDate(d.getDate() - (days - 1 - i));
-            const formattedDate = formatInTimeZone(d, userTz, "MMM d, yyyy");
+            const formattedDate = formatInTimeZone(d, userTz, currentLocale.fullDateFormat, { locale: dateLocale });
             const dbEntry = viewsByDayRaw.find(
               (v) =>
-                formatInTimeZone(new Date(v.date), userTz, "MMM d, yyyy") ===
+                formatInTimeZone(new Date(v.date), userTz, currentLocale.fullDateFormat, { locale: dateLocale }) ===
                 formattedDate,
             );
 
@@ -950,7 +1045,7 @@ export const studioRouter = createTRPCRouter({
               ...topVideos[0],
               timeSincePosted: formatDistanceToNow(
                 new Date(topVideos[0].createdAt),
-                { addSuffix: true },
+                { addSuffix: true, locale: dateLocale },
               ),
             }
           : null,

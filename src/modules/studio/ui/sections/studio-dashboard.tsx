@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { format, formatDistanceToNow } from "date-fns";
 import { enUS, vi, ja, ko, zhCN, de, es, fr } from "date-fns/locale";
 import { Link } from "@/i18n/routing";
+import { useState } from "react";
+import { SubscribersModal } from "../components/subscribers-modal";
 
 const dateFnsLocales = {
   en: enUS,
@@ -90,6 +92,8 @@ export const StudioDashboard = () => {
   const t = useTranslations("Studio");
   const locale = useLocale();
   const dateLocale = dateFnsLocales[locale as keyof typeof dateFnsLocales] || vi;
+
+  const [isSubscribersModalOpen, setIsSubscribersModalOpen] = useState(false);
 
   const { data: videoData, isLoading: isVideosLoading } = trpc.studio.getMany.useQuery({ limit: 10 });
   const { data: statsData, isLoading: isStatsLoading } = trpc.studio.getStats.useQuery();
@@ -280,8 +284,8 @@ export const StudioDashboard = () => {
         <Card className="shadow-md rounded-lg border-neutral-200 dark:border-neutral-800 flex-1">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <CardTitle className="text-base font-bold">{t("latestComments")}</CardTitle>
-            <Button variant="link" size="sm" className="text-blue-500 font-bold p-0" asChild>
-               <Link href="/studio?tab=comments">{t("seeAll")}</Link>
+            <Button variant="outline" size="sm" className="font-bold rounded-full px-4 h-8 text-xs border-neutral-200 dark:border-neutral-800" asChild>
+               <Link href="/studio/community/comments">{t("seeAll")}</Link>
             </Button>
           </CardHeader>
           <CardContent className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
@@ -295,6 +299,11 @@ export const StudioDashboard = () => {
                       <span className="text-[10px] text-muted-foreground">• {c.createdAt ? formatDistanceToNow(new Date(c.createdAt), { addSuffix: true, locale: dateLocale }) : t("justNow")}</span>
                     </div>
                     <p className="text-sm line-clamp-2">{c.value}</p>
+                    {c.imageUrl && (
+                      <div className="mt-2 relative aspect-video w-full max-w-[150px] rounded-md overflow-hidden bg-neutral-100 dark:bg-neutral-800 border">
+                         <img src={c.imageUrl} alt="comment attachment" className="w-full h-full object-cover" />
+                      </div>
+                    )}
                   </div>
                   {c.videoThumbnail && (
                     <img src={c.videoThumbnail} alt="video" className="size-12 rounded object-cover flex-shrink-0" />
@@ -311,23 +320,37 @@ export const StudioDashboard = () => {
         <Card className="shadow-md rounded-lg border-neutral-200 dark:border-neutral-800">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <CardTitle className="text-base font-bold">{t("recentSubscribers")}</CardTitle>
-            <Button variant="link" size="sm" className="text-blue-500 font-bold p-0">{t("seeAll")}</Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="font-bold rounded-full px-4 h-8 text-xs border-neutral-200 dark:border-neutral-800"
+              onClick={() => setIsSubscribersModalOpen(true)}
+            >
+              {t("seeAll")}
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                {statsData?.recentSubscribers?.map((s: any) => (
-                 <div key={s.viewerId} className="flex flex-col items-center text-center gap-y-1.5">
-                    <img src={s.avatarUrl} alt={s.name} className="size-10 rounded-full border dark:border-neutral-700" />
-                    <div className="w-full">
-                       <p className="text-[11px] font-bold truncate">{s.name}</p>
-                       <p className="text-[9px] text-muted-foreground">{t("subscribers", { count: s.subscriberCount || 0 })}</p>
+                 <Link key={s.viewerId} href={`/users/${s.viewerId}`}>
+                    <div className="flex flex-col items-center text-center gap-y-1.5 hover:opacity-70 transition-opacity">
+                       <img src={s.avatarUrl} alt={s.name} className="size-10 rounded-full border dark:border-neutral-700" />
+                       <div className="w-full">
+                          <p className="text-[11px] font-bold truncate">{s.name}</p>
+                          <p className="text-[9px] text-muted-foreground">{t("subscribers", { count: s.subscriberCount || 0 })}</p>
+                       </div>
                     </div>
-                 </div>
+                 </Link>
                ))}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <SubscribersModal 
+        open={isSubscribersModalOpen}
+        onOpenChange={setIsSubscribersModalOpen}
+      />
     </div>
   );
 };

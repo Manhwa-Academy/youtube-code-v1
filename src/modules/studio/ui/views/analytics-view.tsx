@@ -901,7 +901,8 @@ const PostsContentSection = ({ data, days, videoId }: { data: any, days: number,
 
 const ContentTab = ({ days, videoId }: { days: number, videoId?: string }) => {
   const t = useTranslations("Studio");
-  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
+  const locale = useLocale();
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId, locale });
   const [activeSubTab, setActiveSubTab] = useState("all");
 
   return (
@@ -931,7 +932,7 @@ const ContentTab = ({ days, videoId }: { days: number, videoId?: string }) => {
 const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string }) => {
   const t = useTranslations("Studio");
   const locale = useLocale();
-  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId, locale });
   const [activeStat, setActiveStat] = useState<"views" | "watchTime" | "subscribers">("views");
 
   return (
@@ -1226,7 +1227,7 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
 const AudienceTab = ({ days, videoId }: { days: number, videoId?: string }) => {
   const t = useTranslations("Studio");
   const locale = useLocale();
-  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId, locale });
   const [activeStat, setActiveStat] = useState<"viewers" | "subscribers">("viewers");
 
   return (
@@ -1413,7 +1414,8 @@ const AudienceTab = ({ days, videoId }: { days: number, videoId?: string }) => {
 
 const ReachTab = ({ days, videoId }: { days: number, videoId?: string }) => {
   const t = useTranslations("Studio");
-  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
+  const locale = useLocale();
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId, locale });
 
   return (
     <div className="space-y-6">
@@ -1553,7 +1555,8 @@ const ReachTab = ({ days, videoId }: { days: number, videoId?: string }) => {
 
 const EngagementTab = ({ days, videoId }: { days: number, videoId?: string }) => {
   const t = useTranslations("Studio");
-  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
+  const locale = useLocale();
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId, locale });
 
   return (
     <div className="space-y-6">
@@ -1748,7 +1751,7 @@ export const AnalyticsView = ({ videoId: videoIdParam }: { videoId?: string }) =
   };
 
   const days = getDaysFromRange(dateRange);
-  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId });
+  const [data] = trpc.studio.getAnalytics.useSuspenseQuery({ days, videoId, locale });
 
   const formatDateRange = (d: number) => {
     if (d === 3650) return t("allTime");
