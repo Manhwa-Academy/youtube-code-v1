@@ -58,7 +58,11 @@
     "playing": "Lecture en cours",
     "editVideo": "Modifier la vidéo",
     "videoProcessing": "La vidéo est en cours de traitement.",
-    "minutesShortcut": "{count} min"
+    "minutesShortcut": "{count} min",
+    "aiSummaryTitle": "Résumé vidéo par IA",
+    "aiChaptersTitle": "Chapitres vidéo automatiques",
+    "aiChaptersDesc": "Cliquez sur un horodatage pour accéder au contenu correspondant",
+    "aiBeta": "IA Bêta"
   },
   "Comments": {
     "disabled": "Les commentaires sont désactivés.",
@@ -154,7 +158,7 @@
     "last28Days": "28 derniers jours",
     "last90Days": "90 derniers jours",
     "last365Days": "365 derniers jours",
-    "allTime": "Depuis le début",
+    "allTime": "Depuis toujours",
     "subscribersInfo": "Inclut uniquement les utilisateurs qui ont rendu leurs abonnements publics. En savoir plus",
     "channel": "Chaîne",
     "dateSubscribed": "Date d'abonnement",
@@ -350,9 +354,7 @@
     "yourPost": "Votre post",
     "viewPostOnYouTube": "Voir le post sur YouTube",
     "seeMore": "En savoir plus",
-    "last28Days": "28 derniers jours",
     "daysCount": "{days} jours",
-    "allTime": "Depuis toujours",
     "discoveryFunnelTitle": "Impressions et comment elles ont généré de la durée de visionnage",
     "discoveryDataAvailable": "Données disponibles",
     "impressions": "Impressions",
@@ -403,7 +405,6 @@
     "topPosts": "Top des posts",
     "noPostContent": "Aucun contenu de post",
     "noPostsData": "Aucune donnée de post",
-    "thisVideo": "Cette vidéo",
     "yourChannel": "Votre chaîne",
     "hasViewsInPeriod": "{target} a enregistré {count} vues au cours de cette période",
     "goodProgress": "Bonne progression",
@@ -505,7 +506,28 @@
     "trafficSourceOtherFeatures": "Autres fonctionnalités YouTube",
     "trafficSourceShortsFeed": "Flux Shorts",
     "trafficSourceDirect": "Direct ou inconnu",
-    "reply": "Répondre"
+    "reply": "Répondre",
+    "aiAssistantTitle": "Assistant Créatif IA (AI Creative Assistant)",
+    "aiAssistantDesc": "Automatisez les chapitres et les résumés vidéo grâce à l'IA à partir de la transcription",
+    "btnChapters": "Générer les chapitres automatiquement",
+    "btnSummary": "Générer le résumé automatiquement",
+    "summaryLabel": "Résumé IA généré :",
+    "chaptersLabel": "Chapitres IA générés",
+    "abTestTitle": "Test A/B de vignette intelligente",
+    "thumbA": "Vignette A (Par défaut)",
+    "running": "En cours",
+    "changeA": "Modifier la vignette A",
+    "createAI": "Créer avec l'IA",
+    "restoreDefault": "Restaurer par défaut",
+    "thumbB": "Vignette B (Test)",
+    "testing": "En test",
+    "inactive": "Inactif",
+    "uploadB": "Téléverser la vignette B",
+    "removeB": "Supprimer la vignette B",
+    "reportTitle": "Rapport de performance du test A/B (Smart Thumbnail CTR)",
+    "winner": "Gagnant",
+    "applyBest": "Appliquer la meilleure vignette",
+    "applySuccess": "La vignette optimale a été appliquée par défaut !"
   },
   "VideoCard": {
     "noDescription": "Aucune description",
@@ -665,9 +687,11 @@
   },
   "Subscriptions": {
     "title": "Abonnements",
-    "allSubscriptions": "Toutes les chaînes abonnées",
-    "manageSubscriptions": "Afficher et gérer toutes les chaînes auxquelles vous êtes abonné",
-    "unsubscribedSuccess": "Abonnement annulé avec succès"
+    "allSubscriptions": "Toutes các kênh đã đăng ký",
+    "manageSubscriptions": "Voir et gérer tất cả các kênh bạn đã đăng ký",
+    "unsubscribedSuccess": "Désabonnement réussi",
+    "noSubscriptions": "Pas encore d'abonnements",
+    "noSubscriptionsDescription": "Abonnez-vous à vos chaînes préférées pour voir les dernières vidéos ici."
   },
   "Users": {
     "errorLoadingUser": "Erreur lors du chargement des informations de l'utilisateur",
@@ -900,14 +924,6 @@
     "startTimer": "Démarrer",
     "invalidMinutes": "Veuillez entrer un nombre de minutes valide",
     "minutesUnit": "min"
-  },
-  "Subscriptions": {
-    "title": "Abonnements",
-    "allSubscriptions": "Toutes các kênh đã đăng ký",
-    "manageSubscriptions": "Voir et gérer tất cả các kênh bạn đã đăng ký",
-    "unsubscribedSuccess": "Désabonnement réussi",
-    "noSubscriptions": "Pas encore d'abonnements",
-    "noSubscriptionsDescription": "Abonnez-vous à vos chaînes préférées pour voir les dernières vidéos ici."
   },
   "PlaylistPanel": {
     "next": "Suivant",

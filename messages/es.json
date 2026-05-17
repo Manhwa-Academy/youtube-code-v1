@@ -58,7 +58,11 @@
     "unsubscribe": "Anular suscripción",
     "editVideo": "Editar vídeo",
     "videoProcessing": "El video se está procesando.",
-    "minutesShortcut": "{count} min"
+    "minutesShortcut": "{count} min",
+    "aiSummaryTitle": "Resumen de video por IA",
+    "aiChaptersTitle": "Capítulos automáticos de video",
+    "aiChaptersDesc": "Haga clic en una marca de tiempo para ir al contenido correspondiente",
+    "aiBeta": "IA Beta"
   },
   "Comments": {
     "disabled": "Los comentarios están desactivados.",
@@ -351,9 +355,7 @@
     "yourPost": "Tu publicación",
     "viewPostOnYouTube": "Ver publicación en YouTube",
     "seeMore": "Ver más",
-    "last28Days": "Últimos 28 días",
     "daysCount": "{days} días",
-    "allTime": "Desde siempre",
     "discoveryFunnelTitle": "Impresiones y cómo generaron tiempo de reproducción",
     "discoveryDataAvailable": "Datos disponibles",
     "impressions": "Impresiones",
@@ -540,7 +542,28 @@
     "trafficSourceOtherFeatures": "Otras funciones de YouTube",
     "trafficSourceShortsFeed": "Feed de Shorts",
     "trafficSourceDirect": "Directo o desconocido",
-    "reply": "Responder"
+    "reply": "Responder",
+    "aiAssistantTitle": "Asistente Creativo de IA (AI Creative Assistant)",
+    "aiAssistantDesc": "Automatice capítulos y resúmenes de video usando IA desde la transcripción",
+    "btnChapters": "Generar capítulos automáticamente",
+    "btnSummary": "Generar resumen automáticamente",
+    "summaryLabel": "Resumen de IA generado:",
+    "chaptersLabel": "Capítulos de IA generados",
+    "abTestTitle": "Prueba A/B de Miniatura Inteligente",
+    "thumbA": "Miniatura A (Predeterminada)",
+    "running": "Ejecutando",
+    "changeA": "Cambiar Miniatura A",
+    "createAI": "Crear con IA",
+    "restoreDefault": "Restaurar predeterminado",
+    "thumbB": "Miniatura B (Prueba)",
+    "testing": "Probando",
+    "inactive": "Inactivo",
+    "uploadB": "Subir Miniatura B",
+    "removeB": "Eliminar Miniatura B",
+    "reportTitle": "Informe de rendimiento de prueba A/B (Smart Thumbnail CTR)",
+    "winner": "Ganador",
+    "applyBest": "Aplicar mejor miniatura",
+    "applySuccess": "¡Se aplicó la miniatura óptima como predeterminada!"
   },
   "VideoCard": {
     "noDescription": "Sin descripción",
@@ -723,13 +746,10 @@
   "Subscriptions": {
     "title": "Suscripciones",
     "allSubscriptions": "Todos los canales suscritos",
-    "manageSubscriptions": "Ver y gestionar todos los canales a los que estás suscrito",
-    "unsubscribeSuccess": "Suscripción cancelada",
-    "all": "Todas",
-    "personalized": "Personalizadas",
-    "none": "Ninguna",
-    "unsubscribe": "Anular suscripción",
-    "editVideo": "Editar vídeo"
+    "manageSubscriptions": "Ver y gestionar tất cả các kênh bạn đã đăng ký",
+    "unsubscribedSuccess": "Suscripción cancelada con éxito",
+    "noSubscriptions": "Aún không có suscripciones",
+    "noSubscriptionsDescription": "Suscríbete a tus canales favoritos para ver los últimos vídeos aquí."
   },
   "Users": {
     "errorLoadingUser": "Error al cargar la información del usuario",
@@ -962,14 +982,6 @@
     "startTimer": "Comenzar",
     "invalidMinutes": "Por favor, introduce un número válido de minutos",
     "minutesUnit": "min"
-  },
-  "Subscriptions": {
-    "title": "Suscripciones",
-    "allSubscriptions": "Todos los canales suscritos",
-    "manageSubscriptions": "Ver y gestionar tất cả các kênh bạn đã đăng ký",
-    "unsubscribedSuccess": "Suscripción cancelada con éxito",
-    "noSubscriptions": "Aún không có suscripciones",
-    "noSubscriptionsDescription": "Suscríbete a tus canales favoritos para ver los últimos vídeos aquí."
   },
   "PlaylistPanel": {
     "next": "Siguiente",

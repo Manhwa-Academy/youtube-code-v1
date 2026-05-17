@@ -58,7 +58,11 @@
     "playing": "Wird abgespielt",
     "editVideo": "Video bearbeiten",
     "videoProcessing": "Video wird verarbeitet.",
-    "minutesShortcut": "{count} Min."
+    "minutesShortcut": "{count} Min.",
+    "aiSummaryTitle": "AI-Video-Zusammenfassung",
+    "aiChaptersTitle": "Automatische Video-Kapitel",
+    "aiChaptersDesc": "Klicken Sie auf einen Zeitstempel, um zum entsprechenden Inhalt zu springen",
+    "aiBeta": "KI Beta"
   },
   "Comments": {
     "disabled": "Die Kommentarfunktion wurde deaktiviert.",
@@ -152,7 +156,7 @@
     "last28Days": "Letzte 28 Tage",
     "last90Days": "Letzte 90 Tage",
     "last365Days": "Letzte 365 Tage",
-    "allTime": "Gesamte Zeit",
+    "allTime": "Gesamte Laufzeit",
     "subscribersInfo": "Enthält nur Nutzer, die ihre Abonnements öffentlich gemacht haben. Mehr erfahren",
     "channel": "Kanal",
     "dateSubscribed": "Abonniert am",
@@ -352,9 +356,7 @@
     "yourPost": "Dein Beitrag",
     "viewPostOnYouTube": "Beitrag auf YouTube ansehen",
     "seeMore": "Mehr ansehen",
-    "last28Days": "Letzte 28 Tage",
     "daysCount": "{days} Tage",
-    "allTime": "Gesamte Laufzeit",
     "discoveryFunnelTitle": "Impressionen und wie daraus Wiedergabezeit wurde",
     "discoveryDataAvailable": "Daten verfügbar",
     "impressions": "Impressionen",
@@ -542,7 +544,28 @@
     "trafficSourceOtherFeatures": "Andere YouTube-Funktionen",
     "trafficSourceShortsFeed": "Shorts-Feed",
     "trafficSourceDirect": "Direkt oder unbekannt",
-    "reply": "Antworten"
+    "reply": "Antworten",
+    "aiAssistantTitle": "KI-Kreativassistent (AI Creative Assistant)",
+    "aiAssistantDesc": "Automatisieren Sie Video-Kapitel und Zusammenfassungen mit KI aus dem Transkript",
+    "btnChapters": "Kapitel automatisch generieren",
+    "btnSummary": "Zusammenfassung automatisch generieren",
+    "summaryLabel": "Generierte KI-Zusammenfassung:",
+    "chaptersLabel": "Generierte KI-Kapitel",
+    "abTestTitle": "Smart Thumbnail A/B-Test",
+    "thumbA": "Thumbnail A (Standard)",
+    "running": "Läuft",
+    "changeA": "Thumbnail A ändern",
+    "createAI": "Mit KI erstellen",
+    "restoreDefault": "Standard wiederherstellen",
+    "thumbB": "Thumbnail B (Testen)",
+    "testing": "Testen",
+    "inactive": "Inaktiv",
+    "uploadB": "Thumbnail B hochladen",
+    "removeB": "Thumbnail B entfernen",
+    "reportTitle": "A/B-Test-Leistungsbericht (Smart Thumbnail CTR)",
+    "winner": "Gewinner",
+    "applyBest": "Bestes Thumbnail anwenden",
+    "applySuccess": "Das optimale Thumbnail wurde als Standard angewendet!"
   },
   "VideoCard": {
     "noDescription": "Keine Beschreibung",
@@ -747,10 +770,12 @@
     "off": "Aus"
   },
   "Subscriptions": {
-    "title": "Abos",
+    "title": "Abonnements",
     "allSubscriptions": "Alle abonnierten Kanäle",
-    "manageSubscriptions": "Alle abonnierten Kanäle anzeigen und verwalten",
-    "unsubscribedSuccess": "Erfolgreich abgemeldet"
+    "manageSubscriptions": "Alle Kanäle anzeigen und verwalten, die Sie abonniert haben",
+    "unsubscribedSuccess": "Erfolgreich deabonniert",
+    "noSubscriptions": "Noch keine Abonnements",
+    "noSubscriptionsDescription": "Abonnieren Sie Ihre Lieblingskanäle, um hier die neuesten Videos zu sehen."
   },
   "Users": {
     "errorLoadingUser": "Fehler beim Laden der Benutzerinformationen",
@@ -983,14 +1008,6 @@
     "startTimer": "Starten",
     "invalidMinutes": "Bitte geben Sie eine gültige Anzahl von Minuten ein",
     "minutesUnit": "Min."
-  },
-  "Subscriptions": {
-    "title": "Abonnements",
-    "allSubscriptions": "Alle abonnierten Kanäle",
-    "manageSubscriptions": "Alle Kanäle anzeigen und verwalten, die Sie abonniert haben",
-    "unsubscribedSuccess": "Erfolgreich deabonniert",
-    "noSubscriptions": "Noch keine Abonnements",
-    "noSubscriptionsDescription": "Abonnieren Sie Ihre Lieblingskanäle, um hier die neuesten Videos zu sehen."
   },
   "PlaylistPanel": {
     "next": "Nächstes",

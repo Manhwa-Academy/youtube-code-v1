@@ -58,7 +58,11 @@
     "playing": "正在播放",
     "editVideo": "编辑视频",
     "videoProcessing": "视频正在处理中。",
-    "minutesShortcut": "{count}分钟"
+    "minutesShortcut": "{count}分钟",
+    "aiSummaryTitle": "AI 视频摘要",
+    "aiChaptersTitle": "自动视频分段",
+    "aiChaptersDesc": "点击时间戳跳转到相应内容",
+    "aiBeta": "AI 测试版"
   },
   "Comments": {
     "disabled": "评论功能已关闭。",
@@ -149,7 +153,7 @@
     "recentSubscribers": "最近订阅者",
     "noRecentSubscribers": "未找到公开订阅者。请尝试选择其他日期范围。",
     "last7Days": "过去 7 天",
-    "last28Days": "过去 28 天",
+    "last28Days": "最近 28 天",
     "last90Days": "过去 90 天",
     "last365Days": "过去 365 天",
     "allTime": "自始至终",
@@ -369,9 +373,7 @@
     "yourPost": "您的帖子",
     "viewPostOnYouTube": "在 YouTube 上查看帖子",
     "seeMore": "查看更多",
-    "last28Days": "最近 28 天",
     "daysCount": "{days} 天",
-    "allTime": "自始至终",
     "discoveryFunnelTitle": "展示次数以及由此产生的观看时长",
     "discoveryDataAvailable": "可用数据",
     "impressions": "展示次数",
@@ -525,7 +527,28 @@
     "trafficSourceOtherFeatures": "其他 YouTube 功能",
     "trafficSourceShortsFeed": "Shorts 动态",
     "trafficSourceDirect": "直接进入或未知来源",
-    "reply": "回复"
+    "reply": "回复",
+    "aiAssistantTitle": "AI 创意助手",
+    "aiAssistantDesc": "利用 AI 根据语音转文字内容自动生成视频分段和摘要",
+    "btnChapters": "自动生成分段",
+    "btnSummary": "自动生成摘要",
+    "summaryLabel": "生成的 AI 摘要：",
+    "chaptersLabel": "生成的 AI 分段",
+    "abTestTitle": "智能缩略图 A/B 测试",
+    "thumbA": "缩略图 A (默认)",
+    "running": "运行中",
+    "changeA": "更改缩略图 A",
+    "createAI": "使用 AI 创建",
+    "restoreDefault": "恢复默认",
+    "thumbB": "缩略图 B (测试)",
+    "testing": "测试中",
+    "inactive": "未激活",
+    "uploadB": "上传缩略图 B",
+    "removeB": "移除缩略图 B",
+    "reportTitle": "A/B 测试效果报告 (Smart Thumbnail CTR)",
+    "winner": "胜出",
+    "applyBest": "应用最佳缩略图",
+    "applySuccess": "已将最佳缩略图设置为默认！"
   },
   "VideoCard": {
     "noDescription": "无描述",
@@ -685,9 +708,11 @@
   },
   "Subscriptions": {
     "title": "订阅",
-    "allSubscriptions": "所有已订阅频道",
+    "allSubscriptions": "所有订阅频道",
     "manageSubscriptions": "查看和管理您订阅的所有频道",
-    "unsubscribedSuccess": "成功取消订阅"
+    "unsubscribedSuccess": "已成功取消订阅",
+    "noSubscriptions": "暂无订阅",
+    "noSubscriptionsDescription": "订阅您喜欢的频道，在此查看最新视频。"
   },
   "Users": {
     "errorLoadingUser": "加载用户信息时出错",
@@ -920,14 +945,6 @@
     "startTimer": "开始",
     "invalidMinutes": "请输入有效的分钟数",
     "minutesUnit": "分钟"
-  },
-  "Subscriptions": {
-    "title": "订阅",
-    "allSubscriptions": "所有订阅频道",
-    "manageSubscriptions": "查看和管理您订阅的所有频道",
-    "unsubscribedSuccess": "已成功取消订阅",
-    "noSubscriptions": "暂无订阅",
-    "noSubscriptionsDescription": "订阅您喜欢的频道，在此查看最新视频。"
   },
   "PlaylistPanel": {
     "next": "接下来",

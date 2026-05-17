@@ -58,7 +58,11 @@
     "playing": "재생 중",
     "editVideo": "동영상 수정",
     "videoProcessing": "동영상이 처리 중입니다.",
-    "minutesShortcut": "{count}분"
+    "minutesShortcut": "{count}분",
+    "aiSummaryTitle": "AI 동영상 요약",
+    "aiChaptersTitle": "자동 동영상 챕터",
+    "aiChaptersDesc": "타임스탬프를 클릭하여 해당 콘텐츠로 바로 이동하세요",
+    "aiBeta": "AI 베타"
   },
   "Comments": {
     "disabled": "댓글 기능이 사용 중지되었습니다.",
@@ -369,9 +373,7 @@
     "yourPost": "내 게시물",
     "viewPostOnYouTube": "YouTube에서 게시물 보기",
     "seeMore": "더 보기",
-    "last28Days": "지난 28일",
     "daysCount": "{days}일",
-    "allTime": "전체 기간",
     "discoveryFunnelTitle": "노출수 및 시청 시간 발생 경로",
     "discoveryDataAvailable": "사용 가능한 데이터",
     "impressions": "노출수",
@@ -524,7 +526,28 @@
     "trafficSourceOtherFeatures": "기타 YouTube 기능",
     "trafficSourceShortsFeed": "Shorts 피드",
     "trafficSourceDirect": "직접 유입 또는 알 수 없는 출처",
-    "reply": "답글"
+    "reply": "답글",
+    "aiAssistantTitle": "AI 크리에이티브 어시스턴트",
+    "aiAssistantDesc": "텍스트 스크립트에서 AI를 사용하여 동영상 챕터 및 요약을 자동 생성합니다",
+    "btnChapters": "챕터 자동 생성",
+    "btnSummary": "요약 자동 생성",
+    "summaryLabel": "생성된 AI 요약:",
+    "chaptersLabel": "생성된 AI 챕터",
+    "abTestTitle": "스마트 썸네일 A/B 테스트",
+    "thumbA": "썸네일 A (기본값)",
+    "running": "진행 중",
+    "changeA": "썸네일 A 변경",
+    "createAI": "AI로 생성",
+    "restoreDefault": "기본값 복원",
+    "thumbB": "썸네일 B (테스트)",
+    "testing": "테스트 중",
+    "inactive": "비활성화됨",
+    "uploadB": "썸네일 B 업로드",
+    "removeB": "썸네일 B 제거",
+    "reportTitle": "A/B 테스트 성과 보고서 (Smart Thumbnail CTR)",
+    "winner": "우승",
+    "applyBest": "최적의 썸네일 적용",
+    "applySuccess": "최적의 썸네일을 기본값으로 적용했습니다!"
   },
   "VideoCard": {
     "noDescription": "설명 없음",
@@ -684,9 +707,11 @@
   },
   "Subscriptions": {
     "title": "구독",
-    "allSubscriptions": "구독한 모든 채널",
-    "manageSubscriptions": "구독 중인 모든 채널 보기 및 관리",
-    "unsubscribedSuccess": "구독 취소 성공"
+    "allSubscriptions": "모든 구독 채널",
+    "manageSubscriptions": "구독 중인 모든 채널을 보고 관리하세요",
+    "unsubscribedSuccess": "구독이 취소되었습니다",
+    "noSubscriptions": "구독 중인 채널이 없습니다",
+    "noSubscriptionsDescription": "좋아하는 채널을 구독하여 최신 동영상을 여기서 확인하세요."
   },
   "Users": {
     "errorLoadingUser": "사용자 정보 로드 오류",
@@ -919,14 +944,6 @@
     "startTimer": "시작",
     "invalidMinutes": "유효한 분 단위를 입력해주세요",
     "minutesUnit": "분"
-  },
-  "Subscriptions": {
-    "title": "구독",
-    "allSubscriptions": "모든 구독 채널",
-    "manageSubscriptions": "구독 중인 모든 채널을 보고 관리하세요",
-    "unsubscribedSuccess": "구독이 취소되었습니다",
-    "noSubscriptions": "구독 중인 채널이 없습니다",
-    "noSubscriptionsDescription": "좋아하는 채널을 구독하여 최신 동영상을 여기서 확인하세요."
   },
   "PlaylistPanel": {
     "next": "다음",

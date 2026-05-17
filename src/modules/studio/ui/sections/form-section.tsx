@@ -463,10 +463,10 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   </span>
                   <div>
                     <h3 className="font-semibold text-sm text-neutral-800 dark:text-neutral-200">
-                      Trợ lý Sáng tạo AI (AI Creative Assistant)
+                      {t("aiAssistantTitle")}
                     </h3>
                     <p className="text-xs text-neutral-500">
-                      Tự động hóa phân đoạn và tóm tắt nội dung video bằng AI từ Transcript
+                      {t("aiAssistantDesc")}
                     </p>
                   </div>
                 </div>
@@ -485,7 +485,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     ) : (
                       <SparklesIcon className="h-4 w-4 text-violet-500" />
                     )}
-                    Tự động tạo Chapters
+                    {t("btnChapters")}
                   </Button>
 
                   {/* Generate Summary */}
@@ -501,7 +501,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     ) : (
                       <SparklesIcon className="h-4 w-4 text-rose-500" />
                     )}
-                    Tự động tạo Tóm tắt
+                    {t("btnSummary")}
                   </Button>
                 </div>
 
@@ -510,7 +510,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   <div className="p-4 rounded-xl border border-rose-500/10 bg-rose-500/5 space-y-2">
                     <div className="flex items-center gap-1.5">
                       <SparklesIcon className="h-3.5 w-3.5 text-rose-500 animate-pulse" />
-                      <h4 className="text-xs font-bold text-rose-500 uppercase tracking-wider">Tóm tắt AI đã tạo:</h4>
+                      <h4 className="text-xs font-bold text-rose-500 uppercase tracking-wider">{t("summaryLabel")}</h4>
                     </div>
                     <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed font-medium">
                       {video.aiSummary}
@@ -542,7 +542,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                       <div className="flex items-center gap-1.5">
                         <SparklesIcon className="h-3.5 w-3.5 text-violet-500 animate-pulse" />
                         <h4 className="text-xs font-bold text-violet-500 uppercase tracking-wider">
-                          Phân đoạn AI đã tạo ({chaptersList.length}):
+                          {t("chaptersLabel")} ({chaptersList.length}):
                         </h4>
                       </div>
                       <div className="grid gap-1.5 max-h-[160px] overflow-y-auto pr-1">
@@ -563,17 +563,17 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
               {/* 🎯 Smart Thumbnail A/B Testing Section */}
               <div className="space-y-4">
                 <FormLabel className="text-neutral-800 dark:text-neutral-200 font-semibold text-sm">
-                  Thử nghiệm Ảnh bìa A/B (Smart Thumbnail A/B Test)
+                  {t("abTestTitle")}
                 </FormLabel>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Thumbnail A */}
                   <div className="p-4 border rounded-xl bg-neutral-50 dark:bg-neutral-900/30 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Thumbnail A (Mặc định)</span>
+                      <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">{t("thumbA")}</span>
                       {video.thumbnailUrl && (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
-                          Đang chạy
+                          {t("running")}
                         </span>
                       )}
                     </div>
@@ -597,15 +597,15 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                         <DropdownMenuContent align="start" side="right">
                           <DropdownMenuItem onClick={() => setThumbnailModalOpen(true)}>
                             <ImagePlusIcon className="size-4 mr-1" />
-                            Thay đổi ảnh bìa A
+                            {t("changeA")}
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setThumbnailGenerateModalOpen(true)}>
                             <SparklesIcon className="size-4 mr-1" />
-                            Tạo bằng AI
+                            {t("createAI")}
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => restoreThumbnail.mutate({ id: videoId })}>
                             <RotateCcwIcon className="size-4 mr-1" />
-                            Khôi phục mặc định
+                            {t("restoreDefault")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -615,14 +615,14 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   {/* Thumbnail B */}
                   <div className="p-4 border rounded-xl bg-neutral-50 dark:bg-neutral-900/30 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Thumbnail B (Thử nghiệm)</span>
+                      <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">{t("thumbB")}</span>
                       {video.thumbnailBUrl ? (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600">
-                          Đang thử nghiệm
+                          {t("testing")}
                         </span>
                       ) : (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
-                          Chưa kích hoạt
+                          {t("inactive")}
                         </span>
                       )}
                     </div>
@@ -646,7 +646,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                         <DropdownMenuContent align="start" side="right">
                           <DropdownMenuItem onClick={() => setThumbnailBModalOpen(true)}>
                             <ImagePlusIcon className="size-4 mr-1" />
-                            Tải lên ảnh bìa B
+                            {t("uploadB")}
                           </DropdownMenuItem>
                           {video.thumbnailBUrl && (
                             <DropdownMenuItem
@@ -663,7 +663,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                               }}
                             >
                               <TrashIcon className="size-4 mr-1 text-rose-500" />
-                              Gỡ bỏ ảnh bìa B
+                              {t("removeB")}
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
@@ -679,11 +679,11 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                       <div className="flex items-center gap-2">
                         <SparklesIcon className="h-4 w-4 text-rose-500 animate-pulse" />
                         <h4 className="font-semibold text-xs text-neutral-800 dark:text-neutral-200">
-                          Báo cáo hiệu suất A/B Test (Smart Thumbnail CTR)
+                          {t("reportTitle")}
                         </h4>
                       </div>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-300 animate-pulse">
-                        Real-time
+                        {t("realtime")}
                       </span>
                     </div>
 
@@ -713,7 +713,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                                 <span className="text-[10px] font-semibold text-neutral-500">Thumbnail A</span>
                                 {winner === "a" && (
                                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 uppercase">
-                                    Chiến thắng
+                                    {t("winner")}
                                   </span>
                                 )}
                               </div>
@@ -735,7 +735,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                                 <span className="text-[10px] font-semibold text-neutral-500">Thumbnail B</span>
                                 {winner === "b" && (
                                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 uppercase">
-                                    Chiến thắng
+                                    {t("winner")}
                                   </span>
                                 )}
                               </div>
@@ -780,11 +780,11 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                             thumbnailAClicks: 0,
                             thumbnailBClicks: 0,
                           });
-                          toast.success("Đã áp dụng Thumbnail tối ưu nhất làm mặc định!");
+                          toast.success(t("applySuccess"));
                         }}
                       >
                         <CopyCheckIcon className="h-3.5 w-3.5" />
-                        Áp dụng Thumbnail tốt nhất
+                        {t("applyBest")}
                       </Button>
                     </div>
                   </div>

@@ -1,8 +1,8 @@
 "use client";
-
 import React, { useState } from "react";
 import { Sparkles, Play, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface VideoAiFeaturesProps {
   aiChapters: string | null;
@@ -11,6 +11,7 @@ interface VideoAiFeaturesProps {
 
 export const VideoAiFeatures = ({ aiChapters, aiSummary }: VideoAiFeaturesProps) => {
   const [isChaptersExpanded, setIsChaptersExpanded] = useState(false);
+  const t = useTranslations("Video");
 
   if (!aiChapters && !aiSummary) return null;
 
@@ -76,9 +77,9 @@ export const VideoAiFeatures = ({ aiChapters, aiSummary }: VideoAiFeaturesProps)
               <Sparkles className="h-4 w-4 animate-pulse" />
             </span>
             <h3 className="font-semibold text-sm tracking-wide uppercase text-rose-500 dark:text-rose-400 flex items-center gap-1.5">
-              Tóm tắt video bằng AI
+              {t("aiSummaryTitle")}
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-300">
-                AI Beta
+                {t("aiBeta")}
               </span>
             </h3>
           </div>
@@ -101,10 +102,10 @@ export const VideoAiFeatures = ({ aiChapters, aiSummary }: VideoAiFeaturesProps)
               </span>
               <div>
                 <h3 className="font-semibold text-sm text-neutral-800 dark:text-neutral-200">
-                  Phân đoạn Video tự động ({chapters.length})
+                  {t("aiChaptersTitle")} ({chapters.length})
                 </h3>
                 <p className="text-xs text-neutral-500">
-                  Nhấp vào mốc thời gian để nhảy nhanh đến nội dung tương ứng
+                  {t("aiChaptersDesc")}
                 </p>
               </div>
             </div>

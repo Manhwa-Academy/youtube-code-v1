@@ -58,7 +58,11 @@
     "unsubscribe": "登録解除",
     "editVideo": "動画を編集",
     "videoProcessing": "動画を処理しています。",
-    "minutesShortcut": "{count}分"
+    "minutesShortcut": "{count}分",
+    "aiSummaryTitle": "AI動画要約",
+    "aiChaptersTitle": "自動動画チャプター",
+    "aiChaptersDesc": "タイムスタンプをクリックすると、対応するコンテンツにジャンプします",
+    "aiBeta": "AI ベータ"
   },
   "Comments": {
     "disabled": "コメント機能はオフになっています。",
@@ -386,9 +390,7 @@
     "yourPost": "自分の投稿",
     "viewPostOnYouTube": "YouTube で投稿を見る",
     "seeMore": "もっと見る",
-    "last28Days": "過去 28 日間",
     "daysCount": "{days} 日間",
-    "allTime": "全期間",
     "discoveryFunnelTitle": "インプレッションと総再生時間へのつながり",
     "discoveryDataAvailable": "利用可能なデータ",
     "impressions": "インプレッション",
@@ -576,7 +578,28 @@
     "trafficSourceOtherFeatures": "YouTube のその他の機能",
     "trafficSourceShortsFeed": "ショート フィード",
     "trafficSourceDirect": "直接入力、または不明",
-    "reply": "返信"
+    "reply": "返信",
+    "aiAssistantTitle": "AIクリエイティブアシスタント",
+    "aiAssistantDesc": "文字起こしからAIを使用してチャプターと要約を自動生成します",
+    "btnChapters": "チャプター自動生成",
+    "btnSummary": "要約自動生成",
+    "summaryLabel": "生成されたAI要約:",
+    "chaptersLabel": "生成されたAIチャプター",
+    "abTestTitle": "スマートサムネイルA/Bテスト",
+    "thumbA": "サムネイルA（デフォルト）",
+    "running": "配信中",
+    "changeA": "サムネイルAを変更",
+    "createAI": "AIで作成",
+    "restoreDefault": "デフォルトに戻す",
+    "thumbB": "サムネイルB（テスト中）",
+    "testing": "テスト中",
+    "inactive": "未アクティブ",
+    "uploadB": "サムネイルBをアップロード",
+    "removeB": "サムネイルBを削除",
+    "reportTitle": "A/Bテストパフォーマンスレポート (Smart Thumbnail CTR)",
+    "winner": "勝者",
+    "applyBest": "最適なサムネイルを適用",
+    "applySuccess": "最適なサムネイルをデフォルトとして適用しました！"
   },
   "VideoCard": {
     "noDescription": "説明なし",
@@ -782,13 +805,11 @@
   },
   "Subscriptions": {
     "title": "登録チャンネル",
-    "allSubscriptions": "登録済みのすべてのチャンネル",
-    "manageSubscriptions": "登録しているすべてのチャンネルを表示・管理する",
-    "unsubscribeSuccess": "登録を解除しました",
-    "all": "すべて",
-    "personalized": "パーソナライズ",
-    "none": "なし",
-    "unsubscribe": "登録解除"
+    "allSubscriptions": "すべての登録チャンネル",
+    "manageSubscriptions": "登録しているすべてのチャンネルを表示・管理します",
+    "unsubscribedSuccess": "チャンネル登録を解除しました",
+    "noSubscriptions": "チャンネル登録はまだありません",
+    "noSubscriptionsDescription": "お気に入りのチャンネルを登録して、最新の動画をここでチェックしましょう。"
   },
   "Users": {
     "errorLoadingUser": "ユーザー情報の読み込みエラー",
@@ -1021,14 +1042,6 @@
     "startTimer": "開始",
     "invalidMinutes": "有効な分数を入力してください",
     "minutesUnit": "分"
-  },
-  "Subscriptions": {
-    "title": "登録チャンネル",
-    "allSubscriptions": "すべての登録チャンネル",
-    "manageSubscriptions": "登録しているすべてのチャンネルを表示・管理します",
-    "unsubscribedSuccess": "チャンネル登録を解除しました",
-    "noSubscriptions": "チャンネル登録はまだありません",
-    "noSubscriptionsDescription": "お気に入りのチャンネルを登録して、最新の動画をここでチェックしましょう。"
   },
   "PlaylistPanel": {
     "next": "次へ",
