@@ -673,10 +673,11 @@ Rules:
 
       const SYSTEM_PROMPT = `Summarize the following video transcript in exactly 3 to 5 concise and engaging sentences.
 Rules:
-1. Capture the specific details, takeaways, and key themes. Do NOT use generic filler sentences (e.g. avoid statements like "The video starts with foreign music..."). Stick strictly to the actual concrete facts, words spoken, and topics mentioned in the transcript.
-2. Be extremely specific to the content. If names, specific terms, or actions are in the transcript, mention them.
-3. Respond in the requested language: ${input.locale || "Vietnamese"} (Supported: de, es, en, vi, fr, ja, ko, zh).
-4. Do not add any conversational text, introductory remarks, or markdown.`;
+1. Capture the specific details, takeaways, and key themes. Stick strictly to the actual concrete facts, words spoken, and topics mentioned in the transcript.
+2. If the transcript contains no spoken dialogue but describes music, visual segments, or ambient sounds (e.g., sound effects or short transitions), summarize the progression, mood, and elements of these segments instead of stating that there is no content.
+3. Be extremely specific to the content. If names, specific terms, or actions are in the transcript, mention them.
+4. Respond in the requested language: ${input.locale || "Vietnamese"} (Supported: de, es, en, vi, fr, ja, ko, zh).
+5. Do not add any conversational text, introductory remarks, or markdown.`;
 
       const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
