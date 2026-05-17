@@ -567,7 +567,13 @@
     "applyBest": "Bestes Thumbnail anwenden",
     "applySuccess": "Das optimale Thumbnail wurde als Standard angewendet!",
     "promoteToMain": "Als Haupt-Miniaturansicht festlegen",
-    "notEnoughData": "Noch nicht genügend Daten"
+    "notEnoughData": "Noch nicht genügend Daten",
+    "tabAI": "AI Auto",
+    "tabManual": "Manuell",
+    "manualSummaryLabel": "Video-Zusammenfassung",
+    "manualSummaryPlaceholder": "Geben Sie Ihre Video-Zusammenfassung ein...",
+    "manualChaptersLabel": "Video-Kapitel (MM:SS - Titel)",
+    "manualChaptersPlaceholder": "00:00 - Einführung\n00:05 - Hintergrundmusik"
   },
   "VideoCard": {
     "noDescription": "Keine Beschreibung",

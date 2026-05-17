@@ -64,15 +64,16 @@ export async function getEmbedding(text: string): Promise<number[]> {
   }
 
   // ==========================================
-  // 1. FREE Google Gemini API (text-embedding-004)
+  // 1. FREE Google Gemini API (gemini-embedding-001)
   // ==========================================
   if (geminiApiKey) {
     try {
-      console.log(`Generating FREE AI Embedding using Google's text-embedding-004 (1536 dims)...`);
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${geminiApiKey}`, {
+      console.log(`Generating FREE AI Embedding using Google's gemini-embedding-001 (1536 dims)...`);
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${geminiApiKey}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          model: "models/gemini-embedding-001",
           content: {
             parts: [{ text: cleanedText }]
           },

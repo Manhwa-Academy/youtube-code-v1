@@ -529,7 +529,13 @@
     "applyBest": "Appliquer la meilleure vignette",
     "applySuccess": "La vignette optimale a été appliquée par défaut !",
     "promoteToMain": "Définir comme vignette principale",
-    "notEnoughData": "Pas encore assez de données"
+    "notEnoughData": "Pas encore assez de données",
+    "tabAI": "AI Auto",
+    "tabManual": "Manuel",
+    "manualSummaryLabel": "Résumé de la Vidéo",
+    "manualSummaryPlaceholder": "Saisissez le résumé de votre vidéo...",
+    "manualChaptersLabel": "Chapitres de la Vidéo (MM:SS - Titre)",
+    "manualChaptersPlaceholder": "00:00 - Introduction\n00:05 - Musique de fond"
   },
   "VideoCard": {
     "noDescription": "Aucune description",

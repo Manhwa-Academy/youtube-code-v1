@@ -565,7 +565,13 @@
     "applyBest": "Aplicar mejor miniatura",
     "applySuccess": "¡Se aplicó la miniatura óptima como predeterminada!",
     "promoteToMain": "Establecer como miniatura principal",
-    "notEnoughData": "Aún no hay suficientes datos"
+    "notEnoughData": "Aún no hay suficientes datos",
+    "tabAI": "AI Auto",
+    "tabManual": "Manual",
+    "manualSummaryLabel": "Resumen de Video",
+    "manualSummaryPlaceholder": "Ingrese el resumen de su video...",
+    "manualChaptersLabel": "Capítulos de Video (MM:SS - Título)",
+    "manualChaptersPlaceholder": "00:00 - Introducción\n00:05 - Música de fondo"
   },
   "VideoCard": {
     "noDescription": "Sin descripción",

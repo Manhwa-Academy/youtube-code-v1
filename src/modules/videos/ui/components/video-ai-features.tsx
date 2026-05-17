@@ -48,20 +48,43 @@ export const VideoAiFeatures = ({ aiChapters, aiSummary }: VideoAiFeaturesProps)
   const chapters = parseChapters(aiChapters || "");
 
   const handleSeek = (seconds: number) => {
-    // Thẻ Custom Web Component MuxPlayer đóng gói video trong Shadow DOM
-    const muxPlayer = document.querySelector("mux-player") as any;
-    if (muxPlayer) {
-      muxPlayer.currentTime = seconds;
-      muxPlayer.play().catch(() => {});
+    // 1. Tìm tất cả các thẻ Web Component mux-player trên trang
+    const muxPlayers = document.querySelectorAll("mux-player");
+    
+    if (muxPlayers.length > 0) {
+      muxPlayers.forEach((muxPlayer: any) => {
+        // Gán thời gian lên wrapper cấp cao
+        try {
+          muxPlayer.currentTime = seconds;
+          muxPlayer.play().catch(() => {});
+        } catch (e) {
+          console.warn("Failed to set currentTime on mux-player wrapper:", e);
+        }
+
+        // Đi xuyên qua Shadow DOM để gán trực tiếp lên thẻ video HTML5 nguyên bản
+        try {
+          const nativeVideo = muxPlayer.shadowRoot?.querySelector("video");
+          if (nativeVideo) {
+            nativeVideo.currentTime = seconds;
+            nativeVideo.play().catch(() => {});
+          }
+        } catch (e) {
+          console.warn("Failed to seek native video inside shadowRoot:", e);
+        }
+      });
       return;
     }
 
-    // Fallback cho thẻ video thông thường nếu có
-    const player = document.querySelector("video");
-    if (player) {
-      player.currentTime = seconds;
-      player.play().catch(() => {});
-    }
+    // 2. Phương án dự phòng (Fallback) cho thẻ video tiêu chuẩn trong Light DOM
+    const videos = document.querySelectorAll("video");
+    videos.forEach((video) => {
+      try {
+        video.currentTime = seconds;
+        video.play().catch(() => {});
+      } catch (e) {
+        console.warn("Failed to seek native video:", e);
+      }
+    });
   };
 
   return (

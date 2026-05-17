@@ -549,7 +549,13 @@
     "applyBest": "최적의 썸네일 적용",
     "applySuccess": "최적의 썸네일을 기본값으로 적용했습니다!",
     "promoteToMain": "메인 썸네일로 설정",
-    "notEnoughData": "아직 충분한 데이터가 없음"
+    "notEnoughData": "아직 충분한 데이터가 없음",
+    "tabAI": "AI 자동",
+    "tabManual": "수동",
+    "manualSummaryLabel": "동영상 요약",
+    "manualSummaryPlaceholder": "동영상 요약을 입력하세요...",
+    "manualChaptersLabel": "동영상 챕터 (MM:SS - 제목)",
+    "manualChaptersPlaceholder": "00:00 - 도입부\n00:05 - 배경 음악"
   },
   "VideoCard": {
     "noDescription": "설명 없음",

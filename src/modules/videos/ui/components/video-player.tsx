@@ -123,7 +123,8 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       setShowNext(false);
       setCountdown(6);
       setHasRedirected(false);
-    }, [videoId, savedProgress]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [videoId]);
 
     useEffect(() => {
       const player = playerRef.current;

@@ -601,7 +601,13 @@
     "applyBest": "最適なサムネイルを適用",
     "applySuccess": "最適なサムネイルをデフォルトとして適用しました！",
     "promoteToMain": "メインサムネイルに設定",
-    "notEnoughData": "データがまだ不足しています"
+    "notEnoughData": "データがまだ不足しています",
+    "tabAI": "AI自動",
+    "tabManual": "手動",
+    "manualSummaryLabel": "動画の要約",
+    "manualSummaryPlaceholder": "動画の要約を入力してください...",
+    "manualChaptersLabel": "動画のチャプター (MM:SS - タイトル)",
+    "manualChaptersPlaceholder": "00:00 - 導入部\n00:05 - BGM"
   },
   "VideoCard": {
     "noDescription": "説明なし",

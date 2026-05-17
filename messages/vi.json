@@ -615,7 +615,13 @@
     "applyBest": "Áp dụng Thumbnail tốt nhất",
     "applySuccess": "Đã áp dụng Thumbnail tối ưu nhất làm mặc định!",
     "promoteToMain": "Đặt làm ảnh bìa chính",
-    "notEnoughData": "Chưa đủ dữ liệu hiển thị"
+    "notEnoughData": "Chưa đủ dữ liệu hiển thị",
+    "tabAI": "Tự động bằng AI",
+    "tabManual": "Chỉnh sửa thủ công",
+    "manualSummaryLabel": "Tóm tắt Video",
+    "manualSummaryPlaceholder": "Nhập tóm tắt video của bạn...",
+    "manualChaptersLabel": "Phân đoạn Video (MM:SS - Tiêu đề)",
+    "manualChaptersPlaceholder": "00:00 - Lời nói mở đầu\n00:05 - Nhạc nền sôi động"
   },
   "VideoCard": {
     "noDescription": "Không có mô tả",

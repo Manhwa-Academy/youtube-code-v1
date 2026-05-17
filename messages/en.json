@@ -614,7 +614,13 @@
     "applyBest": "Apply Best Thumbnail",
     "applySuccess": "Applied the optimal thumbnail as default!",
     "promoteToMain": "Set as main thumbnail",
-    "notEnoughData": "Not enough view data yet"
+    "notEnoughData": "Not enough view data yet",
+    "tabAI": "AI Auto",
+    "tabManual": "Manual",
+    "manualSummaryLabel": "Video Summary",
+    "manualSummaryPlaceholder": "Enter your video summary...",
+    "manualChaptersLabel": "Video Chapters (MM:SS - Title)",
+    "manualChaptersPlaceholder": "00:00 - Introduction\n00:05 - Background music"
   },
   "VideoCard": {
     "noDescription": "No description",

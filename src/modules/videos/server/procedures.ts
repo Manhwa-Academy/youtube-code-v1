@@ -579,7 +579,7 @@ export const videosRouter = createTRPCRouter({
       return { description };
     }),
   generateChapters: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.string().uuid(), locale: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
       const { id: userId } = ctx.user;
 
@@ -613,7 +613,8 @@ Rules:
 2. The first chapter MUST start exactly at '00:00'.
 3. For short videos (under 1 minute or around 30 seconds), you MUST divide the video into micro-chapters (at least 2-4 chapters, e.g., every 5-10 seconds) focusing on transition points, key spoken words, or topic shifts, rather than having just one chapter.
 4. Stick strictly to the actual facts, spoken words, and events in the transcript.
-5. Respond ONLY with the raw list of chapters. No introductory, conversational, explanation, or markdown text.`;
+5. Respond ONLY with the raw list of chapters. No introductory, conversational, explanation, or markdown text.
+6. Write all chapter titles in the requested language: ${input.locale || "English"} (Supported: de, es, en, vi, fr, ja, ko, zh).`;
 
       const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -1010,6 +1011,24 @@ Rules:
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
+      // Fetch the existing video to check if title or description actually changed
+      const [existingVideo] = await db
+        .select({
+          title: videos.title,
+          description: videos.description,
+        })
+        .from(videos)
+        .where(and(eq(videos.id, input.id), eq(videos.userId, userId)))
+        .limit(1);
+
+      if (!existingVideo) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const titleChanged = input.title !== undefined && input.title !== existingVideo.title;
+      const descriptionChanged = input.description !== undefined && input.description !== existingVideo.description;
+      const shouldRunAI = titleChanged || descriptionChanged;
+
       const [updatedVideo] = await db
         .update(videos)
         .set({
@@ -1031,6 +1050,8 @@ Rules:
           thumbnailBViews: input.thumbnailBViews,
           thumbnailAClicks: input.thumbnailAClicks,
           thumbnailBClicks: input.thumbnailBClicks,
+          aiSummary: input.aiSummary,
+          aiChapters: input.aiChapters,
           updatedAt: new Date(),
         })
         .where(and(eq(videos.id, input.id), eq(videos.userId, userId)))
@@ -1041,7 +1062,7 @@ Rules:
       }
 
       // Trigger background AI tasks: Embedding generation & Content Moderation
-      if (updatedVideo && (input.title !== undefined || input.description !== undefined)) {
+      if (updatedVideo && shouldRunAI) {
         (async () => {
           try {
             const combinedText = `${updatedVideo.title || ""} ${updatedVideo.description || ""}`.trim();

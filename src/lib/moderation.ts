@@ -36,7 +36,7 @@ Do NOT include any markdown formatting, backticks, or conversational filler in y
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-120b:free",
+        model: "google/gemini-2.5-flash:free",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: cleanedText.slice(0, 4000) },
@@ -54,12 +54,28 @@ Do NOT include any markdown formatting, backticks, or conversational filler in y
     const content = data.choices?.[0]?.message?.content?.trim();
     
     if (content) {
-      // Parse JSON safely
-      const parsed = JSON.parse(content.replace(/```json|```/g, ""));
-      return {
-        inappropriate: !!parsed.inappropriate,
-        reason: parsed.reason || "Phát hiện nội dung không phù hợp bởi AI.",
-      };
+      // Parse JSON safely and robustly
+      try {
+        let jsonString = content.trim();
+        const firstBrace = jsonString.indexOf("{");
+        const lastBrace = jsonString.lastIndexOf("}");
+        if (firstBrace !== -1 && lastBrace !== -1) {
+          jsonString = jsonString.substring(firstBrace, lastBrace + 1);
+        }
+        const parsed = JSON.parse(jsonString);
+        return {
+          inappropriate: !!parsed.inappropriate,
+          reason: parsed.reason || "Phát hiện nội dung không phù hợp bởi AI.",
+        };
+      } catch (e) {
+        console.warn("Failed to parse AI moderation JSON, raw content was:", content);
+        // Fallback to resilient keyword check if JSON fails to parse
+        const isBad = /toxic|hate|spam|scam|harassment|offensive|chửi|bậy|bẩn|địt|lồn|cặc/i.test(content);
+        return {
+          inappropriate: isBad,
+          reason: isBad ? "Phát hiện nội dung không phù hợp bởi AI." : "",
+        };
+      }
     }
   } catch (error) {
     console.error("AI Content Moderation failed:", error);

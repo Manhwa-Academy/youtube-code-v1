@@ -550,7 +550,13 @@
     "applyBest": "应用最佳缩略图",
     "applySuccess": "已将最佳缩略图设置为默认！",
     "promoteToMain": "设为主要缩略图",
-    "notEnoughData": "数据尚不足以对比"
+    "notEnoughData": "数据尚不足以对比",
+    "tabAI": "AI自动",
+    "tabManual": "手动",
+    "manualSummaryLabel": "视频摘要",
+    "manualSummaryPlaceholder": "输入您的视频摘要...",
+    "manualChaptersLabel": "视频分段 (MM:SS - 标题)",
+    "manualChaptersPlaceholder": "00:00 - 引入\n00:05 - 背景音乐"
   },
   "VideoCard": {
     "noDescription": "无描述",

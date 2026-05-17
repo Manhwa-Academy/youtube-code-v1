@@ -5,7 +5,7 @@ import { Link } from "@/i18n/routing";
 import { toast } from "sonner";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter } from "@/i18n/routing";
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorFallback } from "@/components/error-fallback";
@@ -150,6 +150,44 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   const locale = useLocale();
   const router = useRouter();
   const utils = trpc.useUtils();
+  const playerRef = useRef<any>(null);
+
+  const formatTime = (seconds: number) => {
+    const s = Math.floor(seconds);
+    const hrs = Math.floor(s / 3600);
+    const mins = Math.floor((s - hrs * 3600) / 60);
+    const secs = s - hrs * 3600 - mins * 60;
+    
+    const pad = (n: number) => String(n).padStart(2, "0");
+    
+    if (hrs > 0) {
+      return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+    }
+    return `${pad(mins)}:${pad(secs)}`;
+  };
+
+  const handleInsertTimestamp = () => {
+    const player = playerRef.current;
+    if (!player) {
+      toast.error("Không tìm thấy trình phát video. Hãy đảm bảo video đã được tải.");
+      return;
+    }
+    
+    const timeSecs = player.currentTime || 0;
+    const formatted = formatTime(timeSecs);
+    const currentValue = form.getValues("aiChapters") || "";
+    
+    // Add new line
+    const newLine = `${formatted} - `;
+    const newValue = currentValue 
+      ? currentValue.endsWith("\n") 
+        ? `${currentValue}${newLine}` 
+        : `${currentValue}\n${newLine}`
+      : newLine;
+      
+    form.setValue("aiChapters", newValue, { shouldDirty: true });
+    toast.success(`Đã chèn mốc ${formatted}! Hãy gõ tiếp tiêu đề cho phân đoạn.`);
+  };
 
   const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
   const [thumbnailBModalOpen, setThumbnailBModalOpen] = useState(false);
@@ -159,8 +197,26 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   const [mixPlaylistCreateModalOpen, setMixPlaylistCreateModalOpen] =
     useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [assistantMode, setAssistantMode] = useState<"ai" | "manual">("ai");
 
   const [video] = trpc.studio.getOne.useSuspenseQuery({ id: videoId });
+  
+  const sanitizeVideo = (v: typeof video) => {
+    return {
+      ...v,
+      title: v.title ?? "",
+      description: v.description ?? "",
+      categoryId: v.categoryId ?? "",
+      tags: v.tags ?? [],
+      aiSummary: v.aiSummary ?? "",
+      aiChapters: v.aiChapters ?? "",
+      thumbnailUrl: v.thumbnailUrl ?? "",
+      thumbnailKey: v.thumbnailKey ?? "",
+      thumbnailBUrl: v.thumbnailBUrl ?? "",
+      thumbnailBKey: v.thumbnailBKey ?? "",
+    };
+  };
+
   const tCategories = useTranslations("Categories");
   const [categories] = trpc.categories.getMany.useSuspenseQuery();
   const [playlists] = trpc.playlists.getManyForVideo.useSuspenseQuery({
@@ -171,8 +227,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   const update = trpc.videos.update.useMutation({
     onSuccess: (data) => {
       utils.studio.getMany.invalidate();
-      utils.studio.getOne.invalidate({ id: videoId });
-      form.reset(data, { keepValues: true });
+      form.reset(sanitizeVideo(data), { keepValues: true });
     },
     onError: () => {
       toast.error(t("error"));
@@ -273,11 +328,11 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
 
   const form = useForm<z.infer<typeof videoUpdateSchema>>({
     resolver: zodResolver(videoUpdateSchema),
-    defaultValues: video,
+    defaultValues: sanitizeVideo(video),
   });
 
   useEffect(() => {
-    form.reset(video);
+    form.reset(sanitizeVideo(video));
   }, [video, form]);
 
   const onSubmit = (data: z.infer<typeof videoUpdateSchema>) => {
@@ -285,13 +340,14 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   };
 
   const values = form.watch();
-  const debouncedValues = useDebounce(values, 1000);
+  const serializedValues = JSON.stringify(values);
+  const debouncedSerialized = useDebounce(serializedValues, 1000);
 
   useEffect(() => {
     if (form.formState.isDirty) {
-      update.mutate(debouncedValues);
+      update.mutate(form.getValues());
     }
-  }, [debouncedValues, update, form.formState.isDirty]);
+  }, [debouncedSerialized]);
 
   const fullUrl = `${APP_URL}/videos/${videoId}`;
   const [isCopied, setIsCopied] = useState(false);
@@ -458,107 +514,203 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
               />
               {/* 🧠 AI Creative Assistant Card */}
               <div className="p-5 border border-violet-500/20 bg-gradient-to-br from-violet-500/5 via-fuchsia-500/5 to-transparent rounded-2xl space-y-4 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center justify-center p-1.5 rounded-lg bg-violet-500/10 text-violet-500">
-                    <SparklesIcon className="h-4 w-4 animate-pulse" />
-                  </span>
-                  <div>
-                    <h3 className="font-semibold text-sm text-neutral-800 dark:text-neutral-200">
-                      {t("aiAssistantTitle")}
-                    </h3>
-                    <p className="text-xs text-neutral-500">
-                      {t("aiAssistantDesc")}
-                    </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-y-3 gap-x-2 border-b border-violet-500/10 pb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center p-1.5 rounded-lg bg-violet-500/10 text-violet-500">
+                      <SparklesIcon className="h-4 w-4 animate-pulse" />
+                    </span>
+                    <div>
+                      <h3 className="font-semibold text-sm text-neutral-800 dark:text-neutral-200">
+                        {t("aiAssistantTitle")}
+                      </h3>
+                      <p className="text-xs text-neutral-500">
+                        {t("aiAssistantDesc")}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Segmented Control for Tabs */}
+                  <div className="flex items-center bg-violet-500/5 dark:bg-violet-500/10 p-1 rounded-xl border border-violet-500/10 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setAssistantMode("ai")}
+                      className={cn(
+                        "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200",
+                        assistantMode === "ai"
+                          ? "bg-violet-600 text-white shadow-sm"
+                          : "text-neutral-500 hover:text-violet-600 dark:text-neutral-400"
+                      )}
+                    >
+                      {t("tabAI")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAssistantMode("manual")}
+                      className={cn(
+                        "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200",
+                        assistantMode === "manual"
+                          ? "bg-violet-600 text-white shadow-sm"
+                          : "text-neutral-500 hover:text-violet-600 dark:text-neutral-400"
+                      )}
+                    >
+                      {t("tabManual")}
+                    </button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Generate Chapters */}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex items-center justify-center gap-2 h-10 border-violet-500/30 hover:bg-violet-500/5 hover:text-violet-600 transition-all duration-200 text-xs font-semibold"
-                    onClick={() => generateChapters.mutate({ id: videoId })}
-                    disabled={generateChapters.isPending || !video.muxTrackId}
-                  >
-                    {generateChapters.isPending ? (
-                      <Loader2Icon className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <SparklesIcon className="h-4 w-4 text-violet-500" />
-                    )}
-                    {t("btnChapters")}
-                  </Button>
+                {assistantMode === "ai" ? (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Generate Chapters */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex items-center justify-center gap-2 h-10 border-violet-500/30 hover:bg-violet-500/5 hover:text-violet-600 transition-all duration-200 text-xs font-semibold"
+                        onClick={() => generateChapters.mutate({ id: videoId, locale })}
+                        disabled={generateChapters.isPending || !video.muxTrackId}
+                      >
+                        {generateChapters.isPending ? (
+                          <Loader2Icon className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <SparklesIcon className="h-4 w-4 text-violet-500" />
+                        )}
+                        {t("btnChapters")}
+                      </Button>
 
-                  {/* Generate Summary */}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex items-center justify-center gap-2 h-10 border-rose-500/30 hover:bg-rose-500/5 hover:text-rose-600 transition-all duration-200 text-xs font-semibold"
-                    onClick={() => generateSummary.mutate({ id: videoId })}
-                    disabled={generateSummary.isPending || !video.muxTrackId}
-                  >
-                    {generateSummary.isPending ? (
-                      <Loader2Icon className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <SparklesIcon className="h-4 w-4 text-rose-500" />
-                    )}
-                    {t("btnSummary")}
-                  </Button>
-                </div>
-
-                {/* AI Summary Display */}
-                {video.aiSummary && (
-                  <div className="p-4 rounded-xl border border-rose-500/10 bg-rose-500/5 space-y-2">
-                    <div className="flex items-center gap-1.5">
-                      <SparklesIcon className="h-3.5 w-3.5 text-rose-500 animate-pulse" />
-                      <h4 className="text-xs font-bold text-rose-500 uppercase tracking-wider">{t("summaryLabel")}</h4>
+                      {/* Generate Summary */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex items-center justify-center gap-2 h-10 border-rose-500/30 hover:bg-rose-500/5 hover:text-rose-600 transition-all duration-200 text-xs font-semibold"
+                        onClick={() => generateSummary.mutate({ id: videoId, locale })}
+                        disabled={generateSummary.isPending || !video.muxTrackId}
+                      >
+                        {generateSummary.isPending ? (
+                          <Loader2Icon className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <SparklesIcon className="h-4 w-4 text-rose-500" />
+                        )}
+                        {t("btnSummary")}
+                      </Button>
                     </div>
-                    <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed font-medium">
-                      {video.aiSummary}
-                    </p>
+
+                    {/* AI Summary Display */}
+                    {video.aiSummary && (
+                      <div className="p-4 rounded-xl border border-rose-500/10 bg-rose-500/5 space-y-2">
+                        <div className="flex items-center gap-1.5">
+                          <SparklesIcon className="h-3.5 w-3.5 text-rose-500 animate-pulse" />
+                          <h4 className="text-xs font-bold text-rose-500 uppercase tracking-wider">{t("summaryLabel")}</h4>
+                        </div>
+                        <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed font-medium">
+                          {video.aiSummary}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* AI Chapters Display */}
+                    {(() => {
+                      if (!video.aiChapters) return null;
+                      const parseChapters = (text: string) => {
+                        return text
+                          .split("\n")
+                          .map((line) => {
+                            const timeMatch = line.match(/(?:(\d{1,2}):)?(\d{1,2}):(\d{2})/);
+                            if (!timeMatch) return null;
+                            const fullTimeStr = timeMatch[0];
+                            const afterTime = line.substring(line.indexOf(fullTimeStr) + fullTimeStr.length).trim();
+                            const title = afterTime.replace(/^[-–—\s:]+/, "").trim();
+                            return { displayTime: fullTimeStr, title: title || "Chapter" };
+                          })
+                          .filter(Boolean);
+                      };
+                      const chaptersList = parseChapters(video.aiChapters);
+                      if (chaptersList.length === 0) return null;
+
+                      return (
+                        <div className="p-4 rounded-xl border border-violet-500/10 bg-violet-500/5 space-y-2">
+                          <div className="flex items-center gap-1.5">
+                            <SparklesIcon className="h-3.5 w-3.5 text-violet-500 animate-pulse" />
+                            <h4 className="text-xs font-bold text-violet-500 uppercase tracking-wider">
+                              {t("chaptersLabel")} ({chaptersList.length}):
+                            </h4>
+                          </div>
+                          <div className="grid gap-1.5 max-h-[160px] overflow-y-auto pr-1">
+                            {chaptersList.map((ch, idx) => (
+                              <div key={idx} className="flex items-center gap-2 text-xs">
+                                <span className="font-mono font-bold text-violet-600 dark:text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded">
+                                  {ch?.displayTime}
+                                </span>
+                                <span className="text-neutral-700 dark:text-neutral-300 font-medium">{ch?.title}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </>
+                ) : (
+                  <div className="space-y-4 pt-1">
+                    {/* Manual Summary Field */}
+                    <FormField
+                      control={form.control}
+                      name="aiSummary"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
+                            {t("manualSummaryLabel")}
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                              rows={3}
+                              className="resize-none text-xs bg-neutral-50 dark:bg-neutral-900/30 border-neutral-200 dark:border-neutral-800 focus-visible:ring-violet-500"
+                              placeholder={t("manualSummaryPlaceholder")}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Manual Chapters Field */}
+                    <FormField
+                      control={form.control}
+                      name="aiChapters"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="text-xs font-bold text-neutral-700 dark:text-neutral-300 flex items-center justify-between">
+                            <div className="flex items-center gap-x-2">
+                              <span>{t("manualChaptersLabel")}</span>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="h-5 px-1.5 py-0 text-[9px] border-violet-500/30 hover:bg-violet-500/10 hover:text-violet-600 text-violet-500 font-bold flex items-center gap-0.5 rounded-md transition-all cursor-pointer"
+                                onClick={handleInsertTimestamp}
+                              >
+                                <SparklesIcon className="size-2.5 animate-pulse" />
+                                Lấy mốc từ Video
+                              </Button>
+                            </div>
+                            <span className="text-[10px] font-normal text-muted-foreground italic">(e.g. 00:00 - Intro)</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                              rows={6}
+                              className="font-mono text-xs bg-neutral-50 dark:bg-neutral-900/30 border-neutral-200 dark:border-neutral-800 focus-visible:ring-violet-500"
+                              placeholder={t("manualChaptersPlaceholder")}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 )}
-
-                {/* AI Chapters Display */}
-                {(() => {
-                  if (!video.aiChapters) return null;
-                  const parseChapters = (text: string) => {
-                    return text
-                      .split("\n")
-                      .map((line) => {
-                        const timeMatch = line.match(/(?:(\d{1,2}):)?(\d{1,2}):(\d{2})/);
-                        if (!timeMatch) return null;
-                        const fullTimeStr = timeMatch[0];
-                        const afterTime = line.substring(line.indexOf(fullTimeStr) + fullTimeStr.length).trim();
-                        const title = afterTime.replace(/^[-–—\s:]+/, "").trim();
-                        return { displayTime: fullTimeStr, title: title || "Chapter" };
-                      })
-                      .filter(Boolean);
-                  };
-                  const chaptersList = parseChapters(video.aiChapters);
-                  if (chaptersList.length === 0) return null;
-
-                  return (
-                    <div className="p-4 rounded-xl border border-violet-500/10 bg-violet-500/5 space-y-2">
-                      <div className="flex items-center gap-1.5">
-                        <SparklesIcon className="h-3.5 w-3.5 text-violet-500 animate-pulse" />
-                        <h4 className="text-xs font-bold text-violet-500 uppercase tracking-wider">
-                          {t("chaptersLabel")} ({chaptersList.length}):
-                        </h4>
-                      </div>
-                      <div className="grid gap-1.5 max-h-[160px] overflow-y-auto pr-1">
-                        {chaptersList.map((ch, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-xs">
-                            <span className="font-mono font-bold text-violet-600 dark:text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded">
-                              {ch?.displayTime}
-                            </span>
-                            <span className="text-neutral-700 dark:text-neutral-300 font-medium">{ch?.title}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })()}
               </div>
 
               {/* 🎯 Smart Thumbnail A/B Testing Section */}
@@ -955,6 +1107,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
               <div className="flex flex-col gap-4 bg-muted/40 rounded-xl overflow-hidden h-fit">
                 <div className="aspect-video overflow-hidden relative">
                   <VideoPlayer
+                    ref={playerRef}
                     videoId={video.id}
                     title={video.title}
                     playbackId={video.muxPlaybackId}
