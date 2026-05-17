@@ -548,7 +548,9 @@
     "reportTitle": "A/B 测试效果报告 (Smart Thumbnail CTR)",
     "winner": "胜出",
     "applyBest": "应用最佳缩略图",
-    "applySuccess": "已将最佳缩略图设置为默认！"
+    "applySuccess": "已将最佳缩略图设置为默认！",
+    "promoteToMain": "设为主要缩略图",
+    "notEnoughData": "数据尚不足以对比"
   },
   "VideoCard": {
     "noDescription": "无描述",

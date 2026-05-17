@@ -599,7 +599,9 @@
     "reportTitle": "A/Bテストパフォーマンスレポート (Smart Thumbnail CTR)",
     "winner": "勝者",
     "applyBest": "最適なサムネイルを適用",
-    "applySuccess": "最適なサムネイルをデフォルトとして適用しました！"
+    "applySuccess": "最適なサムネイルをデフォルトとして適用しました！",
+    "promoteToMain": "メインサムネイルに設定",
+    "notEnoughData": "データがまだ不足しています"
   },
   "VideoCard": {
     "noDescription": "説明なし",

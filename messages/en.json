@@ -612,7 +612,9 @@
     "reportTitle": "A/B Test Performance Report (Smart Thumbnail CTR)",
     "winner": "Winner",
     "applyBest": "Apply Best Thumbnail",
-    "applySuccess": "Applied the optimal thumbnail as default!"
+    "applySuccess": "Applied the optimal thumbnail as default!",
+    "promoteToMain": "Set as main thumbnail",
+    "notEnoughData": "Not enough view data yet"
   },
   "VideoCard": {
     "noDescription": "No description",

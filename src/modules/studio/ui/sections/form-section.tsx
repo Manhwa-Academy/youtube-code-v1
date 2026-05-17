@@ -35,6 +35,7 @@ import {
   RotateCcwIcon,
   SparklesIcon,
   TrashIcon,
+  CheckIcon,
 } from "lucide-react";
 
 import { useDebounce } from "@/hooks/use-debounce";
@@ -649,6 +650,26 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                             {t("uploadB")}
                           </DropdownMenuItem>
                           {video.thumbnailBUrl && (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  update.mutate({
+                                    id: videoId,
+                                    thumbnailUrl: video.thumbnailBUrl,
+                                    thumbnailKey: video.thumbnailBKey,
+                                    thumbnailBUrl: null,
+                                    thumbnailBKey: null,
+                                    thumbnailAViews: 0,
+                                    thumbnailBViews: 0,
+                                    thumbnailAClicks: 0,
+                                    thumbnailBClicks: 0,
+                                  });
+                                  toast.success(t("applySuccess"));
+                                }}
+                              >
+                                <CheckIcon className="size-4 mr-1 text-emerald-500" />
+                                {t("promoteToMain")}
+                              </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => {
                                 update.mutate({
@@ -665,6 +686,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                               <TrashIcon className="size-4 mr-1 text-rose-500" />
                               {t("removeB")}
                             </DropdownMenuItem>
+                            </>
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -752,8 +774,14 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     </div>
 
                     {/* Action: Apply Best Thumbnail */}
-                    <div className="flex justify-end pt-2">
+                    <div className="flex justify-end items-center gap-x-2.5 pt-2">
+                      {((video.thumbnailAViews || 0) === 0 && (video.thumbnailBViews || 0) === 0) && (
+                        <p className="text-[11px] text-muted-foreground italic">
+                          *{t("notEnoughData")}
+                        </p>
+                      )}
                       <Button
+                        disabled={update.isPending || ((video.thumbnailAViews || 0) === 0 && (video.thumbnailBViews || 0) === 0)}
                         type="button"
                         className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-sm"
                         onClick={() => {

@@ -563,7 +563,9 @@
     "reportTitle": "Informe de rendimiento de prueba A/B (Smart Thumbnail CTR)",
     "winner": "Ganador",
     "applyBest": "Aplicar mejor miniatura",
-    "applySuccess": "¡Se aplicó la miniatura óptima como predeterminada!"
+    "applySuccess": "¡Se aplicó la miniatura óptima como predeterminada!",
+    "promoteToMain": "Establecer como miniatura principal",
+    "notEnoughData": "Aún no hay suficientes datos"
   },
   "VideoCard": {
     "noDescription": "Sin descripción",

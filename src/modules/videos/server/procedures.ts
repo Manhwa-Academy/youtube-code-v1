@@ -1023,6 +1023,14 @@ Rules:
           commentSort: input.commentSort,
           showLikeCount: input.showLikeCount,
           tags: input.tags ?? extractHashtags(`${input.title || ""} ${input.description || ""}`),
+          thumbnailUrl: input.thumbnailUrl,
+          thumbnailKey: input.thumbnailKey,
+          thumbnailBUrl: input.thumbnailBUrl,
+          thumbnailBKey: input.thumbnailBKey,
+          thumbnailAViews: input.thumbnailAViews,
+          thumbnailBViews: input.thumbnailBViews,
+          thumbnailAClicks: input.thumbnailAClicks,
+          thumbnailBClicks: input.thumbnailBClicks,
           updatedAt: new Date(),
         })
         .where(and(eq(videos.id, input.id), eq(videos.userId, userId)))

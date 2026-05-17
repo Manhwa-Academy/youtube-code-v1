@@ -613,7 +613,9 @@
     "reportTitle": "Báo cáo hiệu suất A/B Test (Smart Thumbnail CTR)",
     "winner": "Chiến thắng",
     "applyBest": "Áp dụng Thumbnail tốt nhất",
-    "applySuccess": "Đã áp dụng Thumbnail tối ưu nhất làm mặc định!"
+    "applySuccess": "Đã áp dụng Thumbnail tối ưu nhất làm mặc định!",
+    "promoteToMain": "Đặt làm ảnh bìa chính",
+    "notEnoughData": "Chưa đủ dữ liệu hiển thị"
   },
   "VideoCard": {
     "noDescription": "Không có mô tả",

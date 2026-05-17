@@ -547,7 +547,9 @@
     "reportTitle": "A/B 테스트 성과 보고서 (Smart Thumbnail CTR)",
     "winner": "우승",
     "applyBest": "최적의 썸네일 적용",
-    "applySuccess": "최적의 썸네일을 기본값으로 적용했습니다!"
+    "applySuccess": "최적의 썸네일을 기본값으로 적용했습니다!",
+    "promoteToMain": "메인 썸네일로 설정",
+    "notEnoughData": "아직 충분한 데이터가 없음"
   },
   "VideoCard": {
     "noDescription": "설명 없음",

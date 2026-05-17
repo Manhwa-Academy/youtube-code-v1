@@ -527,7 +527,9 @@
     "reportTitle": "Rapport de performance du test A/B (Smart Thumbnail CTR)",
     "winner": "Gagnant",
     "applyBest": "Appliquer la meilleure vignette",
-    "applySuccess": "La vignette optimale a été appliquée par défaut !"
+    "applySuccess": "La vignette optimale a été appliquée par défaut !",
+    "promoteToMain": "Définir comme vignette principale",
+    "notEnoughData": "Pas encore assez de données"
   },
   "VideoCard": {
     "noDescription": "Aucune description",
