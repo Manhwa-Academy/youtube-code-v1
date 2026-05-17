@@ -1,8 +1,5 @@
 # 🚀 Hayase Yuuka — Ý Tưởng Phát Triển Tiếp Theo
 
-> Phân tích dựa trên codebase hiện tại (May 2026).  
-> Project đã có: Video/Shorts, Studio Analytics, Community Posts (text/image/poll/quiz), Playlists, Comments (heart/pin/reply), Notifications, Reports, Moderation, i18n (8 ngôn ngữ), Admin panel, Hashtag pages.
-
 ---
 
 ## 🔴 Ưu Tiên Cao — Nên làm ngay (Tuần 1–4)
@@ -94,14 +91,6 @@ live_chat_messages (id, streamId, userId, message, createdAt)
 
 ## 🟢 Ưu Tiên Thấp — Dài Hạn (3–6 tháng+)
 
-### 13. 🎓 Learning / Course Mode
-- Creator tổ chức video thành **Course** với section/lesson
-- Progress tracking theo lesson
-- **Quiz** tích hợp sau mỗi lesson (đã có quiz system trong Community Posts)
-- Certificate of completion
-
----
-
 ### 14. 🏆 Gamification
 - **Badges / Achievements**: "First 1000 views", "Consistent Creator" (đăng 4 tuần liên tiếp)
 - **Channel milestones**: Hiển thị celebration khi đạt 100/1K/10K subscribers
@@ -114,20 +103,4 @@ live_chat_messages (id, streamId, userId, message, createdAt)
 - Creator group nhiều kênh vào 1 tổ chức
 - Dashboard tổng hợp analytics toàn bộ kênh trong network
 - Chia sẻ revenue trong network
-
----
-
-### 16. 🖥️ Creator Tools Nâng Cao
-- **Subtitle editor** trực tiếp trên web (sửa transcript đã gen bởi Mux)
-- **End screens** builder: Thêm overlay video cuối (link video khác, subscribe button)
-- **Cards**: Popup annotations trong video
-- **Chapters editor** UI: Thêm chapter marker vào description với UI drag-timeline
-- **Bulk actions** trong Studio: Đổi visibility nhiều video cùng lúc
-
----
-
-### 17. 📧 Email Marketing
-- **Newsletter**: Creator gửi email đến subscriber (tích hợp Resend)
-- **Digest email** hàng tuần tự động: "Video mới từ kênh bạn theo dõi"
-- **Re-engagement email**: Gửi cho user chưa login 30+ ngày
 

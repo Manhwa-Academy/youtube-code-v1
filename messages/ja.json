@@ -1029,5 +1029,12 @@
     "unsubscribedSuccess": "チャンネル登録を解除しました",
     "noSubscriptions": "チャンネル登録はまだありません",
     "noSubscriptionsDescription": "お気に入りのチャンネルを登録して、最新の動画をここでチェックしましょう。"
+  },
+  "PlaylistPanel": {
+    "next": "次へ",
+    "mixPlaylist": "ミックスプレイリスト",
+    "mixPlaylistDescription": "YouTubeがあなたのために作成したプレイリストです",
+    "expandPlaylist": "ミックスプレイリストを展開",
+    "hidePlaylist": "ミックスプレイリストを非表示"
   }
 }

@@ -991,5 +991,12 @@
     "unsubscribedSuccess": "Erfolgreich deabonniert",
     "noSubscriptions": "Noch keine Abonnements",
     "noSubscriptionsDescription": "Abonnieren Sie Ihre Lieblingskanäle, um hier die neuesten Videos zu sehen."
+  },
+  "PlaylistPanel": {
+    "next": "Nächstes",
+    "mixPlaylist": "Mix-Playlist",
+    "mixPlaylistDescription": "YouTube hat diese Playlist für dich erstellt",
+    "expandPlaylist": "Mix-Playlist erweitern",
+    "hidePlaylist": "Mix-Playlist ausblenden"
   }
 }

@@ -908,5 +908,12 @@
     "unsubscribedSuccess": "Désabonnement réussi",
     "noSubscriptions": "Pas encore d'abonnements",
     "noSubscriptionsDescription": "Abonnez-vous à vos chaînes préférées pour voir les dernières vidéos ici."
+  },
+  "PlaylistPanel": {
+    "next": "Suivant",
+    "mixPlaylist": "Playlist Mix",
+    "mixPlaylistDescription": "YouTube a créé cette playlist pour vous",
+    "expandPlaylist": "Développer la playlist mix",
+    "hidePlaylist": "Masquer la playlist mix"
   }
 }

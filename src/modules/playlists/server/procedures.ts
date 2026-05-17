@@ -348,7 +348,18 @@ export const playlistsRouter = createTRPCRouter({
 
       return playlist;
     }),
-  getPublicMixPlaylists: publicProcedure.query(async () => {
+  getPublicMixPlaylists: publicProcedure.query(async ({ ctx }) => {
+    const { clerkUserId } = ctx;
+    let viewerId: string | undefined;
+
+    if (clerkUserId) {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.clerkId, clerkUserId));
+      viewerId = user?.id;
+    }
+
     const playlistsData = await db
       .select()
       .from(playlists)
@@ -369,12 +380,32 @@ export const playlistsRouter = createTRPCRouter({
           title: videos.title,
           description: videos.description,
           thumbnail: videos.thumbnailUrl,
+          duration: videos.duration,
           viewsCount: videos.viewsCount,
           createdAt: videos.createdAt,
           updatedAt: videos.updatedAt,
+          progress: sql<number>`COALESCE(user_progress.progress, 0)`.as("progress"),
+          user: {
+            id: users.id,
+            name: users.name,
+            imageUrl: users.imageUrl,
+          },
         })
         .from(videos)
+        .innerJoin(users, eq(videos.userId, users.id))
         .innerJoin(playlistVideos, eq(playlistVideos.videoId, videos.id))
+        .leftJoin(
+          db.select({
+            videoId: videoViews.videoId,
+            userId: videoViews.userId,
+            progress: sql<number>`MAX(${videoViews.progress})`.as("progress")
+          })
+          .from(videoViews)
+          .where(viewerId ? eq(videoViews.userId, viewerId) : sql`1=0`)
+          .groupBy(videoViews.videoId, videoViews.userId)
+          .as("user_progress"),
+          eq(videos.id, sql`user_progress.video_id`)
+        )
         .where(eq(playlistVideos.playlistId, playlist.id))
         .orderBy(playlistVideos.createdAt);
 

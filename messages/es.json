@@ -970,5 +970,12 @@
     "unsubscribedSuccess": "Suscripción cancelada con éxito",
     "noSubscriptions": "Aún không có suscripciones",
     "noSubscriptionsDescription": "Suscríbete a tus canales favoritos para ver los últimos vídeos aquí."
+  },
+  "PlaylistPanel": {
+    "next": "Siguiente",
+    "mixPlaylist": "Lista de reproducción combinada",
+    "mixPlaylistDescription": "YouTube creó esta lista de reproducción para ti",
+    "expandPlaylist": "Expandir lista de reproducción combinada",
+    "hidePlaylist": "Ocultar lista de reproducción combinada"
   }
 }

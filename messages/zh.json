@@ -928,5 +928,12 @@
     "unsubscribedSuccess": "已成功取消订阅",
     "noSubscriptions": "暂无订阅",
     "noSubscriptionsDescription": "订阅您喜欢的频道，在此查看最新视频。"
+  },
+  "PlaylistPanel": {
+    "next": "接下来",
+    "mixPlaylist": "混合视频列表",
+    "mixPlaylistDescription": "YouTube 为您特别制作的播放列表",
+    "expandPlaylist": "展开混合视频列表",
+    "hidePlaylist": "隐藏混合视频列表"
   }
 }

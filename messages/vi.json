@@ -1051,5 +1051,12 @@
     "errorDeletingVideo": "Lỗi khi xóa video.",
     "noLocalVideoData": "Không tìm thấy dữ liệu video cục bộ.",
     "cannotPlayVideo": "Không thể phát video."
+  },
+  "PlaylistPanel": {
+    "next": "Tiếp theo",
+    "mixPlaylist": "Danh sách kết hợp",
+    "mixPlaylistDescription": "YouTube tạo danh sách phát này cho riêng bạn",
+    "expandPlaylist": "Mở rộng danh sách kết hợp",
+    "hidePlaylist": "Ẩn danh sách kết hợp"
   }
 }

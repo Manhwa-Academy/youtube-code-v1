@@ -1050,5 +1050,12 @@
     "errorDeletingVideo": "Error deleting video.",
     "noLocalVideoData": "No local video data found.",
     "cannotPlayVideo": "Cannot play video."
+  },
+  "PlaylistPanel": {
+    "next": "Next",
+    "mixPlaylist": "Mix Playlist",
+    "mixPlaylistDescription": "YouTube created this playlist for you",
+    "expandPlaylist": "Expand mix playlist",
+    "hidePlaylist": "Hide mix playlist"
   }
 }

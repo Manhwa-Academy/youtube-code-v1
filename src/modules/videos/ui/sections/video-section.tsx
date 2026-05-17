@@ -220,61 +220,6 @@ const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp 
           setLoopEnabledAction={setLoopEnabled}
         />
       )}
-
-      {/* 📌 PLAYLIST TOGGLE */}
-      {!hideInfo && playlist && (
-        <button
-          className="text-sm text-blue-500 hover:text-blue-600 font-medium mt-1 self-start"
-          onClick={() => setShowPlaylist((prev) => !prev)}
-        >
-          {showPlaylist ? t("hidePlaylist") : t("showPlaylist")}
-        </button>
-      )}
-
-      {/* 📚 PLAYLIST */}
-      {!hideInfo && showPlaylist && playlist && (
-        <div className="w-full mt-2 max-h-72 overflow-y-auto bg-gray-900/90 backdrop-blur-md rounded-lg shadow-xl p-3 border border-gray-700">
-          <div className="text-white font-semibold text-sm mb-2">
-            {playlist.name}
-          </div>
-
-          {playlist.videos.map((v, i) => (
-            <div
-              key={v.id}
-              className={cn(
-                "flex gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-700/50",
-                i === currentIndex ? "bg-gray-700/70" : "",
-              )}
-              onClick={() => {
-                setCurrentVideoId(v.id);
-                setCurrentIndex(i);
-                window.history.pushState(
-                  null,
-                  "",
-                  `/videos/${v.id}?list=${playlist.id}&index=${i}`,
-                );
-              }}
-            >
-              <div className="relative w-20 aspect-video rounded overflow-hidden">
-                <img
-                  src={v.thumbnail || THUMBNAIL_FALLBACK}
-                  className="w-full h-full object-cover"
-                />
-
-                {i === currentIndex && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                    <span className="text-white text-lg">▶️</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-1 text-white text-sm line-clamp-2">
-                {i + 1}. {v.title}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

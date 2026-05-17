@@ -927,5 +927,12 @@
     "unsubscribedSuccess": "구독이 취소되었습니다",
     "noSubscriptions": "구독 중인 채널이 없습니다",
     "noSubscriptionsDescription": "좋아하는 채널을 구독하여 최신 동영상을 여기서 확인하세요."
+  },
+  "PlaylistPanel": {
+    "next": "다음",
+    "mixPlaylist": "믹스 플레이리스트",
+    "mixPlaylistDescription": "YouTube에서 나만을 위해 만든 플레이리스트입니다",
+    "expandPlaylist": "믹스 플레이리스트 펼치기",
+    "hidePlaylist": "믹스 플레이리스트 숨기기"
   }
 }

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 import { useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 
 import { trpc } from "@/trpc/client";
 import { VideoSection } from "../sections/video-section";
@@ -10,6 +11,7 @@ import { CommentsSection } from "../sections/comments-section";
 import { SuggestionsSection } from "../sections/suggestions-section";
 import { ShortsActions } from "../components/shorts-actions";
 import { ShortsInfo } from "../components/shorts-info";
+import { VideoPlaylist } from "../components/video-playlist";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
@@ -32,6 +34,15 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
   const t = useTranslations("Video");
   const router = useRouter();
   const [canGoBack, setCanGoBack] = useState(false);
+
+  const params = useSearchParams();
+  const playlistId = params.get("list");
+  const index = Number(params.get("index") || 0);
+
+  const { data: playlists } = trpc.playlists.getPublicMixPlaylists.useQuery() as {
+    data: any[] | undefined;
+  };
+  const playlist = playlists?.find((p) => p.id === playlistId);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -212,12 +223,33 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
       <div className="flex flex-col xl:flex-row gap-6">
         <div className="flex-1 min-w-0">
           <VideoSection videoId={videoId} />
+          
+          {/* Mobile mix playlist panel */}
+          {playlist && (
+            <div className="xl:hidden block mt-4">
+              <VideoPlaylist 
+                playlist={playlist} 
+                currentIndex={index} 
+                currentVideoId={videoId} 
+              />
+            </div>
+          )}
+
           <div className="xl:hidden block mt-4">
             <SuggestionsSection videoId={videoId} isManual isShort={isShort} />
           </div>
           <CommentsSection videoId={videoId} />
         </div>
-        <div className="hidden xl:block w-full xl:w-[380px] 2xl:w-[460px] shrink-1">
+        
+        {/* Right sidebar column */}
+        <div className="hidden xl:flex flex-col w-full xl:w-[380px] 2xl:w-[460px] shrink-0 gap-4">
+          {playlist && (
+            <VideoPlaylist 
+              playlist={playlist} 
+              currentIndex={index} 
+              currentVideoId={videoId} 
+            />
+          )}
           <SuggestionsSection videoId={videoId} isShort={isShort} />
         </div>
       </div>
