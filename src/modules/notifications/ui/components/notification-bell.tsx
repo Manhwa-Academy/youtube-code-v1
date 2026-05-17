@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { BellIcon, CheckIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS, ja, ko, zhCN, es, fr, de } from "date-fns/locale";
 import { Link } from "@/i18n/routing";
 import { useRouter } from "@/i18n/routing";
+import { toast } from "sonner";
 
 import { trpc } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +20,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { NotificationPreferencesDialog } from "./notification-preferences-dialog";
 
 const locales: Record<string, any> = {
   vi,
@@ -38,7 +41,7 @@ export const NotificationBell = () => {
   
   const { data: unreadCount } = trpc.notifications.getUnreadCount.useQuery(
     undefined,
-    { refetchInterval: 30000 } // Poll every 30 seconds
+    { refetchInterval: 60000 } // Keep 60s as a gentle fallback
   );
   const { data: notifications, isLoading } = trpc.notifications.getMany.useQuery({
     limit: 5,
@@ -68,6 +71,85 @@ export const NotificationBell = () => {
     }
   };
 
+  // Set up Server-Sent Events (SSE) for real-time notifications
+  useEffect(() => {
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: NodeJS.Timeout;
+    
+    const connectSSE = () => {
+      console.log("[SSEClient] Connecting to real-time notification stream...");
+      eventSource = new EventSource("/api/notifications/stream");
+      
+      eventSource.onopen = () => {
+        console.log("[SSEClient] Stream connection opened.");
+      };
+
+      eventSource.addEventListener("open", (event: MessageEvent) => {
+        console.log("[SSEClient] Open event received:", event.data);
+      });
+
+      eventSource.onmessage = (event) => {
+        try {
+          const notification = JSON.parse(event.data);
+          console.log("[SSEClient] New real-time notification received:", notification);
+          
+          const actorName = notification.actor?.name || "Ai đó";
+          const actionText = t(notification.type as any) || t("default") || "đã tương tác với bạn";
+          
+          // Display beautiful Sonner toast
+          toast(
+            <div 
+              className="flex items-center gap-3 cursor-pointer w-full"
+              onClick={() => {
+                markAsRead.mutate({ id: notification.id });
+                if (notification.videoId) {
+                  router.push(`/videos/${notification.videoId}`);
+                } else if (notification.postId) {
+                  router.push(`/posts/${notification.postId}`);
+                }
+              }}
+            >
+              <UserAvatar 
+                imageUrl={notification.actor?.imageUrl} 
+                name={actorName} 
+                className="size-8 flex-shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold truncate">{actorName}</p>
+                <p className="text-xs text-neutral-500 line-clamp-1">{actionText}</p>
+              </div>
+            </div>,
+            {
+              duration: 6000,
+            }
+          );
+
+          // Instantly refresh caches to update the bell
+          utils.notifications.getUnreadCount.invalidate();
+          utils.notifications.getMany.invalidate();
+        } catch (err) {
+          console.error("[SSEClient] Error parsing incoming event data:", err);
+        }
+      };
+
+      eventSource.onerror = (err) => {
+        console.warn("[SSEClient] Stream error. Attempting to reconnect in 5s...", err);
+        eventSource?.close();
+        reconnectTimeout = setTimeout(connectSSE, 5000);
+      };
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+        console.log("[SSEClient] Stream connection closed.");
+      }
+      clearTimeout(reconnectTimeout);
+    };
+  }, [utils, router, t]);
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -84,7 +166,10 @@ export const NotificationBell = () => {
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0 overflow-hidden shadow-xl border-neutral-200 dark:border-neutral-800">
         <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between bg-white dark:bg-black">
-          <h3 className="font-bold text-lg">{t("title")}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-lg">{t("title")}</h3>
+            <NotificationPreferencesDialog />
+          </div>
           {unreadCount && unreadCount.count > 0 && (
             <Button 
               variant="ghost" 

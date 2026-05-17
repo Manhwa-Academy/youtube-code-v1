@@ -14,8 +14,8 @@ import {
   users,
   videos,
   comments,
-  notifications,
 } from "@/db/schema";
+import { dispatchNotification } from "@/modules/notifications/server/service";
 
 import { createTRPCRouter, protectedProcedure, baseProcedure } from "@/trpc/init";
 
@@ -415,7 +415,7 @@ export const postsRouter = createTRPCRouter({
           .where(eq(posts.id, postId));
 
         if (post && post.userId !== userId) {
-          await db.insert(notifications).values({
+          await dispatchNotification({
             userId: post.userId,
             actorId: userId,
             type: "post_like",

@@ -565,7 +565,20 @@
     "subscription": "hat deinen Kanal abonniert",
     "post_like": "hat deinen Beitrag mit „Mag ich“ bewertet",
     "post_comment": "hat deinen Beitrag kommentiert",
-    "default": "hat mit dir interagiert"
+    "default": "hat mit dir interagiert",
+    "preferencesTitle": "Benachrichtigungseinstellungen",
+    "preferencesDesc": "Personalisiere die Benachrichtigungen, die du über verschiedene Kanäle erhalten möchtest.",
+    "activityType": "Aktivität",
+    "inAppNotify": "In-App",
+    "pushNotify": "Browser",
+    "emailNotify": "E-Mail",
+    "video_like_pref": "Video-Likes",
+    "video_comment_pref": "Video-Kommentare",
+    "comment_reply_pref": "Kommentar-Antworten",
+    "comment_like_pref": "Kommentar-Likes",
+    "subscription_pref": "Neue Abonnenten",
+    "post_like_pref": "Beitrag-Likes",
+    "post_comment_pref": "Beitrag-Kommentare"
   },
   "Categories": {
     "Cars & Vehicles": "Autos & Fahrzeuge",

@@ -3,8 +3,9 @@ import { and, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
 
 import { db } from "@/db";
 import { TRPCError } from "@trpc/server";
-import { subscriptions, users, notifications } from "@/db/schema";
+import { subscriptions, users } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { dispatchNotification } from "@/modules/notifications/server/service";
 
 export const subscriptionsRouter = createTRPCRouter({
   getMany: protectedProcedure
@@ -82,7 +83,7 @@ export const subscriptionsRouter = createTRPCRouter({
         .returning();
 
       if (createdSubscription) {
-        await db.insert(notifications).values({
+        await dispatchNotification({
           userId: userId,
           actorId: ctx.user.id,
           type: "subscription",

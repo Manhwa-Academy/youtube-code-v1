@@ -569,7 +569,20 @@
     "subscription": "님이 내 채널을 구독했습니다",
     "post_like": "님이 내 게시물을 좋아합니다",
     "post_comment": "님이 내 게시물에 댓글을 남겼습니다",
-    "default": "님이 나와 상호작용했습니다"
+    "default": "님이 나와 상호작용했습니다",
+    "preferencesTitle": "알림 설정",
+    "preferencesDesc": "다양한 채널에서 수신하려는 알림을 맞춤설정합니다.",
+    "activityType": "활동",
+    "inAppNotify": "앱 내",
+    "pushNotify": "브라우저",
+    "emailNotify": "이메일",
+    "video_like_pref": "동영상 좋아요",
+    "video_comment_pref": "동영상 댓글",
+    "comment_reply_pref": "댓글 답글",
+    "comment_like_pref": "댓글 좋아요",
+    "subscription_pref": "새 구독자",
+    "post_like_pref": "게시물 좋아요",
+    "post_comment_pref": "게시물 댓글"
   },
   "Categories": {
     "Cars & Vehicles": "자동차",

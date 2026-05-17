@@ -2,8 +2,9 @@ import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { videoReactions, videos, notifications } from "@/db/schema";
+import { videoReactions, videos } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { dispatchNotification } from "@/modules/notifications/server/service";
 
 export const videoReactionsRouter = createTRPCRouter({
   like: protectedProcedure
@@ -61,7 +62,7 @@ export const videoReactionsRouter = createTRPCRouter({
           .where(eq(videos.id, videoId));
 
         if (video && video.userId !== userId) {
-          await db.insert(notifications).values({
+          await dispatchNotification({
             userId: video.userId,
             actorId: userId,
             type: "video_like",

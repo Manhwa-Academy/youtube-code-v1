@@ -16,7 +16,8 @@ import {
 import { db } from "@/db";
 import { getTranslations } from "next-intl/server";
 import { TRPCError } from "@trpc/server";
-import { commentReactions, comments, users, videos, posts, notifications, channelModerations, subscriptions } from "@/db/schema";
+import { commentReactions, comments, users, videos, posts, channelModerations, subscriptions } from "@/db/schema";
+import { dispatchNotification } from "@/modules/notifications/server/service";
 import {
   baseProcedure,
   createTRPCRouter,
@@ -351,7 +352,7 @@ export const commentsRouter = createTRPCRouter({
             .where(eq(comments.id, parentId));
 
           if (parentComment && parentComment.userId !== userId) {
-            await db.insert(notifications).values({
+            await dispatchNotification({
               userId: parentComment.userId,
               actorId: userId,
               type: "comment_reply",
@@ -364,7 +365,7 @@ export const commentsRouter = createTRPCRouter({
         // 2. If it's a new comment, notify the content owner
         else {
           if (contentOwnerId && contentOwnerId !== userId) {
-            await db.insert(notifications).values({
+            await dispatchNotification({
               userId: contentOwnerId,
               actorId: userId,
               type: videoId ? "video_comment" : "post_comment",

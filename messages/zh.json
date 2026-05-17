@@ -570,7 +570,20 @@
     "subscription": "订阅了您的频道",
     "post_like": "顶了您的帖子",
     "post_comment": "评论了您的帖子",
-    "default": "与您进行了互动"
+    "default": "与您进行了互动",
+    "preferencesTitle": "通知设置",
+    "preferencesDesc": "个性化您希望在不同渠道收到的通知。",
+    "activityType": "活动",
+    "inAppNotify": "应用内",
+    "pushNotify": "浏览器",
+    "emailNotify": "电子邮件",
+    "video_like_pref": "视频点赞",
+    "video_comment_pref": "视频评论",
+    "comment_reply_pref": "回复评论",
+    "comment_like_pref": "评论点赞",
+    "subscription_pref": "新增订阅者",
+    "post_like_pref": "帖子点赞",
+    "post_comment_pref": "帖子评论"
   },
   "Categories": {
     "Cars & Vehicles": "汽车",

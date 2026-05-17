@@ -1,11 +1,92 @@
 import { z } from "zod";
 import { db } from "@/db";
-import { notifications, users, videos, posts, comments } from "@/db/schema";
+import { notifications, users, videos, posts, comments, notificationPreferences, pushSubscriptions } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { eq, and, desc, count, getTableColumns, or, lt } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const notificationsRouter = createTRPCRouter({
+  savePushSubscription: protectedProcedure
+    .input(z.object({
+      endpoint: z.string(),
+      keys: z.object({
+        p256dh: z.string(),
+        auth: z.string()
+      })
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+      const { endpoint, keys } = input;
+      const stringifiedKeys = JSON.stringify(keys);
+
+      const [subscription] = await db
+        .insert(pushSubscriptions)
+        .values({ userId, endpoint, keys: stringifiedKeys })
+        .onConflictDoUpdate({
+          target: pushSubscriptions.endpoint,
+          set: { userId, keys: stringifiedKeys, updatedAt: new Date() }
+        })
+        .returning();
+
+      return subscription;
+    }),
+
+  getPreferences: protectedProcedure
+    .query(async ({ ctx }) => {
+      const { id: userId } = ctx.user;
+      
+      const existing = await db
+        .select()
+        .from(notificationPreferences)
+        .where(eq(notificationPreferences.userId, userId));
+      
+      const allTypes = ["video_like", "video_comment", "comment_reply", "comment_like", "subscription", "post_like", "post_comment"] as const;
+      
+      const fullPreferences = allTypes.map(type => {
+        const pref = existing.find(p => p.type === type);
+        return {
+          type,
+          email: pref ? pref.email : true,
+          push: pref ? pref.push : true,
+          inApp: pref ? pref.inApp : true,
+        };
+      });
+      
+      return fullPreferences;
+    }),
+
+  updatePreference: protectedProcedure
+    .input(z.object({
+      type: z.enum(["video_like", "video_comment", "comment_reply", "comment_like", "subscription", "post_like", "post_comment"]),
+      email: z.boolean().optional(),
+      push: z.boolean().optional(),
+      inApp: z.boolean().optional()
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+      const { type, email, push, inApp } = input;
+      
+      const [updated] = await db
+        .insert(notificationPreferences)
+        .values({
+          userId,
+          type,
+          email: email ?? true,
+          push: push ?? true,
+          inApp: inApp ?? true
+        })
+        .onConflictDoUpdate({
+          target: [notificationPreferences.userId, notificationPreferences.type],
+          set: {
+            ...(email !== undefined && { email }),
+            ...(push !== undefined && { push }),
+            ...(inApp !== undefined && { inApp }),
+          }
+        })
+        .returning();
+      
+      return updated;
+    }),
   getMany: protectedProcedure
     .input(
       z.object({

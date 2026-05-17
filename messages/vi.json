@@ -611,7 +611,20 @@
     "subscription": "đã đăng ký kênh của bạn",
     "post_like": "đã thích bài viết của bạn",
     "post_comment": "đã bình luận về bài viết của bạn",
-    "default": "đã tương tác với bạn"
+    "default": "đã tương tác với bạn",
+    "preferencesTitle": "Cài đặt thông báo",
+    "preferencesDesc": "Cá nhân hóa các loại thông báo bạn muốn nhận trên các kênh khác nhau.",
+    "activityType": "Hoạt động",
+    "inAppNotify": "Trong ứng dụng",
+    "pushNotify": "Trình duyệt",
+    "emailNotify": "Email",
+    "video_like_pref": "Lượt thích video",
+    "video_comment_pref": "Bình luận video",
+    "comment_reply_pref": "Phản hồi bình luận",
+    "comment_like_pref": "Lượt thích bình luận",
+    "subscription_pref": "Người đăng ký mới",
+    "post_like_pref": "Lượt thích bài viết",
+    "post_comment_pref": "Bình luận bài viết"
   },
   "Categories": {
     "Cars & Vehicles": "Ô tô và xe cộ",

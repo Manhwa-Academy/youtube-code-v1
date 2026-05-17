@@ -16,6 +16,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Suspense } from "react";
 
 import { EmptyState } from "@/components/empty-state";
+import { NotificationPreferencesDialog } from "../components/notification-preferences-dialog";
 
 const locales: Record<string, any> = {
   vi,
@@ -111,6 +112,7 @@ const NotificationsSectionSuspense = () => {
             <BellIcon className="size-6 text-blue-600" />
           </div>
           <h1 className="text-2xl font-bold">{t("yourNotifications")}</h1>
+          <NotificationPreferencesDialog />
         </div>
         {notifications.length > 0 && (
           <Button 

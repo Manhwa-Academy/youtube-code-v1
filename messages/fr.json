@@ -550,7 +550,20 @@
     "subscription": "s'est abonné à votre chaîne",
     "post_like": "a aimé votre post",
     "post_comment": "a commenté votre post",
-    "default": "a interagi avec vous"
+    "default": "a interagi avec vous",
+    "preferencesTitle": "Paramètres de notification",
+    "preferencesDesc": "Personnalisez les notifications que vous souhaitez recevoir sur différents canaux.",
+    "activityType": "Activité",
+    "inAppNotify": "Dans l'application",
+    "pushNotify": "Navigateur",
+    "emailNotify": "E-mail",
+    "video_like_pref": "J'aime sur les vidéos",
+    "video_comment_pref": "Commentaires sur les vidéos",
+    "comment_reply_pref": "Réponses aux commentaires",
+    "comment_like_pref": "J'aime sur les commentaires",
+    "subscription_pref": "Nouveaux abonnés",
+    "post_like_pref": "J'aime sur les publications",
+    "post_comment_pref": "Commentaires sur les publications"
   },
   "Categories": {
     "Cars & Vehicles": "Auto-moto",

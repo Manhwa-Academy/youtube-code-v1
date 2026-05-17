@@ -675,3 +675,63 @@ export const reports = pgTable("reports", {
 export const reportRelations = relations(reports, ({ one }) => ({
   user: one(users, { fields: [reports.userId], references: [users.id] }),
 }));
+
+// ====================== NOTIFICATION PREFERENCES ======================
+export const notificationPreferences = pgTable(
+  "notification_preferences",
+  {
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    type: notificationType("type").notNull(),
+    email: boolean("email").default(true).notNull(),
+    push: boolean("push").default(true).notNull(),
+    inApp: boolean("in_app").default(true).notNull(),
+  },
+  (t) => [
+    primaryKey({
+      name: "notification_preferences_pk",
+      columns: [t.userId, t.type],
+    }),
+  ]
+);
+
+export const notificationPreferenceRelations = relations(
+  notificationPreferences,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [notificationPreferences.userId],
+      references: [users.id],
+    }),
+  })
+);
+
+export const notificationPreferenceSelectSchema = createSelectSchema(notificationPreferences);
+export const notificationPreferenceInsertSchema = createInsertSchema(notificationPreferences);
+export const notificationPreferenceUpdateSchema = createUpdateSchema(notificationPreferences);
+
+// ====================== PUSH SUBSCRIPTIONS ======================
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  endpoint: text("endpoint").notNull().unique(),
+  keys: text("keys").notNull(), // stringified keys: { p256dh, auth }
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const pushSubscriptionRelations = relations(
+  pushSubscriptions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [pushSubscriptions.userId],
+      references: [users.id],
+    }),
+  })
+);
+
+export const pushSubscriptionSelectSchema = createSelectSchema(pushSubscriptions);
+export const pushSubscriptionInsertSchema = createInsertSchema(pushSubscriptions);
+

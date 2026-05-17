@@ -29,6 +29,13 @@
       "when": 1778824027816,
       "tag": "0003_ancient_vision",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778998826556,
+      "tag": "0004_striped_stick",
+      "breakpoints": true
     }
   ]
 }

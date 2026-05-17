@@ -563,7 +563,20 @@
     "subscription": "se ha suscrito a tu canal",
     "post_like": "le ha dado a me gusta a tu publicación",
     "post_comment": "ha comentado en tu publicación",
-    "default": "ha interactuado contigo"
+    "default": "ha interactuado contigo",
+    "preferencesTitle": "Configuración de notificaciones",
+    "preferencesDesc": "Personaliza las notificaciones que deseas recibir en los diferentes canales.",
+    "activityType": "Actividad",
+    "inAppNotify": "En la aplicación",
+    "pushNotify": "Navegador",
+    "emailNotify": "Correo electrónico",
+    "video_like_pref": "Me gusta en videos",
+    "video_comment_pref": "Comentarios en videos",
+    "comment_reply_pref": "Respuestas a comentarios",
+    "comment_like_pref": "Me gusta en comentarios",
+    "subscription_pref": "Nuevos suscriptores",
+    "post_like_pref": "Me gusta en publicaciones",
+    "post_comment_pref": "Comentarios en publicaciones"
   },
   "Categories": {
     "Cars & Vehicles": "Autos y vehículos",

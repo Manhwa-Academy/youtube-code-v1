@@ -644,7 +644,20 @@
     "subscription": "があなたのチャンネルを登録しました",
     "post_like": "があなたの投稿を高く評価しました",
     "post_comment": "があなたの投稿にコメントしました",
-    "default": "があなたと対話しました"
+    "default": "があなたと対話しました",
+    "preferencesTitle": "通知設定",
+    "preferencesDesc": "さまざまなチャネルで受信したい通知をカスタマイズします。",
+    "activityType": "アクティビティ",
+    "inAppNotify": "アプリ内",
+    "pushNotify": "ブラウザ",
+    "emailNotify": "メール",
+    "video_like_pref": "動画の高評価",
+    "video_comment_pref": "動画のコメント",
+    "comment_reply_pref": "コメントへの返信",
+    "comment_like_pref": "コメントの高評価",
+    "subscription_pref": "新しいチャンネル登録者",
+    "post_like_pref": "投稿の高評価",
+    "post_comment_pref": "投稿のコメント"
   },
   "Playlists": {
     "addModalTitle": "再生リストに追加",

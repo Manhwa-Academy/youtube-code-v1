@@ -7,19 +7,6 @@
 
 ## 🔴 Ưu Tiên Cao — Nên làm ngay (Tuần 1–4)
 
-### 1. 🔔 Notification Push (Real-time / Web Push)
-**Tại sao cấp bách:** NotificationBell hiện chỉ poll mỗi 30 giây — trải nghiệm kém.
-- Tích hợp **Server-Sent Events (SSE)** hoặc **WebSocket** cho real-time notification stream
-- **Web Push API** + service worker để nhận thông báo khi tab bị đóng (như YouTube thật)
-- Bảng `notification_preferences` — user chọn loại thông báo muốn nhận (new video, comment reply, subscription...)
-
-```
-Schema cần thêm:
-notification_preferences (userId, type, email, push, inApp)
-push_subscriptions (userId, endpoint, keys)
-```
----
-
 ### 3. 📊 Studio Analytics — Giai đoạn 2
 **Hiện trạng:** Analytics khá tốt nhưng còn thiếu:
 - **Traffic sources breakdown**: Direct / Search / Suggested / External / Shorts / Playlist

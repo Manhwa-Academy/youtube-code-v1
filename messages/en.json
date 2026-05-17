@@ -611,7 +611,20 @@
     "subscription": "subscribed to your channel",
     "post_like": "liked your post",
     "post_comment": "commented on your post",
-    "default": "interacted with you"
+    "default": "interacted with you",
+    "preferencesTitle": "Notification settings",
+    "preferencesDesc": "Personalize the notifications you want to receive across different channels.",
+    "activityType": "Activity",
+    "inAppNotify": "In-App",
+    "pushNotify": "Browser",
+    "emailNotify": "Email",
+    "video_like_pref": "Video likes",
+    "video_comment_pref": "Video comments",
+    "comment_reply_pref": "Comment replies",
+    "comment_like_pref": "Comment likes",
+    "subscription_pref": "New subscribers",
+    "post_like_pref": "Post likes",
+    "post_comment_pref": "Post comments"
   },
   "Categories": {
     "Cars & Vehicles": "Cars & Vehicles",
