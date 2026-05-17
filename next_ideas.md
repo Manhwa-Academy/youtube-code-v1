@@ -44,15 +44,6 @@ live_chat_messages (id, streamId, userId, message, createdAt)
 
 ---
 
-### 7. 💰 Monetization / Channel Membership
-- **Channel Membership**: Subscriber trả phí để vào tier đặc biệt
-- Member-only videos/posts (visibility = "members")
-- **Tipping / Super Thanks**: Donate khi xem video (tích hợp Stripe)
-- Bảng tổng hợp revenue trong Studio Analytics
-- Huy hiệu thành viên hiển thị cạnh tên trong comment
-
----
-
 ### 8. 🧠 AI Enhancement
 **Hiện trạng:** AI generate title/description + thumbnail đã có.
 - **Auto-chapters**: Phân tích transcript để tạo timestamps tự động

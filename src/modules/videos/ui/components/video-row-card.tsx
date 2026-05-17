@@ -108,7 +108,7 @@ export const VideoRowCard = ({
       {/* Thumbnail */}
       <Link
         prefetch
-        href={`/videos/${data.id}`}
+        href={`/videos/${data.id}${(data as any).thumbnailType ? `?t=${(data as any).thumbnailType}` : ""}`}
         className={thumbnailVariants({ size })}
       >
         <VideoThumbnail
@@ -128,7 +128,7 @@ export const VideoRowCard = ({
         {menu && <div className="absolute top-2 right-2 z-10">{menu}</div>}
 
         <div className="flex justify-between gap-x-2">
-          <Link prefetch href={`/videos/${data.id}`} className="flex-1 min-w-0">
+          <Link prefetch href={`/videos/${data.id}${(data as any).thumbnailType ? `?t=${(data as any).thumbnailType}` : ""}`} className="flex-1 min-w-0">
             <h3
               className={cn(
                 "font-medium line-clamp-2",

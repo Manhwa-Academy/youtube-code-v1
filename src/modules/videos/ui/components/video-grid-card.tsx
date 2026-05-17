@@ -53,7 +53,7 @@ export const VideoGridCard = ({
       {menu && <div className="absolute top-2 right-2 z-10">{menu}</div>}
 
       {/* Video thumbnail */}
-      <Link prefetch href={`/videos/${data.id}`}>
+      <Link prefetch href={`/videos/${data.id}${(data as any).thumbnailType ? `?t=${(data as any).thumbnailType}` : ""}`}>
         <VideoThumbnail
           imageUrl={data.thumbnailUrl}
           previewUrl={data.previewUrl}

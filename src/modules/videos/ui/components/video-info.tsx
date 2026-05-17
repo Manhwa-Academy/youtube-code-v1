@@ -68,7 +68,7 @@ export const VideoInfo = ({ data, onRemove, hideAvatar }: VideoInfoProps) => {
       )}
 
       <div className="min-w-0 flex-1">
-        <Link prefetch href={`/videos/${data.id}`}>
+        <Link prefetch href={`/videos/${data.id}${(data as any).thumbnailType ? `?t=${(data as any).thumbnailType}` : ""}`}>
           <h3 className={cn(
             "font-medium line-clamp-1 lg:line-clamp-2 text-sm break-words leading-snug",
             !hideAvatar && "text-base"
@@ -83,7 +83,7 @@ export const VideoInfo = ({ data, onRemove, hideAvatar }: VideoInfoProps) => {
           </Link>
         )}
 
-        <Link prefetch href={`/videos/${data.id}`}>
+        <Link prefetch href={`/videos/${data.id}${(data as any).thumbnailType ? `?t=${(data as any).thumbnailType}` : ""}`}>
           <p className="text-sm text-muted-foreground line-clamp-1">
             {data.viewCount > 0 ? `${compactViews} ${t("views")}` : compactViews} • {compactDate}
           </p>

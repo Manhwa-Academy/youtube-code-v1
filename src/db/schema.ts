@@ -14,7 +14,24 @@ import {
   uniqueIndex,
   index,
   uuid,
+  customType,
 } from "drizzle-orm/pg-core";
+
+// Define pgVector custom type for Drizzle (1536 dimension vector)
+export const pgVector = customType<{ data: number[] }>({
+  dataType() {
+    return "vector(1536)";
+  },
+  toDriver(value: number[]): string {
+    return `[${value.join(",")}]`;
+  },
+  fromDriver(value: unknown): number[] {
+    if (typeof value === "string") {
+      return value.slice(1, -1).split(",").map(Number);
+    }
+    return value as number[];
+  },
+});
 
 // Zod schemas cho insert / select / update
 import {
@@ -308,6 +325,17 @@ export const videos = pgTable("videos", {
   commentSort: text("comment_sort").default("top").notNull(),
   showLikeCount: boolean("show_like_count").default(true).notNull(),
   tags: text("tags").array(),
+  aiChapters: text("ai_chapters"), // JSON string hoặc text lưu danh sách chapters tự động
+  aiSummary: text("ai_summary"), // Summary 3-5 câu của video tự động
+  thumbnailBUrl: text("thumbnail_b_url"), // URL của thumbnail B cho A/B testing
+  thumbnailBKey: text("thumbnail_b_key"), // Key của thumbnail B trên UploadThing
+  thumbnailAViews: integer("thumbnail_a_views").default(0).notNull(),
+  thumbnailBViews: integer("thumbnail_b_views").default(0).notNull(),
+  thumbnailAClicks: integer("thumbnail_a_clicks").default(0).notNull(),
+  thumbnailBClicks: integer("thumbnail_b_clicks").default(0).notNull(),
+  embedding: pgVector("embedding"), // Lưu Vector Embedding 1536 chiều để Recommendation ML
+  isFlagged: boolean("is_flagged").default(false).notNull(), // AI flag video vi phạm
+  flagReason: text("flag_reason"), // Lý do AI flag
 }, (t) => [
   index("tags_gin_idx").using("gin", t.tags),
 ]);

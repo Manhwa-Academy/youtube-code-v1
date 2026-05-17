@@ -61,6 +61,15 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
     }
   }, [videoId]);
 
+  const recordClick = trpc.videos.recordThumbnailClick.useMutation();
+
+  useEffect(() => {
+    const tParam = params.get("t");
+    if (tParam === "a" || tParam === "b") {
+      recordClick.mutate({ videoId, type: tParam });
+    }
+  }, [videoId, params]);
+
   const [video] = trpc.videos.getOne.useSuspenseQuery({ id: videoId });
   
   // Logic xác định là Shorts: dưới 1 phút hoặc tỉ lệ khung hình dọc

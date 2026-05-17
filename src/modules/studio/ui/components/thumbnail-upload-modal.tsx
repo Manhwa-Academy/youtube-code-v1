@@ -19,6 +19,7 @@ interface ThumbnailUploadModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onThumbnailUpdate?: (url: string) => void; // callback cập nhật form
+  endpoint?: "thumbnailUploader" | "thumbnailBUploader";
 }
 
 export const ThumbnailUploadModal = ({
@@ -26,6 +27,7 @@ export const ThumbnailUploadModal = ({
   open,
   onOpenChange,
   onThumbnailUpdate,
+  endpoint = "thumbnailUploader",
 }: ThumbnailUploadModalProps) => {
   const t = useTranslations("Studio");
   const utils = trpc.useUtils();
@@ -33,6 +35,7 @@ export const ThumbnailUploadModal = ({
   const onUploadComplete = (res: UploadedFile[]) => {
     console.group("=== UploadDropzone Result ===");
     console.log("VideoId:", videoId);
+    console.log("Endpoint:", endpoint);
     console.log("Raw Upload response:", res);
     console.groupEnd();
 
@@ -64,7 +67,7 @@ export const ThumbnailUploadModal = ({
     >
       <div className="p-4">
         <UploadDropzone
-          endpoint="thumbnailUploader"
+          endpoint={endpoint}
           input={{ videoId }}
           onClientUploadComplete={onUploadComplete}
         />

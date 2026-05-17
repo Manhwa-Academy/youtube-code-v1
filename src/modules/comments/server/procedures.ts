@@ -16,7 +16,8 @@ import {
 import { db } from "@/db";
 import { getTranslations } from "next-intl/server";
 import { TRPCError } from "@trpc/server";
-import { commentReactions, comments, users, videos, posts, channelModerations, subscriptions } from "@/db/schema";
+import { commentReactions, comments, users, videos, posts, channelModerations, subscriptions, reports } from "@/db/schema";
+import { moderateTextAI } from "@/lib/moderation";
 import { dispatchNotification } from "@/modules/notifications/server/service";
 import {
   baseProcedure,
@@ -309,6 +310,7 @@ export const commentsRouter = createTRPCRouter({
 
       // 4. Determine initial moderation status
       let moderationStatus: "published" | "held_for_review" | "hidden" = "published";
+      let aiFlaggedReason: string | undefined;
 
       if (userId === contentOwnerId) {
         moderationStatus = "published";
@@ -322,6 +324,19 @@ export const commentsRouter = createTRPCRouter({
         // Simple heuristic: if it has a link, hold it for review
         if (value.includes("http://") || value.includes("https://") || value.includes("www.")) {
           moderationStatus = "held_for_review";
+        }
+      }
+
+      // 4.5 AI Content Moderation check
+      if (moderationStatus === "published" && userId !== contentOwnerId && !isApproved) {
+        try {
+          const aiResult = await moderateTextAI(value);
+          if (aiResult.inappropriate) {
+            moderationStatus = "held_for_review";
+            aiFlaggedReason = aiResult.reason;
+          }
+        } catch (e) {
+          console.error("AI Moderation error in comments router:", e);
         }
       }
 
@@ -342,6 +357,22 @@ export const commentsRouter = createTRPCRouter({
         .insert(comments)
         .values({ userId, videoId, postId, parentId, value, imageUrl, timestamp, moderationStatus })
         .returning();
+
+      // If AI flagged the comment, automatically insert an AI moderation report
+      if (createdComment && aiFlaggedReason) {
+        try {
+          await db.insert(reports).values({
+            userId,
+            targetId: createdComment.id,
+            targetType: "comment",
+            reason: "AI_MODERATION",
+            description: `AI Auto-Moderation flagged: "${value}". Lý do: ${aiFlaggedReason}`,
+            status: "pending",
+          });
+        } catch (e) {
+          console.error("Failed to insert AI moderation report:", e);
+        }
+      }
 
       if (createdComment && moderationStatus === "published") {
         // 1. If it's a reply, notify the parent comment owner

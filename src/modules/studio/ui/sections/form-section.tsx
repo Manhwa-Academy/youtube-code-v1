@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 
 import { useDebounce } from "@/hooks/use-debounce";
+import { cn } from "@/lib/utils";
 import { trpc } from "@/trpc/client";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -150,6 +151,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   const utils = trpc.useUtils();
 
   const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
+  const [thumbnailBModalOpen, setThumbnailBModalOpen] = useState(false);
   const [thumbnailGenerateModalOpen, setThumbnailGenerateModalOpen] =
     useState(false);
   const [playlistCreateModalOpen, setPlaylistCreateModalOpen] = useState(false);
@@ -228,6 +230,26 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     },
   });
 
+  const generateChapters = trpc.videos.generateChapters.useMutation({
+    onSuccess: () => {
+      utils.studio.getOne.invalidate({ id: videoId });
+      toast.success(t("success"));
+    },
+    onError: () => {
+      toast.error(t("error"));
+    },
+  });
+
+  const generateSummary = trpc.videos.generateSummary.useMutation({
+    onSuccess: () => {
+      utils.studio.getOne.invalidate({ id: videoId });
+      toast.success(t("success"));
+    },
+    onError: () => {
+      toast.error(t("error"));
+    },
+  });
+
   const addVideoToPlaylist = trpc.playlists.addVideo.useMutation({
     onSuccess: () => {
       utils.playlists.getManyForVideo.invalidate({ videoId });
@@ -293,6 +315,12 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
         open={thumbnailModalOpen}
         onOpenChange={setThumbnailModalOpen}
         videoId={videoId}
+      />
+      <ThumbnailUploadModal
+        open={thumbnailBModalOpen}
+        onOpenChange={setThumbnailBModalOpen}
+        videoId={videoId}
+        endpoint="thumbnailBUploader"
       />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="pb-8">
@@ -427,60 +455,341 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   </FormItem>
                 )}
               />
-              <FormField
-                name="thumbnailUrl"
-                control={form.control}
-                render={() => (
-                  <FormItem>
-                    <FormLabel>{t("thumbnail")}</FormLabel>
-                    <FormControl>
-                      <div className="p-0.5 border border-dashed border-neutral-400 relative h-[84px] w-[153px] group">
-                        <Image
-                          src={video.thumbnailUrl || THUMBNAIL_FALLBACK}
-                          className="object-cover"
-                          fill
-                          alt="Thumbnail"
-                        />
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              type="button"
-                              size="icon"
-                              className="bg-black/50 hover:bg-black/50 absolute top-1 right-1 rounded-full opacity-100 md:opacity-0 group-hover:opacity-100 duration-300 size-7"
-                            >
-                              <MoreVerticalIcon className="text-white" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start" side="right">
-                            <DropdownMenuItem
-                              onClick={() => setThumbnailModalOpen(true)}
-                            >
-                              <ImagePlusIcon className="size-4 mr-1" />
-                              {t("change")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                setThumbnailGenerateModalOpen(true)
-                              }
-                            >
-                              <SparklesIcon className="size-4 mr-1" />
-                              {t("generateThumbnail")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                restoreThumbnail.mutate({ id: videoId })
-                              }
-                            >
-                              <RotateCcwIcon className="size-4 mr-1" />
-                              {t("revalidate")}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </FormControl>
-                  </FormItem>
+              {/* 🧠 AI Creative Assistant Card */}
+              <div className="p-5 border border-violet-500/20 bg-gradient-to-br from-violet-500/5 via-fuchsia-500/5 to-transparent rounded-2xl space-y-4 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center p-1.5 rounded-lg bg-violet-500/10 text-violet-500">
+                    <SparklesIcon className="h-4 w-4 animate-pulse" />
+                  </span>
+                  <div>
+                    <h3 className="font-semibold text-sm text-neutral-800 dark:text-neutral-200">
+                      Trợ lý Sáng tạo AI (AI Creative Assistant)
+                    </h3>
+                    <p className="text-xs text-neutral-500">
+                      Tự động hóa phân đoạn và tóm tắt nội dung video bằng AI từ Transcript
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Generate Chapters */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex items-center justify-center gap-2 h-10 border-violet-500/30 hover:bg-violet-500/5 hover:text-violet-600 transition-all duration-200 text-xs font-semibold"
+                    onClick={() => generateChapters.mutate({ id: videoId })}
+                    disabled={generateChapters.isPending || !video.muxTrackId}
+                  >
+                    {generateChapters.isPending ? (
+                      <Loader2Icon className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <SparklesIcon className="h-4 w-4 text-violet-500" />
+                    )}
+                    Tự động tạo Chapters
+                  </Button>
+
+                  {/* Generate Summary */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex items-center justify-center gap-2 h-10 border-rose-500/30 hover:bg-rose-500/5 hover:text-rose-600 transition-all duration-200 text-xs font-semibold"
+                    onClick={() => generateSummary.mutate({ id: videoId })}
+                    disabled={generateSummary.isPending || !video.muxTrackId}
+                  >
+                    {generateSummary.isPending ? (
+                      <Loader2Icon className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <SparklesIcon className="h-4 w-4 text-rose-500" />
+                    )}
+                    Tự động tạo Tóm tắt
+                  </Button>
+                </div>
+
+                {/* AI Summary Display */}
+                {video.aiSummary && (
+                  <div className="p-4 rounded-xl border border-rose-500/10 bg-rose-500/5 space-y-2">
+                    <div className="flex items-center gap-1.5">
+                      <SparklesIcon className="h-3.5 w-3.5 text-rose-500 animate-pulse" />
+                      <h4 className="text-xs font-bold text-rose-500 uppercase tracking-wider">Tóm tắt AI đã tạo:</h4>
+                    </div>
+                    <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed font-medium">
+                      {video.aiSummary}
+                    </p>
+                  </div>
                 )}
-              />
+
+                {/* AI Chapters Display */}
+                {(() => {
+                  if (!video.aiChapters) return null;
+                  const parseChapters = (text: string) => {
+                    return text
+                      .split("\n")
+                      .map((line) => {
+                        const timeMatch = line.match(/(?:(\d{1,2}):)?(\d{1,2}):(\d{2})/);
+                        if (!timeMatch) return null;
+                        const fullTimeStr = timeMatch[0];
+                        const afterTime = line.substring(line.indexOf(fullTimeStr) + fullTimeStr.length).trim();
+                        const title = afterTime.replace(/^[-–—\s:]+/, "").trim();
+                        return { displayTime: fullTimeStr, title: title || "Chapter" };
+                      })
+                      .filter(Boolean);
+                  };
+                  const chaptersList = parseChapters(video.aiChapters);
+                  if (chaptersList.length === 0) return null;
+
+                  return (
+                    <div className="p-4 rounded-xl border border-violet-500/10 bg-violet-500/5 space-y-2">
+                      <div className="flex items-center gap-1.5">
+                        <SparklesIcon className="h-3.5 w-3.5 text-violet-500 animate-pulse" />
+                        <h4 className="text-xs font-bold text-violet-500 uppercase tracking-wider">
+                          Phân đoạn AI đã tạo ({chaptersList.length}):
+                        </h4>
+                      </div>
+                      <div className="grid gap-1.5 max-h-[160px] overflow-y-auto pr-1">
+                        {chaptersList.map((ch, idx) => (
+                          <div key={idx} className="flex items-center gap-2 text-xs">
+                            <span className="font-mono font-bold text-violet-600 dark:text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded">
+                              {ch?.displayTime}
+                            </span>
+                            <span className="text-neutral-700 dark:text-neutral-300 font-medium">{ch?.title}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* 🎯 Smart Thumbnail A/B Testing Section */}
+              <div className="space-y-4">
+                <FormLabel className="text-neutral-800 dark:text-neutral-200 font-semibold text-sm">
+                  Thử nghiệm Ảnh bìa A/B (Smart Thumbnail A/B Test)
+                </FormLabel>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Thumbnail A */}
+                  <div className="p-4 border rounded-xl bg-neutral-50 dark:bg-neutral-900/30 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Thumbnail A (Mặc định)</span>
+                      {video.thumbnailUrl && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
+                          Đang chạy
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-0.5 border border-dashed border-neutral-400 relative h-[100px] w-[180px] group rounded-lg overflow-hidden">
+                      <Image
+                        src={video.thumbnailUrl || THUMBNAIL_FALLBACK}
+                        className="object-cover"
+                        fill
+                        alt="Thumbnail A"
+                      />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            type="button"
+                            size="icon"
+                            className="bg-black/50 hover:bg-black/50 absolute top-1 right-1 rounded-full opacity-100 md:opacity-0 group-hover:opacity-100 duration-300 size-7"
+                          >
+                            <MoreVerticalIcon className="text-white size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" side="right">
+                          <DropdownMenuItem onClick={() => setThumbnailModalOpen(true)}>
+                            <ImagePlusIcon className="size-4 mr-1" />
+                            Thay đổi ảnh bìa A
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setThumbnailGenerateModalOpen(true)}>
+                            <SparklesIcon className="size-4 mr-1" />
+                            Tạo bằng AI
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => restoreThumbnail.mutate({ id: videoId })}>
+                            <RotateCcwIcon className="size-4 mr-1" />
+                            Khôi phục mặc định
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+
+                  {/* Thumbnail B */}
+                  <div className="p-4 border rounded-xl bg-neutral-50 dark:bg-neutral-900/30 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Thumbnail B (Thử nghiệm)</span>
+                      {video.thumbnailBUrl ? (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600">
+                          Đang thử nghiệm
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
+                          Chưa kích hoạt
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-0.5 border border-dashed border-neutral-400 relative h-[100px] w-[180px] group rounded-lg overflow-hidden">
+                      <Image
+                        src={video.thumbnailBUrl || THUMBNAIL_FALLBACK}
+                        className="object-cover"
+                        fill
+                        alt="Thumbnail B"
+                      />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            type="button"
+                            size="icon"
+                            className="bg-black/50 hover:bg-black/50 absolute top-1 right-1 rounded-full opacity-100 md:opacity-0 group-hover:opacity-100 duration-300 size-7"
+                          >
+                            <MoreVerticalIcon className="text-white size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" side="right">
+                          <DropdownMenuItem onClick={() => setThumbnailBModalOpen(true)}>
+                            <ImagePlusIcon className="size-4 mr-1" />
+                            Tải lên ảnh bìa B
+                          </DropdownMenuItem>
+                          {video.thumbnailBUrl && (
+                            <DropdownMenuItem
+                              onClick={() => {
+                                update.mutate({
+                                  id: videoId,
+                                  thumbnailBUrl: null,
+                                  thumbnailBKey: null,
+                                  thumbnailAViews: 0,
+                                  thumbnailBViews: 0,
+                                  thumbnailAClicks: 0,
+                                  thumbnailBClicks: 0,
+                                });
+                              }}
+                            >
+                              <TrashIcon className="size-4 mr-1 text-rose-500" />
+                              Gỡ bỏ ảnh bìa B
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 📊 CTR Comparison Dashboard */}
+                {video.thumbnailBUrl && (
+                  <div className="p-5 border border-rose-500/20 bg-gradient-to-br from-rose-500/5 via-violet-500/5 to-transparent rounded-2xl space-y-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <SparklesIcon className="h-4 w-4 text-rose-500 animate-pulse" />
+                        <h4 className="font-semibold text-xs text-neutral-800 dark:text-neutral-200">
+                          Báo cáo hiệu suất A/B Test (Smart Thumbnail CTR)
+                        </h4>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-300 animate-pulse">
+                        Real-time
+                      </span>
+                    </div>
+
+                    {/* Comparison Cards */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Metric A */}
+                      {(() => {
+                        const viewsA = video.thumbnailAViews || 0;
+                        const clicksA = video.thumbnailAClicks || 0;
+                        const ctrA = viewsA > 0 ? (clicksA / viewsA) * 100 : 0;
+
+                        const viewsB = video.thumbnailBViews || 0;
+                        const clicksB = video.thumbnailBClicks || 0;
+                        const ctrB = viewsB > 0 ? (clicksB / viewsB) * 100 : 0;
+
+                        const winner = ctrA > ctrB ? "a" : ctrB > ctrA ? "b" : null;
+
+                        return (
+                          <>
+                            <div className={cn(
+                              "p-3 rounded-xl border transition-all duration-200",
+                              winner === "a" 
+                                ? "bg-emerald-500/5 border-emerald-500/30" 
+                                : "bg-neutral-50 dark:bg-neutral-900/50 border-neutral-100 dark:border-neutral-800"
+                            )}>
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-[10px] font-semibold text-neutral-500">Thumbnail A</span>
+                                {winner === "a" && (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 uppercase">
+                                    Chiến thắng
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xl font-bold text-neutral-800 dark:text-neutral-100">
+                                {ctrA.toFixed(2)}% <span className="text-[10px] font-normal text-neutral-500">CTR</span>
+                              </p>
+                              <p className="text-[10px] text-neutral-500 mt-1">
+                                {clicksA} clicks / {viewsA} views
+                              </p>
+                            </div>
+
+                            <div className={cn(
+                              "p-3 rounded-xl border transition-all duration-200",
+                              winner === "b" 
+                                ? "bg-emerald-500/5 border-emerald-500/30" 
+                                : "bg-neutral-50 dark:bg-neutral-900/50 border-neutral-100 dark:border-neutral-800"
+                            )}>
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-[10px] font-semibold text-neutral-500">Thumbnail B</span>
+                                {winner === "b" && (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 uppercase">
+                                    Chiến thắng
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xl font-bold text-neutral-800 dark:text-neutral-100">
+                                {ctrB.toFixed(2)}% <span className="text-[10px] font-normal text-neutral-500">CTR</span>
+                              </p>
+                              <p className="text-[10px] text-neutral-500 mt-1">
+                                {clicksB} clicks / {viewsB} views
+                              </p>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Action: Apply Best Thumbnail */}
+                    <div className="flex justify-end pt-2">
+                      <Button
+                        type="button"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-sm"
+                        onClick={() => {
+                          const viewsA = video.thumbnailAViews || 0;
+                          const clicksA = video.thumbnailAClicks || 0;
+                          const ctrA = viewsA > 0 ? (clicksA / viewsA) * 100 : 0;
+
+                          const viewsB = video.thumbnailBViews || 0;
+                          const clicksB = video.thumbnailBClicks || 0;
+                          const ctrB = viewsB > 0 ? (clicksB / viewsB) * 100 : 0;
+
+                          // Decide best url and key
+                          const bestUrl = ctrB > ctrA ? video.thumbnailBUrl : video.thumbnailUrl;
+                          const bestKey = ctrB > ctrA ? video.thumbnailBKey : video.thumbnailKey;
+
+                          update.mutate({
+                            id: videoId,
+                            thumbnailUrl: bestUrl,
+                            thumbnailKey: bestKey,
+                            thumbnailBUrl: null,
+                            thumbnailBKey: null,
+                            thumbnailAViews: 0,
+                            thumbnailBViews: 0,
+                            thumbnailAClicks: 0,
+                            thumbnailBClicks: 0,
+                          });
+                          toast.success("Đã áp dụng Thumbnail tối ưu nhất làm mặc định!");
+                        }}
+                      >
+                        <CopyCheckIcon className="h-3.5 w-3.5" />
+                        Áp dụng Thumbnail tốt nhất
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="space-y-2">
                 <FormLabel>{t("playlists")}</FormLabel>
                 <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>

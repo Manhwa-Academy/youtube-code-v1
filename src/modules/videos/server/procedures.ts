@@ -18,6 +18,7 @@ import { db } from "@/db";
 import { mux } from "@/lib/mux";
 import { TRPCError } from "@trpc/server";
 import { workflow } from "@/lib/workflow";
+import { processABTesting } from "@/lib/ab-testing";
 import {
   baseProcedure,
   createTRPCRouter,
@@ -142,8 +143,10 @@ export const videosRouter = createTRPCRouter({
             }
           : null;
 
+      const processedItems = await processABTesting(items);
+
       return {
-        items,
+        items: processedItems,
         nextCursor,
       };
     }),
@@ -236,7 +239,8 @@ export const videosRouter = createTRPCRouter({
           }
         : null;
 
-      return { items, nextCursor };
+      const processedItems = await processABTesting(items);
+      return { items: processedItems, nextCursor };
     }),
   getManyShorts: baseProcedure
     .input(
@@ -425,7 +429,8 @@ export const videosRouter = createTRPCRouter({
           }
         : null;
 
-      return { items, nextCursor };
+      const processedItems = await processABTesting(items);
+      return { items: processedItems, nextCursor };
     }),
 
   getOne: baseProcedure
@@ -572,6 +577,133 @@ export const videosRouter = createTRPCRouter({
       await db.update(videos).set({ description }).where(eq(videos.id, video.id));
 
       return { description };
+    }),
+  generateChapters: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+
+      const [video] = await db
+        .select()
+        .from(videos)
+        .where(and(eq(videos.id, input.id), eq(videos.userId, userId)));
+
+      if (!video) throw new TRPCError({ code: "NOT_FOUND" });
+
+      let transcript = "";
+      if (video.muxPlaybackId && video.muxTrackId) {
+        try {
+          const res = await fetch(`https://stream.mux.com/${video.muxPlaybackId}/text/${video.muxTrackId}.txt`);
+          if (res.ok) transcript = await res.text();
+        } catch (e) {
+          console.error("Transcript fetch error", e);
+        }
+      }
+
+      if (!transcript) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Không tìm thấy phụ đề cho video này. Vui lòng đợi Mux xử lý phụ đề."
+        });
+      }
+
+      const SYSTEM_PROMPT = `Analyze the following video transcript and generate automatic, highly detailed, clickable timestamps (chapters) for it.
+Rules:
+1. Each chapter must be on a new line in the exact format 'MM:SS - Chapter Title' (e.g. '00:00 - Introduction').
+2. The first chapter MUST start exactly at '00:00'.
+3. For short videos (under 1 minute or around 30 seconds), you MUST divide the video into micro-chapters (at least 2-4 chapters, e.g., every 5-10 seconds) focusing on transition points, key spoken words, or topic shifts, rather than having just one chapter.
+4. Stick strictly to the actual facts, spoken words, and events in the transcript.
+5. Respond ONLY with the raw list of chapters. No introductory, conversational, explanation, or markdown text.`;
+
+      const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY!}`,
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-oss-120b:free",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: transcript.slice(0, 8000) },
+          ],
+        }),
+      });
+
+      if (!aiResponse.ok) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "AI failed" });
+      const aiData = await aiResponse.json();
+      let aiChapters = aiData.choices?.[0]?.message?.content?.trim();
+
+      if (!aiChapters) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "AI generated empty chapters" });
+      }
+
+      await db.update(videos).set({ aiChapters }).where(eq(videos.id, video.id));
+
+      return { aiChapters };
+    }),
+  generateSummary: protectedProcedure
+    .input(z.object({ id: z.string().uuid(), locale: z.string().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+
+      const [video] = await db
+        .select()
+        .from(videos)
+        .where(and(eq(videos.id, input.id), eq(videos.userId, userId)));
+
+      if (!video) throw new TRPCError({ code: "NOT_FOUND" });
+
+      let transcript = "";
+      if (video.muxPlaybackId && video.muxTrackId) {
+        try {
+          const res = await fetch(`https://stream.mux.com/${video.muxPlaybackId}/text/${video.muxTrackId}.txt`);
+          if (res.ok) transcript = await res.text();
+        } catch (e) {
+          console.error("Transcript fetch error", e);
+        }
+      }
+
+      if (!transcript) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Không tìm thấy phụ đề cho video này. Vui lòng đợi Mux xử lý phụ đề."
+        });
+      }
+
+      const SYSTEM_PROMPT = `Summarize the following video transcript in exactly 3 to 5 concise and engaging sentences.
+Rules:
+1. Capture the specific details, takeaways, and key themes. Do NOT use generic filler sentences (e.g. avoid statements like "The video starts with foreign music..."). Stick strictly to the actual concrete facts, words spoken, and topics mentioned in the transcript.
+2. Be extremely specific to the content. If names, specific terms, or actions are in the transcript, mention them.
+3. Respond in the requested language: ${input.locale || "Vietnamese"} (Supported: de, es, en, vi, fr, ja, ko, zh).
+4. Do not add any conversational text, introductory remarks, or markdown.`;
+
+      const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY!}`,
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-oss-120b:free",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: transcript.slice(0, 8000) },
+          ],
+        }),
+      });
+
+      if (!aiResponse.ok) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "AI failed" });
+      const aiData = await aiResponse.json();
+      let aiSummary = aiData.choices?.[0]?.message?.content?.trim();
+
+      if (!aiSummary) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "AI generated empty summary" });
+      }
+
+      await db.update(videos).set({ aiSummary }).where(eq(videos.id, video.id));
+
+      return { aiSummary };
     }),
   incrementView: baseProcedure
     .input(z.object({ videoId: z.string().uuid() }))
@@ -899,6 +1031,50 @@ export const videosRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
+      // Trigger background AI tasks: Embedding generation & Content Moderation
+      if (updatedVideo && (input.title !== undefined || input.description !== undefined)) {
+        (async () => {
+          try {
+            const combinedText = `${updatedVideo.title || ""} ${updatedVideo.description || ""}`.trim();
+            if (combinedText) {
+              // 1. Recommendation ML Embedding
+              const { getEmbedding } = await import("@/lib/embeddings");
+              const vectorVal = await getEmbedding(combinedText);
+              await db.update(videos).set({ embedding: vectorVal }).where(eq(videos.id, updatedVideo.id));
+              console.log("Vector embedding updated for video:", updatedVideo.id);
+
+              // 2. Content Moderation AI
+              const { moderateTextAI } = await import("@/lib/moderation");
+              const modResult = await moderateTextAI(combinedText);
+              if (modResult.inappropriate) {
+                // Flag video and auto-report
+                await db.update(videos)
+                  .set({ isFlagged: true, flagReason: modResult.reason })
+                  .where(eq(videos.id, updatedVideo.id));
+
+                const { reports } = await import("@/db/schema");
+                await db.insert(reports).values({
+                  userId: updatedVideo.userId,
+                  targetId: updatedVideo.id,
+                  targetType: "video",
+                  reason: "AI_MODERATION",
+                  description: `AI Auto-Moderation flagged video. Lý do: ${modResult.reason}`,
+                  status: "pending",
+                });
+                console.log("Video flagged by AI Moderation:", updatedVideo.id);
+              } else {
+                // If clean, unflag it
+                await db.update(videos)
+                  .set({ isFlagged: false, flagReason: null })
+                  .where(eq(videos.id, updatedVideo.id));
+              }
+            }
+          } catch (e) {
+            console.error("Async background video AI processing failed:", e);
+          }
+        })();
+      }
+
       return updatedVideo;
     }),
   create: protectedProcedure.mutation(async ({ ctx }) => {
@@ -978,5 +1154,32 @@ export const videosRouter = createTRPCRouter({
         .returning();
 
       return updatedVideos;
+    }),
+  recordThumbnailClick: baseProcedure
+    .input(
+      z.object({
+        videoId: z.string().uuid(),
+        type: z.enum(["a", "b"]),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { videoId, type } = input;
+      try {
+        if (type === "a") {
+          await db
+            .update(videos)
+            .set({ thumbnailAClicks: sql`${videos.thumbnailAClicks} + 1` })
+            .where(eq(videos.id, videoId));
+        } else {
+          await db
+            .update(videos)
+            .set({ thumbnailBClicks: sql`${videos.thumbnailBClicks} + 1` })
+            .where(eq(videos.id, videoId));
+        }
+        return { success: true };
+      } catch (e) {
+        console.error("[AB_TESTING] Failed to record thumbnail click:", e);
+        return { success: false };
+      }
     }),
 });

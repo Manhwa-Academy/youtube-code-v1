@@ -410,7 +410,16 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
               player.currentTime = localResumeRef.current;
             }
           }}
-        />
+        >
+          {/* AI Translated Subtitle Tracks */}
+          <track label="Vietnamese (AI)" kind="subtitles" srcLang="vi" src={`/api/videos/${videoId}/subtitles?lang=vi`} />
+          <track label="Spanish (AI)" kind="subtitles" srcLang="es" src={`/api/videos/${videoId}/subtitles?lang=es`} />
+          <track label="German (AI)" kind="subtitles" srcLang="de" src={`/api/videos/${videoId}/subtitles?lang=de`} />
+          <track label="French (AI)" kind="subtitles" srcLang="fr" src={`/api/videos/${videoId}/subtitles?lang=fr`} />
+          <track label="Japanese (AI)" kind="subtitles" srcLang="ja" src={`/api/videos/${videoId}/subtitles?lang=ja`} />
+          <track label="Korean (AI)" kind="subtitles" srcLang="ko" src={`/api/videos/${videoId}/subtitles?lang=ko`} />
+          <track label="Chinese (AI)" kind="subtitles" srcLang="zh" src={`/api/videos/${videoId}/subtitles?lang=zh`} />
+        </MuxPlayer>
 
         {autoNextEnabled && showNext && nextVideo && (
           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white px-4">

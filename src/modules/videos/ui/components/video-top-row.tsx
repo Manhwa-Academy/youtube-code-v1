@@ -22,6 +22,7 @@ import { VideoMenu } from "./video-menu";
 import { VideoDescription } from "./video-description";
 import { VideoGetOneOutput } from "../../types";
 import { VideoPlaybackMenu } from "./video-playback-menu";
+import { VideoAiFeatures } from "./video-ai-features";
 import { Button } from "@/components/ui/button";
 import { ExternalLinkIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -179,6 +180,11 @@ export const VideoTopRow = ({
           <VideoMenu videoId={video.id} variant="secondary" />
         </div>
       </div>
+
+      <VideoAiFeatures
+        aiChapters={video.aiChapters}
+        aiSummary={video.aiSummary}
+      />
 
       <VideoDescription
         compactViews={compactViews}
