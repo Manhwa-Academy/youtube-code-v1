@@ -30,7 +30,6 @@ export async function dispatchNotification(input: NotificationInput) {
   const inAppEnabled = preferences ? preferences.inApp : true;
   const pushEnabled = preferences ? preferences.push : true;
 
-  console.log(`[NotificationService] Dispatching ${type} from ${actorId} to ${userId}. Preferences - inApp: ${inAppEnabled}, push: ${pushEnabled}`);
 
   let dbNotification: any = null;
 
@@ -172,7 +171,6 @@ export async function dispatchNotification(input: NotificationInput) {
 
       // If the subscription is expired or invalid, delete it from the database!
       if (result && typeof result === "object" && result.expired) {
-        console.log(`[NotificationService] Deleting expired push subscription: ${sub.id}`);
         await db.delete(pushSubscriptions).where(eq(pushSubscriptions.id, sub.id));
       }
     }

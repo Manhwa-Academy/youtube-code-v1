@@ -40,7 +40,6 @@ export async function subscribeToPush(saveSubscriptionMutation: (sub: any) => vo
       applicationServerKey: urlBase64ToUint8Array(publicKey),
     });
 
-    console.log("[WebPushClient] Web Push subscribed successfully:", subscription);
 
     // 4. Save subscription in DB
     const subJSON = subscription.toJSON();

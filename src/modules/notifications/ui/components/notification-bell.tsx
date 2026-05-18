@@ -77,21 +77,17 @@ export const NotificationBell = () => {
     let reconnectTimeout: NodeJS.Timeout;
     
     const connectSSE = () => {
-      console.log("[SSEClient] Connecting to real-time notification stream...");
       eventSource = new EventSource("/api/notifications/stream");
       
       eventSource.onopen = () => {
-        console.log("[SSEClient] Stream connection opened.");
       };
 
       eventSource.addEventListener("open", (event: MessageEvent) => {
-        console.log("[SSEClient] Open event received:", event.data);
       });
 
       eventSource.onmessage = (event) => {
         try {
           const notification = JSON.parse(event.data);
-          console.log("[SSEClient] New real-time notification received:", notification);
           
           const actorName = notification.actor?.name || "Ai đó";
           const actionText = t(notification.type as any) || t("default") || "đã tương tác với bạn";
@@ -144,7 +140,6 @@ export const NotificationBell = () => {
     return () => {
       if (eventSource) {
         eventSource.close();
-        console.log("[SSEClient] Stream connection closed.");
       }
       clearTimeout(reconnectTimeout);
     };

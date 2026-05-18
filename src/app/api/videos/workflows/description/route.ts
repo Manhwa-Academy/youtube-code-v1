@@ -10,7 +10,6 @@ interface InputType {
 }
 
 export const { POST } = serve(async (context) => {
-  console.log("🚀 DESCRIPTION WORKFLOW START");
 
   const input = context.requestPayload as InputType;
 
@@ -59,7 +58,6 @@ export const { POST } = serve(async (context) => {
   });
 
   // ================= AI INPUT =================
-  console.log("🤖 Generating description...");
 
   const isGoodTranscript = transcript && transcript.length > 200;
 
@@ -140,7 +138,6 @@ Rules:
       "Watch this video to discover the key highlights and main ideas.";
   }
 
-  console.log("✨ FINAL DESCRIPTION:", description);
 
   // ================= UPDATE DB =================
   await context.run("update-video", async () => {
@@ -153,5 +150,4 @@ Rules:
       .where(and(eq(videos.id, video.id), eq(videos.userId, video.userId)));
   });
 
-  console.log("🎉 DESCRIPTION DONE");
 });

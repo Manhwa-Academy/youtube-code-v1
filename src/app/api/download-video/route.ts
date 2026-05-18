@@ -13,7 +13,6 @@ export async function GET(req: NextRequest) {
   try {
     const asset: any = await mux.video.assets.retrieve(assetId);
 
-    console.log("MUX ASSET RETRIEVE:", asset);
 
     const playbackId = asset.playback_ids?.[0]?.id;
     const staticFiles = asset.static_renditions?.files || [];
@@ -30,11 +29,9 @@ export async function GET(req: NextRequest) {
 
     const mp4Url = `https://stream.mux.com/${playbackId}/${bestMp4.name}`;
 
-    console.log("REDIRECT TO:", mp4Url);
 
     return Response.redirect(mp4Url, 302);
   } catch (error) {
-    console.log("DOWNLOAD VIDEO ERROR:", error);
     return new Response("Download failed", { status: 500 });
   }
 }

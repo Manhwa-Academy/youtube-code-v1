@@ -9,7 +9,6 @@ if (publicKey && privateKey) {
     publicKey,
     privateKey
   );
-  console.log("[WebPush] VAPID details initialized successfully.");
 } else {
   console.warn("[WebPush] VAPID keys are missing. Web Push will not function correctly.");
 }
@@ -28,7 +27,6 @@ export async function sendPushNotification(
       subObj,
       JSON.stringify(payload)
     );
-    console.log(`[WebPush] Successfully sent push notification to endpoint: ${subscription.endpoint}`);
     return true;
   } catch (error: any) {
     console.error(`[WebPush] Error sending push notification:`, error);

@@ -66,7 +66,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.log("SAVE PROGRESS BEACON ERROR:", err);
     return NextResponse.json({ ok: false });
   }
 }

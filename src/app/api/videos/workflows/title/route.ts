@@ -10,10 +10,8 @@ interface InputType {
 }
 
 export const { POST } = serve(async (context) => {
-  console.log("🚀 WORKFLOW START");
 
   const input = context.requestPayload as InputType | undefined;
-  console.log("📦 PAYLOAD:", input);
 
   if (!input?.videoId || !input?.userId) {
     throw new Error("Missing videoId or userId");
@@ -55,7 +53,6 @@ export const { POST } = serve(async (context) => {
   });
 
   // ================= AI GENERATE =================
-  console.log("🤖 Sending to AI...");
 
   const isGoodTranscript = transcript && transcript.length > 200;
 
@@ -131,7 +128,6 @@ Rules:
     title = video.title || "🔥 Amazing Manhwa Story";
   }
 
-  console.log("✨ FINAL TITLE:", title);
 
   // ================= UPDATE DB =================
   await context.run("update-video", async () => {
@@ -144,5 +140,4 @@ Rules:
       .where(and(eq(videos.id, video.id), eq(videos.userId, video.userId)));
   });
 
-  console.log("🎉 WORKFLOW DONE");
 });

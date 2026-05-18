@@ -68,7 +68,6 @@ export async function getEmbedding(text: string): Promise<number[]> {
   // ==========================================
   if (geminiApiKey) {
     try {
-      console.log(`Generating FREE AI Embedding using Google's gemini-embedding-001 (1536 dims)...`);
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${geminiApiKey}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,7 +103,6 @@ export async function getEmbedding(text: string): Promise<number[]> {
   // ==========================================
   if (usePaidEmbeddings && openRouterApiKey) {
     try {
-      console.log(`Generating PAID OpenAI text-embedding-3-small embedding via OpenRouter...`);
       const res = await fetch("https://openrouter.ai/api/v1/embeddings", {
         method: "POST",
         headers: {

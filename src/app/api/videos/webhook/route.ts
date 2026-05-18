@@ -40,7 +40,6 @@ export const POST = async (request: Request) => {
 
     payload = JSON.parse(rawBody) as MuxWebhookEvent;
   } catch (err) {
-    console.log("MUX VERIFY ERROR:", err);
     return new Response("Invalid signature", { status: 401 });
   }
 
@@ -65,7 +64,6 @@ export const POST = async (request: Request) => {
       const data = payload.data;
 
       await updateVideo(data.status, { muxAssetId: data.id }, data.upload_id);
-      console.log("Video created:", data.upload_id);
       break;
     }
 
@@ -106,7 +104,6 @@ export const POST = async (request: Request) => {
           previewKey = prev.data.key;
         }
       } catch (err) {
-        console.log("Thumbnail upload fail:", err);
       }
 
       await updateVideo(
@@ -123,7 +120,6 @@ export const POST = async (request: Request) => {
         data.upload_id,
       );
 
-      console.log("Video ready:", data.upload_id);
       break;
     }
 
@@ -140,7 +136,6 @@ export const POST = async (request: Request) => {
         await db.delete(videos).where(eq(videos.muxUploadId, data.upload_id));
       }
 
-      console.log("Video deleted:", data.upload_id);
       break;
     }
 
@@ -155,13 +150,11 @@ export const POST = async (request: Request) => {
         })
         .where(eq(videos.muxAssetId, data.asset_id));
 
-      console.log("Track ready:", data.asset_id);
       break;
     }
 
     case "video.asset.static_renditions.ready": {
       const data = payload.data;
-      console.log("🔥 STATIC MP4 READY:", data.id);
       break;
     }
   }

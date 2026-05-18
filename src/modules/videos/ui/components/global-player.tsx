@@ -142,7 +142,6 @@ export const GlobalPlayer = () => {
                   finalTime = targetTime;
                 }
                 
-                console.log("[GLOBAL_PLAYER] syncing time:", { finalTime, targetTime, duration });
                 player.currentTime = finalTime;
               }
             }}

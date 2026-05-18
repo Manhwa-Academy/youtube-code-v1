@@ -27,7 +27,6 @@ Do NOT include any markdown formatting, backticks, or conversational filler in y
 `;
 
   try {
-    console.log(`Moderating text with AI: "${cleanedText.slice(0, 45)}..."`);
     
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",

@@ -36,7 +36,6 @@ export async function GET(
   try {
     const cachedVtt = await redis.get<string>(cacheKey);
     if (cachedVtt) {
-      console.log(`[SUBTITLE_TRANSLATION] Cache hit for videoId: ${videoId}, lang: ${lang}`);
       return new Response(cachedVtt, {
         headers: {
           "Content-Type": "text/vtt; charset=utf-8",
@@ -67,7 +66,6 @@ export async function GET(
   let vttContent = "";
   try {
     const muxVttUrl = `https://stream.mux.com/${video.muxPlaybackId}/text/${video.muxTrackId}.vtt`;
-    console.log(`[SUBTITLE_TRANSLATION] Fetching original subtitle from Mux: ${muxVttUrl}`);
     const res = await fetch(muxVttUrl);
     if (res.ok) {
       vttContent = await res.text();
@@ -116,7 +114,6 @@ Rules:
 `;
 
   try {
-    console.log(`[SUBTITLE_TRANSLATION] Translating WebVTT to ${targetLanguage} for video: ${videoId}`);
     const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -143,7 +140,6 @@ Rules:
         // Save to cache
         try {
           await redis.set(cacheKey, translatedVtt, { ex: 60 * 60 * 24 * 7 }); // 7 days expiration
-          console.log(`[SUBTITLE_TRANSLATION] Cached translation successfully for ${lang}`);
         } catch (cacheError) {
           console.error("[SUBTITLE_TRANSLATION] Cache save error:", cacheError);
         }

@@ -1071,7 +1071,6 @@ Rules:
               const { getEmbedding } = await import("@/lib/embeddings");
               const vectorVal = await getEmbedding(combinedText);
               await db.update(videos).set({ embedding: vectorVal }).where(eq(videos.id, updatedVideo.id));
-              console.log("Vector embedding updated for video:", updatedVideo.id);
 
               // 2. Content Moderation AI
               const { moderateTextAI } = await import("@/lib/moderation");
@@ -1091,7 +1090,6 @@ Rules:
                   description: `AI Auto-Moderation flagged video. Lý do: ${modResult.reason}`,
                   status: "pending",
                 });
-                console.log("Video flagged by AI Moderation:", updatedVideo.id);
               } else {
                 // If clean, unflag it
                 await db.update(videos)

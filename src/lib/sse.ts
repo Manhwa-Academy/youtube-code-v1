@@ -23,7 +23,6 @@ export function registerSSEClient(userId: string, controller: ReadableStreamDefa
   }
   
   clients.get(userId)!.push({ id: clientId, controller });
-  console.log(`[SSE] Client ${clientId} registered for user ${userId}. Total clients for user: ${clients.get(userId)!.length}`);
   
   return clientId;
 }
@@ -38,13 +37,11 @@ export function unregisterSSEClient(userId: string, clientId: string) {
   } else {
     clients.set(userId, updatedClients);
   }
-  console.log(`[SSE] Client ${clientId} unregistered for user ${userId}.`);
 }
 
 export function sendRealTimeNotification(userId: string, data: any) {
   const userClients = clients.get(userId);
   if (!userClients || userClients.length === 0) {
-    console.log(`[SSE] No active SSE connections for user ${userId}. Notification will only be stored in DB.`);
     return false;
   }
   
@@ -63,6 +60,5 @@ export function sendRealTimeNotification(userId: string, data: any) {
     }
   }
   
-  console.log(`[SSE] Broadcasted notification to ${successCount}/${userClients.length} active clients of user ${userId}.`);
   return successCount > 0;
 }
