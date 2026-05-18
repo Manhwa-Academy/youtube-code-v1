@@ -75,7 +75,7 @@ const ClipsSectionSuspense = () => {
         </p>
         <Button asChild className="rounded-2xl h-11 px-6 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-semibold shadow-lg shadow-violet-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
           <Link href="/">
-            Khám phá video ngay <ArrowRight className="size-4 ml-1.5" />
+            {t("exploreVideos")} <ArrowRight className="size-4 ml-1.5" />
           </Link>
         </Button>
       </div>
@@ -106,7 +106,7 @@ const ClipsSectionSuspense = () => {
               {/* Scissors Clip Label Badge */}
               <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-600/90 text-white text-[10px] font-extrabold tracking-wider uppercase shadow-md backdrop-blur-sm">
                 <Scissors className="size-3 stroke-[2.5]" />
-                Clip
+                {t("clip")}
               </div>
 
               {/* Clip Link / Thumbnail */}
@@ -143,7 +143,7 @@ const ClipsSectionSuspense = () => {
                     href={`/videos/${clip.video.id}`}
                     className="text-[11px] text-muted-foreground hover:text-violet-500 dark:hover:text-violet-400 transition-colors truncate mt-1 flex items-center gap-1"
                   >
-                    <span className="font-semibold text-neutral-500 dark:text-neutral-400 shrink-0">Video gốc:</span>
+                    <span className="font-semibold text-neutral-500 dark:text-neutral-400 shrink-0">{t("originalVideo")}</span>
                     <span className="truncate">{clip.video.title}</span>
                   </Link>
 
@@ -156,7 +156,7 @@ const ClipsSectionSuspense = () => {
                     <span>•</span>
                     <span className="flex items-center gap-0.5">
                       <Scissors className="size-3" />
-                      {duration} giây
+                      {t("seconds", { count: duration })}
                     </span>
                   </div>
                 </div>

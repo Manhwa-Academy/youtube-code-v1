@@ -32,7 +32,7 @@ export const VideoClipDialog = ({
   open,
   onOpenChange,
 }: VideoClipDialogProps) => {
-  const t = useTranslations("Video");
+  const t = useTranslations("Clips");
   const [title, setTitle] = useState("");
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(10);
@@ -42,10 +42,10 @@ export const VideoClipDialog = ({
   const createClipMutation = trpc.clips.create.useMutation({
     onSuccess: (data) => {
       setCreatedClipId(data.id);
-      toast.success("Tạo Clip thành công!");
+      toast.success(t("createClipSuccess"));
     },
     onError: (err) => {
-      toast.error(err.message || "Không thể tạo Clip, vui lòng thử lại.");
+      toast.error(err.message || t("createClipError"));
     },
   });
 
@@ -82,7 +82,7 @@ export const VideoClipDialog = ({
       }
     } else {
       if (current <= startTime) {
-        toast.warning("Mốc kết thúc phải lớn hơn mốc bắt đầu!");
+        toast.warning(t("endTimeMustBeGreater"));
         return;
       }
       setEndTime(Math.min(current, maxDurationSec));
@@ -103,17 +103,17 @@ export const VideoClipDialog = ({
     if (nativeVideo) {
       nativeVideo.currentTime = startTime;
       nativeVideo.play().catch(() => {});
-      toast.info(`Đang phát thử từ mốc ${formatSeconds(startTime)}`);
+      toast.info(t("playingPreviewFrom", { time: formatSeconds(startTime) }));
     }
   };
 
   const handleCreate = () => {
     if (!title.trim()) {
-      toast.error("Vui lòng nhập tiêu đề cho Clip!");
+      toast.error(t("titleRequired"));
       return;
     }
     if (startTime < 0 || endTime > maxDurationSec) {
-      toast.error("Mốc thời gian không hợp lệ!");
+      toast.error(t("invalidTimeRange"));
       return;
     }
     createClipMutation.mutate({
@@ -138,7 +138,7 @@ export const VideoClipDialog = ({
     if (!shareUrl) return;
     navigator.clipboard.writeText(shareUrl);
     setIsCopied(true);
-    toast.success("Đã copy liên kết Clip vào bộ nhớ tạm!");
+    toast.success(t("copiedLinkSuccess"));
     setTimeout(() => setIsCopied(false), 2000);
   };
 
@@ -148,10 +148,10 @@ export const VideoClipDialog = ({
         <DialogHeader className="gap-1.5">
           <DialogTitle className="text-lg font-bold flex items-center gap-2">
             <Scissors className="size-5 text-violet-500 animate-pulse" />
-            <span>Tạo Clip phân đoạn mới</span>
+            <span>{t("createNewClipSegment")}</span>
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            Cắt một phân đoạn từ 5 đến 60 giây trong video này để chia sẻ nhanh với bạn bè của bạn!
+            {t("clipDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -162,8 +162,8 @@ export const VideoClipDialog = ({
               <Check className="size-8 stroke-[3]" />
             </div>
             <div className="flex flex-col gap-1">
-              <h3 className="font-bold text-base text-neutral-800 dark:text-neutral-100">Cắt Clip thành công!</h3>
-              <p className="text-xs text-muted-foreground">Sao chép liên kết bên dưới để chia sẻ phân đoạn này.</p>
+              <h3 className="font-bold text-base text-neutral-800 dark:text-neutral-100">{t("createClipSuccess")}</h3>
+              <p className="text-xs text-muted-foreground">{t("copyShareLinkDesc")}</p>
             </div>
 
             <div className="w-full mt-2 flex items-center gap-2 bg-neutral-50 dark:bg-neutral-950 p-2.5 rounded-xl border border-neutral-100 dark:border-neutral-800">
@@ -181,7 +181,7 @@ export const VideoClipDialog = ({
                 }`}
               >
                 {isCopied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-                <span>{isCopied ? "Đã copy" : "Copy Link"}</span>
+                <span>{isCopied ? t("copied") : t("copyLink")}</span>
               </Button>
             </div>
 
@@ -190,7 +190,7 @@ export const VideoClipDialog = ({
               className="mt-2 w-full rounded-xl text-xs h-10 border-neutral-200"
               onClick={() => onOpenChange(false)}
             >
-              Đóng hộp thoại
+              {t("closeDialog")}
             </Button>
           </div>
         ) : (
@@ -199,11 +199,11 @@ export const VideoClipDialog = ({
             {/* Nhập tiêu đề */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="clip-title" className="text-xs font-semibold">
-                Tiêu đề Clip <span className="text-red-500">*</span>
+                {t("clipTitle")} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="clip-title"
-                placeholder="Ví dụ: Khoảnh khắc cười ra nước mắt..."
+                placeholder={t("clipTitlePlaceholder")}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={100}
@@ -216,7 +216,7 @@ export const VideoClipDialog = ({
               {/* Start Time */}
               <div className="flex flex-col gap-2">
                 <Label htmlFor="start-time" className="text-xs font-semibold">
-                  Bắt đầu (giây)
+                  {t("startSeconds")}
                 </Label>
                 <div className="relative flex items-center">
                   <Input
@@ -231,7 +231,7 @@ export const VideoClipDialog = ({
                   <button
                     type="button"
                     onClick={() => handleGetCurrentTime("start")}
-                    title="Ghim mốc hiện tại của player"
+                    title={t("pinCurrentTime")}
                     className="absolute right-2.5 p-1 rounded-md text-neutral-400 hover:text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/30 transition-colors"
                   >
                     <MapPin className="size-3.5" />
@@ -245,7 +245,7 @@ export const VideoClipDialog = ({
               {/* End Time */}
               <div className="flex flex-col gap-2">
                 <Label htmlFor="end-time" className="text-xs font-semibold">
-                  Kết thúc (giây)
+                  {t("endSeconds")}
                 </Label>
                 <div className="relative flex items-center">
                   <Input
@@ -260,7 +260,7 @@ export const VideoClipDialog = ({
                   <button
                     type="button"
                     onClick={() => handleGetCurrentTime("end")}
-                    title="Ghim mốc hiện tại của player"
+                    title={t("pinCurrentTime")}
                     className="absolute right-2.5 p-1 rounded-md text-neutral-400 hover:text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/30 transition-colors"
                   >
                     <MapPin className="size-3.5" />
@@ -275,9 +275,9 @@ export const VideoClipDialog = ({
             {/* Thông số độ dài và nút Xem trước */}
             <div className="flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-950 rounded-xl border border-neutral-100 dark:border-neutral-800">
               <div className="flex flex-col gap-0.5">
-                <span className="text-[11px] font-semibold text-neutral-500">Độ dài phân đoạn:</span>
+                <span className="text-[11px] font-semibold text-neutral-500">{t("segmentDuration")}</span>
                 <span className={`text-xs font-bold font-mono ${isDurationValid ? "text-neutral-800 dark:text-neutral-100" : "text-red-500"}`}>
-                  {duration} giây
+                  {t("seconds", { count: duration })}
                 </span>
               </div>
 
@@ -289,14 +289,14 @@ export const VideoClipDialog = ({
                 className="h-8 rounded-lg text-xs gap-1.5 font-semibold text-neutral-700 dark:text-neutral-300 border-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
               >
                 <Play className="size-3 fill-neutral-700 dark:fill-neutral-300 stroke-[3]" />
-                <span>Xem thử</span>
+                <span>{t("preview")}</span>
               </Button>
             </div>
 
             {/* Text báo lỗi độ dài */}
             {!isDurationValid && (
               <p className="text-[10px] text-red-500 text-center font-medium leading-normal">
-                ⚠️ Độ dài Clip đang là {duration}s. Độ dài bắt buộc phải từ 5 đến 60 giây để đảm bảo chất lượng!
+                {t("durationWarning", { duration })}
               </p>
             )}
 
@@ -306,7 +306,7 @@ export const VideoClipDialog = ({
                 onClick={() => onOpenChange(false)}
                 className="rounded-xl text-xs h-10 border-neutral-200"
               >
-                Hủy bỏ
+                {t("cancel")}
               </Button>
               <Button
                 disabled={!isDurationValid || createClipMutation.isPending}
@@ -318,7 +318,7 @@ export const VideoClipDialog = ({
                 ) : (
                   <Scissors className="size-3.5" />
                 )}
-                <span>Cắt & Tạo Clip</span>
+                <span>{t("cutAndCreateClip")}</span>
               </Button>
             </DialogFooter>
           </div>

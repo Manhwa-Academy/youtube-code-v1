@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { and, desc, eq, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { getTranslations } from "next-intl/server";
 
 import { db } from "@/db";
 import { clips, videos, users } from "@/db/schema";
@@ -84,7 +85,7 @@ export const clipsRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        title: z.string().min(1, "Vui lòng nhập tiêu đề cho Clip").max(100, "Tiêu đề không được dài quá 100 ký tự"),
+        title: z.string(),
         videoId: z.string().uuid(),
         startTime: z.number().int().min(0),
         endTime: z.number().int().min(1),
@@ -94,11 +95,26 @@ export const clipsRouter = createTRPCRouter({
       const { title, videoId, startTime, endTime } = input;
       const { id: userId } = ctx.user;
 
+      const t = await getTranslations("Clips");
+
+      if (!title || !title.trim()) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: t("titleRequired"),
+        });
+      }
+      if (title.length > 100) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: t("titleTooLong"),
+        });
+      }
+
       const duration = endTime - startTime;
       if (duration < 5 || duration > 60) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Độ dài Clip phải nằm trong khoảng từ 5 đến 60 giây.",
+          message: t("durationInvalid", { min: 5, max: 60 }),
         });
       }
 
@@ -110,14 +126,14 @@ export const clipsRouter = createTRPCRouter({
       if (!video) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Không tìm thấy video gốc.",
+          message: t("originalVideoNotFound"),
         });
       }
 
       if (endTime > video.duration) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Thời gian kết thúc không được vượt quá độ dài video.",
+          message: t("endTimeInvalid"),
         });
       }
 
@@ -139,6 +155,7 @@ export const clipsRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ input }) => {
       const { id } = input;
+      const t = await getTranslations("Clips");
 
       const [clip] = await db
         .select({
@@ -168,7 +185,7 @@ export const clipsRouter = createTRPCRouter({
       if (!clip) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Không tìm thấy Clip này.",
+          message: t("clipNotFound"),
         });
       }
 

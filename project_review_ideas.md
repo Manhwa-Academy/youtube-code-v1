@@ -21,14 +21,6 @@
 
 ---
 
-### 🟢 Ưu tiên thấp — Ý tưởng dài hạn
-
-#### 22. Video Clips
-- Tạo clip ngắn từ video dài (giống YouTube Clips)
-- Share clip với timestamp range
-- Embed clip
----
-
 ### Fix CSS Issues
 ```diff
 // globals.css
