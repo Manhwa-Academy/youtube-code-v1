@@ -9,7 +9,6 @@
 - **Traffic sources breakdown**: Direct / Search / Suggested / External / Shorts / Playlist
 - **Geographic data**: Lượt xem theo quốc gia/thành phố (dùng IP geolocation khi record `viewEvents`)
 - **Device/Browser breakdown**: Mobile vs Desktop vs Tablet
-- **Revenue simulation card**: CPC * views (mock data để demo monetization)
 - **Comparison mode**: So sánh 2 khoảng thời gian (e.g., tuần này vs tuần trước)
 - Export CSV/Excel cho analytics data
 

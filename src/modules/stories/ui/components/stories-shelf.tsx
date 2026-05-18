@@ -268,11 +268,11 @@ export const StoriesShelf = () => {
                 setActiveGroupIndex(gIndex);
                 setActiveStoryIndex(0);
               }}
-              className="relative p-0.5 rounded-full flex items-center justify-center transition-transform duration-300 hover:scale-105 active:scale-95"
+              className="relative size-16 p-0.5 rounded-full flex items-center justify-center transition-transform duration-300 hover:scale-105 active:scale-95 shrink-0"
             >
               {/* Spinning / Glowing Gradient Ring for Unread stories */}
               <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-amber-400 animate-spin duration-10000 opacity-100" />
-              <div className="relative size-15 rounded-full p-0.5 bg-white dark:bg-black z-10">
+              <div className="relative size-14 rounded-full p-0.5 bg-white dark:bg-black z-10">
                 <UserAvatar name={group.user.name} imageUrl={group.user.imageUrl} size="sm" className="size-full hover:brightness-90" />
               </div>
             </button>
@@ -317,6 +317,7 @@ const StoryViewerModal = ({
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<any>(null);
+  const progressRef = useRef(0);
 
   const group = groups[activeGroupIndex];
   const story = group.stories[activeStoryIndex];
@@ -324,6 +325,7 @@ const StoryViewerModal = ({
   const duration = 5000; // 5 seconds per story
 
   useEffect(() => {
+    progressRef.current = 0;
     setProgress(0);
   }, [activeGroupIndex, activeStoryIndex]);
 
@@ -335,14 +337,15 @@ const StoryViewerModal = ({
 
     const interval = 50; // Update every 50ms
     timerRef.current = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(timerRef.current);
-          handleNext();
-          return 100;
-        }
-        return prev + (interval / duration) * 100;
-      });
+      progressRef.current += (interval / duration) * 100;
+      
+      if (progressRef.current >= 100) {
+        clearInterval(timerRef.current);
+        setProgress(100);
+        handleNext();
+      } else {
+        setProgress(progressRef.current);
+      }
     }, interval);
 
     return () => {
