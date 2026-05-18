@@ -17,6 +17,7 @@ import {
   videoReactions,
   videos,
   videoViews,
+  playlistCollaborators,
 } from "@/db/schema";
 
 export const playlistsRouter = createTRPCRouter({
@@ -44,16 +45,39 @@ export const playlistsRouter = createTRPCRouter({
 
       return deletedPlaylist;
     }),
-  getOne: protectedProcedure
+  getOne: publicProcedure
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ input, ctx }) => {
       const { id } = input;
-      const { id: userId } = ctx.user;
+      const clerkUserId = ctx.clerkUserId;
+
+      let userId: string | undefined;
+      if (clerkUserId) {
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.clerkId, clerkUserId));
+        userId = user?.id;
+      }
 
       const [existingPlaylist] = await db
         .select()
         .from(playlists)
-        .where(and(eq(playlists.id, id), eq(playlists.userId, userId)));
+        .where(
+          and(
+            eq(playlists.id, id),
+            or(
+              eq(playlists.visibility, "public"),
+              userId ? eq(playlists.userId, userId) : sql`false`,
+              userId
+                ? sql`EXISTS (
+                    SELECT 1 FROM playlist_collaborators pc
+                    WHERE pc.playlist_id = playlists.id AND pc.user_id = ${userId}
+                  )`
+                : sql`false`
+            )
+          )
+        );
 
       if (!existingPlaylist) {
         throw new TRPCError({ code: "NOT_FOUND" });
@@ -61,7 +85,7 @@ export const playlistsRouter = createTRPCRouter({
 
       return existingPlaylist;
     }),
-  getVideos: protectedProcedure
+  getVideos: publicProcedure
     .input(
       z.object({
         playlistId: z.string().uuid(),
@@ -75,13 +99,36 @@ export const playlistsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { id: userId } = ctx.user;
+      const { clerkUserId } = ctx;
       const { cursor, limit, playlistId } = input;
+
+      let userId: string | undefined;
+      if (clerkUserId) {
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.clerkId, clerkUserId));
+        userId = user?.id;
+      }
 
       const [existingPlaylist] = await db
         .select()
         .from(playlists)
-        .where(and(eq(playlists.id, playlistId), eq(playlists.userId, userId)));
+        .where(
+          and(
+            eq(playlists.id, playlistId),
+            or(
+              eq(playlists.visibility, "public"),
+              userId ? eq(playlists.userId, userId) : sql`false`,
+              userId
+                ? sql`EXISTS (
+                    SELECT 1 FROM playlist_collaborators pc
+                    WHERE pc.playlist_id = playlists.id AND pc.user_id = ${userId}
+                  )`
+                : sql`false`
+            )
+          )
+        );
 
       if (!existingPlaylist) {
         throw new TRPCError({ code: "NOT_FOUND" });
@@ -92,6 +139,7 @@ export const playlistsRouter = createTRPCRouter({
           .select({
             videoId: playlistVideos.videoId,
             addedAt: playlistVideos.createdAt,
+            position: playlistVideos.position,
           })
           .from(playlistVideos)
           .where(eq(playlistVideos.playlistId, playlistId)),
@@ -103,6 +151,7 @@ export const playlistsRouter = createTRPCRouter({
           ...getTableColumns(videos),
           user: users,
           addedAt: videosFromPlaylist.addedAt,
+          position: videosFromPlaylist.position,
           viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
           likeCount: db.$count(
             videoReactions,
@@ -139,7 +188,7 @@ export const playlistsRouter = createTRPCRouter({
               : undefined,
           ),
         )
-        .orderBy(videosFromPlaylist.addedAt, videos.id)
+        .orderBy(videosFromPlaylist.position, videosFromPlaylist.addedAt, videos.id)
         .limit(limit + 1);
 
       const hasMore = data.length > limit;
@@ -173,7 +222,18 @@ export const playlistsRouter = createTRPCRouter({
       const [existingPlaylist] = await db
         .select()
         .from(playlists)
-        .where(and(eq(playlists.id, playlistId), eq(playlists.userId, userId)));
+        .where(
+          and(
+            eq(playlists.id, playlistId),
+            or(
+              eq(playlists.userId, userId),
+              sql`EXISTS (
+                SELECT 1 FROM playlist_collaborators pc
+                WHERE pc.playlist_id = playlists.id AND pc.user_id = ${userId}
+              )`
+            )
+          )
+        );
 
       if (!existingPlaylist) {
         throw new TRPCError({ code: "NOT_FOUND" });
@@ -208,7 +268,7 @@ export const playlistsRouter = createTRPCRouter({
         .from(playlistVideos)
         .where(eq(playlistVideos.playlistId, playlistId));
 
-      if (remainVideos.length === 0 && !existingPlaylist.isMixPlaylist) {
+      if (remainVideos.length === 0 && !existingPlaylist.isMixPlaylist && existingPlaylist.userId === userId) {
         await db.delete(playlists).where(eq(playlists.id, playlistId));
       } else {
         await db
@@ -245,18 +305,18 @@ export const playlistsRouter = createTRPCRouter({
           ),
           user: users,
           containsVideo: sql<boolean>`(
-          SELECT EXISTS (
-            SELECT 1
-            FROM ${playlistVideos} pv
-            WHERE pv.playlist_id = ${playlists.id}
-            AND pv.video_id = ${videoId}
-          )
-        )`,
+            SELECT EXISTS (
+              SELECT 1
+              FROM playlist_videos pv
+              WHERE pv.playlist_id = playlists.id
+              AND pv.video_id = ${videoId}
+            )
+          )`,
           viewCount: sql<number>`(
             SELECT COALESCE(SUM(v.views_count), 0)
-            FROM ${playlistVideos} pv
-            JOIN ${videos} v ON v.id = pv.video_id
-            WHERE pv.playlist_id = ${playlists.id}
+            FROM playlist_videos pv
+            JOIN videos v ON v.id = pv.video_id
+            WHERE pv.playlist_id = playlists.id
           )`,
         })
         .from(playlists)
@@ -480,25 +540,25 @@ export const playlistsRouter = createTRPCRouter({
           ),
           user: users,
           thumbnailUrl: sql<string | null>`(
-          SELECT v.thumbnail_url
-          FROM ${playlistVideos} pv
-          JOIN ${videos} v ON v.id = pv.video_id
-          WHERE pv.playlist_id = ${playlists.id}
-          ORDER BY pv.created_at ASC
-          LIMIT 1
-        )`,
+            SELECT v.thumbnail_url
+            FROM playlist_videos pv
+            JOIN videos v ON v.id = pv.video_id
+            WHERE pv.playlist_id = playlists.id
+            ORDER BY pv.created_at ASC
+            LIMIT 1
+          )`,
           firstVideoId: sql<string | null>`(
-          SELECT pv.video_id
-          FROM ${playlistVideos} pv
-          WHERE pv.playlist_id = ${playlists.id}
-          ORDER BY pv.created_at ASC
-          LIMIT 1
-        )`,
+            SELECT pv.video_id
+            FROM playlist_videos pv
+            WHERE pv.playlist_id = playlists.id
+            ORDER BY pv.created_at ASC
+            LIMIT 1
+          )`,
           viewCount: sql<number>`(
             SELECT COALESCE(SUM(v.views_count), 0)
-            FROM ${playlistVideos} pv
-            JOIN ${videos} v ON v.id = pv.video_id
-            WHERE pv.playlist_id = ${playlists.id}
+            FROM playlist_videos pv
+            JOIN videos v ON v.id = pv.video_id
+            WHERE pv.playlist_id = playlists.id
           )`,
         })
         .from(playlists)
@@ -551,7 +611,18 @@ export const playlistsRouter = createTRPCRouter({
       const [existingPlaylist] = await db
         .select()
         .from(playlists)
-        .where(and(eq(playlists.id, playlistId), eq(playlists.userId, userId)));
+        .where(
+          and(
+            eq(playlists.id, playlistId),
+            or(
+              eq(playlists.userId, userId),
+              sql`EXISTS (
+                SELECT 1 FROM playlist_collaborators pc
+                WHERE pc.playlist_id = playlists.id AND pc.user_id = ${userId}
+              )`
+            )
+          )
+        );
 
       if (!existingPlaylist) {
         throw new TRPCError({ code: "NOT_FOUND" });
@@ -583,11 +654,21 @@ export const playlistsRouter = createTRPCRouter({
         });
       }
 
+      const [maxPositionResult] = await db
+        .select({
+          maxPos: sql<number>`COALESCE(MAX(${playlistVideos.position}), -1)`
+        })
+        .from(playlistVideos)
+        .where(eq(playlistVideos.playlistId, playlistId));
+
+      const newPosition = (maxPositionResult?.maxPos ?? -1) + 1;
+
       const [createdPlaylistVideo] = await db
         .insert(playlistVideos)
         .values({
           playlistId,
           videoId,
+          position: newPosition,
         })
         .returning();
 
@@ -627,16 +708,16 @@ export const playlistsRouter = createTRPCRouter({
             ? sql<boolean>`(
               SELECT EXISTS (
                 SELECT 1
-                FROM ${playlistVideos} pv
-                WHERE pv.playlist_id = ${playlists.id} AND pv.video_id = ${videoId}
+                FROM playlist_videos pv
+                WHERE pv.playlist_id = playlists.id AND pv.video_id = ${videoId}
               )
             )`
             : sql<boolean>`false`,
           viewCount: sql<number>`(
             SELECT COALESCE(SUM(v.views_count), 0)
-            FROM ${playlistVideos} pv
-            JOIN ${videos} v ON v.id = pv.video_id
-            WHERE pv.playlist_id = ${playlists.id}
+            FROM playlist_videos pv
+            JOIN videos v ON v.id = pv.video_id
+            WHERE pv.playlist_id = playlists.id
           )`,
         })
         .from(playlists)
@@ -704,26 +785,26 @@ export const playlistsRouter = createTRPCRouter({
           user: users,
 
           thumbnailUrl: sql<string | null>`(
-          SELECT v.thumbnail_url
-          FROM ${playlistVideos} pv
-          JOIN ${videos} v ON v.id = pv.video_id
-          WHERE pv.playlist_id = ${playlists.id}
-          ORDER BY pv.created_at ASC
-          LIMIT 1
-        )`,
+            SELECT v.thumbnail_url
+            FROM playlist_videos pv
+            JOIN videos v ON v.id = pv.video_id
+            WHERE pv.playlist_id = playlists.id
+            ORDER BY pv.created_at ASC
+            LIMIT 1
+          )`,
 
           firstVideoId: sql<string | null>`(
-          SELECT pv.video_id
-          FROM ${playlistVideos} pv
-          WHERE pv.playlist_id = ${playlists.id}
-          ORDER BY pv.created_at ASC
-          LIMIT 1
-        )`,
+            SELECT pv.video_id
+            FROM playlist_videos pv
+            WHERE pv.playlist_id = playlists.id
+            ORDER BY pv.created_at ASC
+            LIMIT 1
+          )`,
           viewCount: sql<number>`(
             SELECT COALESCE(SUM(v.views_count), 0)
-            FROM ${playlistVideos} pv
-            JOIN ${videos} v ON v.id = pv.video_id
-            WHERE pv.playlist_id = ${playlists.id}
+            FROM playlist_videos pv
+            JOIN videos v ON v.id = pv.video_id
+            WHERE pv.playlist_id = playlists.id
           )`,
         })
         .from(playlists)
@@ -1080,5 +1161,191 @@ export const playlistsRouter = createTRPCRouter({
         .where(eq(playlists.id, playlistId));
 
       return { count: newVideoIds.length };
+    }),
+  reorderVideos: protectedProcedure
+    .input(
+      z.object({
+        playlistId: z.string().uuid(),
+        videoIds: z.array(z.string().uuid()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { playlistId, videoIds } = input;
+      const { id: userId } = ctx.user;
+
+      const [playlist] = await db
+        .select()
+        .from(playlists)
+        .where(
+          and(
+            eq(playlists.id, playlistId),
+            or(
+              eq(playlists.userId, userId),
+              sql`EXISTS (
+                SELECT 1 FROM playlist_collaborators pc
+                WHERE pc.playlist_id = playlists.id AND pc.user_id = ${userId}
+              )`
+            )
+          )
+        );
+
+      if (!playlist) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Playlist not found or permission denied" });
+      }
+
+      await db.transaction(async (tx) => {
+        for (let index = 0; index < videoIds.length; index++) {
+          const videoId = videoIds[index];
+          await tx
+            .update(playlistVideos)
+            .set({ position: index })
+            .where(
+              and(
+                eq(playlistVideos.playlistId, playlistId),
+                eq(playlistVideos.videoId, videoId)
+              )
+            );
+        }
+      });
+
+      return { success: true };
+    }),
+  toggleCollaboration: protectedProcedure
+    .input(
+      z.object({
+        playlistId: z.string().uuid(),
+        isCollaborative: z.boolean(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { playlistId, isCollaborative } = input;
+      const { id: userId } = ctx.user;
+
+      const [existingPlaylist] = await db
+        .select()
+        .from(playlists)
+        .where(and(eq(playlists.id, playlistId), eq(playlists.userId, userId)));
+
+      if (!existingPlaylist) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Playlist not found or permission denied" });
+      }
+
+      await db
+        .update(playlists)
+        .set({ isCollaborative, updatedAt: new Date() })
+        .where(eq(playlists.id, playlistId));
+
+      return { success: true };
+    }),
+  addCollaborator: protectedProcedure
+    .input(
+      z.object({
+        playlistId: z.string().uuid(),
+        handle: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { playlistId, handle } = input;
+      const { id: ownerId } = ctx.user;
+
+      const [playlist] = await db
+        .select()
+        .from(playlists)
+        .where(and(eq(playlists.id, playlistId), eq(playlists.userId, ownerId)));
+
+      if (!playlist) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Playlist not found or permission denied" });
+      }
+
+      const cleanedHandle = handle.startsWith("@") ? handle.substring(1) : handle;
+      const [userToCollaborate] = await db
+        .select()
+        .from(users)
+        .where(eq(users.handle, cleanedHandle));
+
+      if (!userToCollaborate) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "User not found with this handle" });
+      }
+
+      if (userToCollaborate.id === ownerId) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot add yourself as a collaborator" });
+      }
+
+      const [existingCollab] = await db
+        .select()
+        .from(playlistCollaborators)
+        .where(
+          and(
+            eq(playlistCollaborators.playlistId, playlistId),
+            eq(playlistCollaborators.userId, userToCollaborate.id)
+          )
+        );
+
+      if (existingCollab) {
+        throw new TRPCError({ code: "CONFLICT", message: "User is already a collaborator" });
+      }
+
+      await db.insert(playlistCollaborators).values({
+        playlistId,
+        userId: userToCollaborate.id,
+      });
+
+      return { success: true };
+    }),
+  removeCollaborator: protectedProcedure
+    .input(
+      z.object({
+        playlistId: z.string().uuid(),
+        userId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { playlistId, userId } = input;
+      const { id: currentUserId } = ctx.user;
+
+      const [playlist] = await db
+        .select()
+        .from(playlists)
+        .where(eq(playlists.id, playlistId));
+
+      if (!playlist) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const isOwner = playlist.userId === currentUserId;
+      const isSelf = userId === currentUserId;
+
+      if (!isOwner && !isSelf) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Permission denied" });
+      }
+
+      await db
+        .delete(playlistCollaborators)
+        .where(
+          and(
+            eq(playlistCollaborators.playlistId, playlistId),
+            eq(playlistCollaborators.userId, userId)
+          )
+        );
+
+      return { success: true };
+    }),
+  getCollaborators: protectedProcedure
+    .input(z.object({ playlistId: z.string().uuid() }))
+    .query(async ({ input }) => {
+      const { playlistId } = input;
+
+      const collabs = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          imageUrl: users.imageUrl,
+          handle: users.handle,
+        })
+        .from(playlistCollaborators)
+        .innerJoin(users, eq(playlistCollaborators.userId, users.id))
+        .where(eq(playlistCollaborators.playlistId, playlistId));
+
+      return collabs;
     }),
 });

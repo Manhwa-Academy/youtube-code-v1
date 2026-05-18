@@ -381,11 +381,13 @@ export const playlists = pgTable("playlists", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   isMixPlaylist: boolean("is_mix_playlist").default(false).notNull(),
   visibility: playlistVisibility("visibility").default("public").notNull(), // dùng enum thay vì varchar
+  isCollaborative: boolean("is_collaborative").default(false).notNull(),
 });
 
 export const playlistRelations = relations(playlists, ({ one, many }) => ({
   user: one(users, { fields: [playlists.userId], references: [users.id] }),
   playlistVideos: many(playlistVideos),
+  collaborators: many(playlistCollaborators),
 }));
 
 export const playlistVideos = pgTable(
@@ -397,6 +399,7 @@ export const playlistVideos = pgTable(
     videoId: uuid("video_id")
       .references(() => videos.id, { onDelete: "cascade" })
       .notNull(),
+    position: integer("position").default(0).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -406,6 +409,39 @@ export const playlistVideos = pgTable(
       columns: [t.playlistId, t.videoId],
     }),
   ],
+);
+
+export const playlistCollaborators = pgTable(
+  "playlist_collaborators",
+  {
+    playlistId: uuid("playlist_id")
+      .references(() => playlists.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({
+      name: "playlist_collaborators_pk",
+      columns: [t.playlistId, t.userId],
+    }),
+  ],
+);
+
+export const playlistCollaboratorRelations = relations(
+  playlistCollaborators,
+  ({ one }) => ({
+    playlist: one(playlists, {
+      fields: [playlistCollaborators.playlistId],
+      references: [playlists.id],
+    }),
+    user: one(users, {
+      fields: [playlistCollaborators.userId],
+      references: [users.id],
+    }),
+  })
 );
 
 export const playlistVideoRelations = relations(playlistVideos, ({ one }) => ({

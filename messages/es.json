@@ -694,7 +694,18 @@
     "playAll": "Reproducir todo",
     "videosCount": "{count} videos",
     "videoRemovedFromPlaylist": "Video eliminado de la lista de reproducción",
-    "errorRemovingVideo": "Error al eliminar el video de la lista de reproducción"
+    "errorRemovingVideo": "Error al eliminar el video de la lista de reproducción",
+    "playlistReordered": "Lista de reproducción reordenada con éxito",
+    "errorReordering": "Error al reordenar la lista de reproducción",
+    "collaborationTitle": "Colaborar",
+    "collaborationDesc": "Permitir que otros añadan y reordenen videos en esta lista de reproducción",
+    "addCollaborator": "Añadir colaborador",
+    "collaboratorHandlePlaceholder": "Ingrese el @username del colaborador",
+    "shareTitle": "Compartir lista de reproducción",
+    "embedCode": "Código de inserción",
+    "copyLink": "Copiar enlace",
+    "linkCopied": "¡Enlace copiado al portapapeles!",
+    "embedCopied": "¡Código de inserción copiado!"
   },
   "Posts": {
     "viewAll": "Ver todo",

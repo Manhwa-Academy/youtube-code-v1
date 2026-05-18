@@ -111,14 +111,18 @@ const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp 
     ? (isVideoFinished ? 0 : (video.progress || 0)) 
     : (isLocalFinished ? 0 : localProgress);
 
-  // 🔹 playlist public
-  const { data: playlists } =
-    trpc.playlists.getPublicMixPlaylists.useQuery() as {
-      data: Playlist[] | undefined;
-    };
+  // Fetch playlist details and videos directly (supports all playlists: custom, collaborative, and mix, with custom positions)
+  const { data: playlist } = trpc.playlists.getOne.useQuery(
+    { id: playlistId || "" },
+    { enabled: !!playlistId }
+  );
 
-  const playlist = playlists?.find((p: Playlist) => p.id === playlistId);
-  const next = playlist?.videos?.[currentIndex + 1];
+  const { data: playlistVideosData } = trpc.playlists.getVideos.useQuery(
+    { playlistId: playlistId || "", limit: 100 },
+    { enabled: !!playlistId }
+  );
+
+  const next = playlistVideosData?.items?.[currentIndex + 1];
 
   // 🔹 suggestion random nếu không có playlist
   const [history, setHistory] = useState<string[]>([]);
@@ -142,7 +146,7 @@ const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp 
       return {
         id: next.id,
         title: next.title,
-        thumbnail: next.thumbnail || THUMBNAIL_FALLBACK,
+        thumbnail: next.thumbnailUrl || THUMBNAIL_FALLBACK,
         playlistId,
         index: currentIndex + 1,
       };

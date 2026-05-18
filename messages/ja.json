@@ -752,8 +752,19 @@
     "playlistNameRequired": "リスト名を入力してください",
     "playAll": "すべて再生",
     "videosCount": "{count} 本の動画",
-    "videoRemovedFromPlaylist": "動画が再生リストから削除されました",
-    "errorRemovingVideo": "再生リストからの動画の削除中にエラーが発生しました"
+    "videoRemovedFromPlaylist": "動画をプレイリストから削除しました",
+    "errorRemovingVideo": "動画の削除中にエラーが発生しました",
+    "playlistReordered": "プレイリストの順序を正常に変更しました",
+    "errorReordering": "プレイリストの並べ替え中にエラーが発生しました",
+    "collaborationTitle": "共同編集",
+    "collaborationDesc": "他のユーザーがこのプレイリストに動画を追加および並べ替えることを許可する",
+    "addCollaborator": "共同編集者を追加",
+    "collaboratorHandlePlaceholder": "共同編集者の@usernameを入力してください",
+    "shareTitle": "プレイリストを共有",
+    "embedCode": "埋め込みコード",
+    "copyLink": "リンクをコピー",
+    "linkCopied": "リンクをクリップボードにコピーしました！",
+    "embedCopied": "埋め込みコードをコピーしました！"
   },
   "Posts": {
     "viewAll": "すべて表示",

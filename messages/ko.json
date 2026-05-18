@@ -604,8 +604,19 @@
     "playlistNameRequired": "재생목록 이름을 입력하세요",
     "playAll": "모두 재생",
     "videosCount": "{count}개의 동영상",
-    "videoRemovedFromPlaylist": "동영상이 재생목록에서 제거되었습니다",
-    "errorRemovingVideo": "재생목록에서 동영상을 제거하는 중 오류가 발생했습니다"
+    "videoRemovedFromPlaylist": "동영상이 재생목록에서 삭제되었습니다",
+    "errorRemovingVideo": "동영상 삭제 중 오류가 발생했습니다",
+    "playlistReordered": "재생목록 순서가 성공적으로 변경되었습니다",
+    "errorReordering": "재생목록 순서 변경 중 오류가 발생했습니다",
+    "collaborationTitle": "공동 작업",
+    "collaborationDesc": "다른 사람이 이 재생목록에 동영상을 추가하고 순서를 변경할 수 있도록 허용",
+    "addCollaborator": "공동 작업자 추가",
+    "collaboratorHandlePlaceholder": "공동 작업자의 @username을 입력하세요",
+    "shareTitle": "재생목록 공유",
+    "embedCode": "소스 코드",
+    "copyLink": "링크 복사",
+    "linkCopied": "링크가 클립보드에 복사되었습니다!",
+    "embedCopied": "소스 코드가 복사되었습니다!"
   },
   "Notifications": {
     "title": "알림",

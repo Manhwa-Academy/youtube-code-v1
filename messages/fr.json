@@ -585,7 +585,18 @@
     "playAll": "Tout lire",
     "videosCount": "{count} vidéos",
     "videoRemovedFromPlaylist": "Vidéo retirée de la playlist",
-    "errorRemovingVideo": "Erreur lors de la suppression de la vidéo de la playlist"
+    "errorRemovingVideo": "Erreur lors du retrait de la vidéo de la playlist",
+    "playlistReordered": "Playlist réorganisée avec succès",
+    "errorReordering": "Erreur lors de la réorganisation de la playlist",
+    "collaborationTitle": "Collaborer",
+    "collaborationDesc": "Autoriser d'autres personnes à ajouter et réorganiser des vidéos dans cette playlist",
+    "addCollaborator": "Ajouter un collaborateur",
+    "collaboratorHandlePlaceholder": "Entrez le @username du collaborateur",
+    "shareTitle": "Partager la playlist",
+    "embedCode": "Code d'intégration",
+    "copyLink": "Copier le lien",
+    "linkCopied": "Lien copié dans le presse-papiers !",
+    "embedCopied": "Code d'intégration copié !"
   },
   "Notifications": {
     "title": "Notifications",

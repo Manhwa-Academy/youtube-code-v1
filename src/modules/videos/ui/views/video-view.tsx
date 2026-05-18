@@ -40,10 +40,33 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
   const playlistId = params.get("list");
   const index = Number(params.get("index") || 0);
 
-  const { data: playlists } = trpc.playlists.getPublicMixPlaylists.useQuery() as {
-    data: any[] | undefined;
-  };
-  const playlist = playlists?.find((p) => p.id === playlistId);
+  const { data: playlistData } = trpc.playlists.getOne.useQuery(
+    { id: playlistId || "" },
+    { enabled: !!playlistId }
+  );
+
+  const { data: playlistVideosData } = trpc.playlists.getVideos.useQuery(
+    { playlistId: playlistId || "", limit: 100 },
+    { enabled: !!playlistId }
+  );
+
+  const playlist = playlistData && playlistVideosData ? {
+    id: playlistData.id,
+    name: playlistData.name,
+    videos: playlistVideosData.items.map(item => ({
+      id: item.id,
+      title: item.title,
+      duration: item.duration,
+      progress: (item as any).progress ?? 0,
+      thumbnail: item.thumbnailUrl,
+      thumbnailUrl: item.thumbnailUrl,
+      user: {
+        id: item.user.id,
+        name: item.user.name,
+        imageUrl: item.user.imageUrl,
+      }
+    }))
+  } : undefined;
 
   useEffect(() => {
     if (typeof window !== "undefined") {

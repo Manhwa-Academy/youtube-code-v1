@@ -24,7 +24,8 @@ import { VideoGetOneOutput } from "../../types";
 import { VideoPlaybackMenu } from "./video-playback-menu";
 import { VideoAiFeatures } from "./video-ai-features";
 import { Button } from "@/components/ui/button";
-import { ExternalLinkIcon, Scissors } from "lucide-react";
+import { ExternalLinkIcon, Scissors, ListPlus } from "lucide-react";
+import { PlaylistAddModal } from "@/modules/playlists/ui/components/playlist-add-modal";
 import { toast } from "sonner";
 import { usePlayerStore } from "@/modules/videos/store/use-player-store";
 import { VideoClipDialog } from "./video-clip-dialog";
@@ -54,10 +55,12 @@ export const VideoTopRow = ({
   setLoopEnabledAction,
 }: VideoTopRowProps) => {
   const t = useTranslations("Video");
+  const tMenu = useTranslations("VideoMenu");
   const locale = useLocale();
   const { setVideo, minimize } = usePlayerStore();
   const [playbackRate, setPlaybackRate] = useState(1);
   const [clipDialogOpen, setClipDialogOpen] = useState(false);
+  const [playlistAddOpen, setPlaylistAddOpen] = useState(false);
 
   // Áp dụng playbackRate trực tiếp
   useEffect(() => {
@@ -189,6 +192,16 @@ export const VideoTopRow = ({
             <span>Clip</span>
           </Button>
 
+          <Button
+            variant="secondary"
+            className="rounded-full px-4 font-bold text-xs flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 border-none h-9 hover:bg-red-500/10 hover:text-red-500 transition-colors"
+            onClick={() => setPlaylistAddOpen(true)}
+            title={tMenu("addToPlaylist")}
+          >
+            <ListPlus className="size-4" />
+            <span>{tMenu("addToPlaylist")}</span>
+          </Button>
+
           <VideoMenu videoId={video.id} variant="secondary" />
         </div>
       </div>
@@ -211,6 +224,12 @@ export const VideoTopRow = ({
         playerRef={playerRef}
         open={clipDialogOpen}
         onOpenChange={setClipDialogOpen}
+      />
+
+      <PlaylistAddModal
+        videoId={video.id}
+        open={playlistAddOpen}
+        onOpenChange={setPlaylistAddOpen}
       />
     </div>
   );

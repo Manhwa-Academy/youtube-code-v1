@@ -718,8 +718,19 @@
     "playlistNameRequired": "Bitte geben Sie einen Namen für die Playlist ein",
     "playAll": "Alle abspielen",
     "videosCount": "{count} Videos",
-    "videoRemovedFromPlaylist": "Video aus der Playlist entfernt",
-    "errorRemovingVideo": "Fehler beim Entfernen des Videos aus der Playlist"
+    "videoRemovedFromPlaylist": "Video aus der Wiedergabeliste entfernt",
+    "errorRemovingVideo": "Fehler beim Entfernen des Videos aus der Wiedergabeliste",
+    "playlistReordered": "Wiedergabeliste erfolgreich neu geordnet",
+    "errorReordering": "Fehler beim Reorganisieren der Wiedergabeliste",
+    "collaborationTitle": "Zusammenarbeiten",
+    "collaborationDesc": "Anderen erlauben, Videos in dieser Wiedergabeliste hinzuzufügen und neu zu ordnen",
+    "addCollaborator": "Mitwirkenden hinzufügen",
+    "collaboratorHandlePlaceholder": "Geben Sie das @username des Mitwirkenden ein",
+    "shareTitle": "Wiedergabeliste teilen",
+    "embedCode": "Einbettungscode",
+    "copyLink": "Link kopieren",
+    "linkCopied": "Link in die Zwischenablage kopiert!",
+    "embedCopied": "Einbettungscode kopiert!"
   },
   "Posts": {
     "viewAll": "Alle ansehen",

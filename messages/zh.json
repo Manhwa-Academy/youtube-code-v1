@@ -604,8 +604,19 @@
     "playlistNameRequired": "请输入播放列表名称",
     "playAll": "全部播放",
     "videosCount": "{count} 个视频",
-    "videoRemovedFromPlaylist": "视频已从播放列表中移除",
-    "errorRemovingVideo": "从播放列表中移除视频时出错"
+    "videoRemovedFromPlaylist": "视频已从播放列表中删除",
+    "errorRemovingVideo": "从播放列表中删除视频时出错",
+    "playlistReordered": "播放列表顺序已成功重新排序",
+    "errorReordering": "重新排序播放列表时出错",
+    "collaborationTitle": "合作",
+    "collaborationDesc": "允许他人在此播放列表中添加和重新排序视频",
+    "addCollaborator": "添加合作者",
+    "collaboratorHandlePlaceholder": "输入合作者的 @username",
+    "shareTitle": "分享播放列表",
+    "embedCode": "嵌入代码",
+    "copyLink": "复制链接",
+    "linkCopied": "链接已复制到剪贴板！",
+    "embedCopied": "嵌入代码已复制！"
   },
   "Notifications": {
     "title": "通知",

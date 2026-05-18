@@ -860,7 +860,18 @@
     "playAll": "Play all",
     "videosCount": "{count} videos",
     "videoRemovedFromPlaylist": "Video removed from playlist",
-    "errorRemovingVideo": "Error removing video from playlist"
+    "errorRemovingVideo": "Error removing video from playlist",
+    "playlistReordered": "Playlist reordered successfully",
+    "errorReordering": "Error reordering playlist",
+    "collaborationTitle": "Collaborate",
+    "collaborationDesc": "Allow others to add and reorder videos in this playlist",
+    "addCollaborator": "Add collaborator",
+    "collaboratorHandlePlaceholder": "Enter collaborator's @username",
+    "shareTitle": "Share Playlist",
+    "embedCode": "Embed Code",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link copied to clipboard!",
+    "embedCopied": "Embed code copied!"
   },
   "Liked": {
     "title": "Liked videos",

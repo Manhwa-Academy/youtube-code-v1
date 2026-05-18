@@ -861,7 +861,18 @@
     "playAll": "Phát tất cả",
     "videosCount": "{count} video",
     "videoRemovedFromPlaylist": "Đã gỡ video khỏi danh sách phát",
-    "errorRemovingVideo": "Đã xảy ra lỗi khi gỡ video"
+    "errorRemovingVideo": "Lỗi khi gỡ video khỏi danh sách phát",
+    "playlistReordered": "Đã sắp xếp lại danh sách phát thành công",
+    "errorReordering": "Có lỗi xảy ra khi sắp xếp lại danh sách phát",
+    "collaborationTitle": "Cộng tác",
+    "collaborationDesc": "Cho phép người khác thêm và sắp xếp video trong danh sách này",
+    "addCollaborator": "Thêm cộng tác viên",
+    "collaboratorHandlePlaceholder": "Nhập @username của cộng tác viên",
+    "shareTitle": "Chia sẻ danh sách phát",
+    "embedCode": "Mã nhúng (Embed Code)",
+    "copyLink": "Sao chép liên kết",
+    "linkCopied": "Đã sao chép liên kết vào khay nhớ tạm!",
+    "embedCopied": "Đã sao chép mã nhúng!"
   },
   "Liked": {
     "title": "Video đã thích",
