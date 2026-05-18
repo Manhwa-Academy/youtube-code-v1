@@ -24,9 +24,10 @@ import { VideoGetOneOutput } from "../../types";
 import { VideoPlaybackMenu } from "./video-playback-menu";
 import { VideoAiFeatures } from "./video-ai-features";
 import { Button } from "@/components/ui/button";
-import { ExternalLinkIcon } from "lucide-react";
+import { ExternalLinkIcon, Scissors } from "lucide-react";
 import { toast } from "sonner";
 import { usePlayerStore } from "@/modules/videos/store/use-player-store";
+import { VideoClipDialog } from "./video-clip-dialog";
 
 interface VideoTopRowProps {
   video: VideoGetOneOutput;
@@ -56,6 +57,7 @@ export const VideoTopRow = ({
   const locale = useLocale();
   const { setVideo, minimize } = usePlayerStore();
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [clipDialogOpen, setClipDialogOpen] = useState(false);
 
   // Áp dụng playbackRate trực tiếp
   useEffect(() => {
@@ -177,6 +179,16 @@ export const VideoTopRow = ({
             setLoopEnabledAction={setLoopEnabledAction}
           />
 
+          <Button
+            variant="secondary"
+            className="rounded-full px-4 font-bold text-xs flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 border-none h-9 hover:bg-violet-500/10 hover:text-violet-500 transition-colors"
+            onClick={() => setClipDialogOpen(true)}
+            title="Cắt Clip"
+          >
+            <Scissors className="size-4" />
+            <span>Clip</span>
+          </Button>
+
           <VideoMenu videoId={video.id} variant="secondary" />
         </div>
       </div>
@@ -192,6 +204,13 @@ export const VideoTopRow = ({
         compactDate={compactDate}
         expandedDate={expandedDate}
         description={video.description}
+      />
+
+      <VideoClipDialog
+        video={video}
+        playerRef={playerRef}
+        open={clipDialogOpen}
+        onOpenChange={setClipDialogOpen}
       />
     </div>
   );

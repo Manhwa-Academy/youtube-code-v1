@@ -23,6 +23,7 @@
     "history": "History",
     "yourVideos": "Your videos",
     "likedVideos": "Liked videos",
+    "yourClips": "Your Clips",
     "allPlaylists": "All playlists",
     "downloads": "Downloads",
     "allSubscriptions": "All subscriptions",
@@ -67,7 +68,11 @@
     "aiSummaryTitle": "AI Video Summary",
     "aiChaptersTitle": "Automatic Video Chapters",
     "aiChaptersDesc": "Click on a timestamp to seek to the corresponding content",
-    "aiBeta": "AI Beta"
+    "aiBeta": "AI Beta",
+    "playingClip": "Playing Clip",
+    "seconds": "{count} seconds",
+    "clippedBy": "Clipped by <bold>{name}</bold>",
+    "watchFullVideo": "Watch full video"
   },
   "Comments": {
     "disabled": "Comments are turned off.",
@@ -1089,5 +1094,62 @@
     "mixPlaylistDescription": "YouTube created this playlist for you",
     "expandPlaylist": "Expand mix playlist",
     "hidePlaylist": "Hide mix playlist"
+  },
+  "Clips": {
+    "title": "Your Clips",
+    "description": "Short video segments you have clipped and saved",
+    "noClips": "No clips yet",
+    "noClipsDescription": "Clip segments from videos to create your own clips now!",
+    "yourClips": "Your Clips"
+  },
+  "Stories": {
+    "title": "Stories / Reels",
+    "yourStory": "Your Story",
+    "createStory": "Create Story",
+    "addStory": "Add Story",
+    "expiresIn24h": "Story disappears after 24 hours",
+    "noStories": "No stories yet",
+    "uploading": "Uploading...",
+    "storyType": "Story Type",
+    "image": "Image",
+    "video": "Video",
+    "caption": "Caption",
+    "captionPlaceholder": "How is it going today...",
+    "cancel": "Cancel",
+    "success": "Story created successfully!",
+    "error": "An error occurred while creating the story.",
+    "uploadMedia": "Upload media",
+    "uploadFile": "Upload File",
+    "uploadTip": "Select an image or video to upload directly to Cloudinary",
+    "uploadSuccess": "Uploaded to Cloudinary successfully!",
+    "uploadError": "Error uploading to Cloudinary. Please try again!",
+    "uploadLimit": "Image max 10MB, Video max 50MB!"
+  },
+  "Merch": {
+    "title": "Channel Merch",
+    "buyNow": "Buy Now",
+    "noProducts": "No products available",
+    "manageMerch": "Manage Merch",
+    "addProduct": "Add Product",
+    "productTitle": "Product Title",
+    "productPrice": "Price",
+    "productLink": "External Link",
+    "productImage": "Product Image",
+    "manageMerchDescription": "Manage external products displayed below your videos",
+    "addProductSuccess": "Product added successfully!",
+    "addProductError": "An error occurred while adding the product.",
+    "deleteProductSuccess": "Product deleted successfully!",
+    "deleteProductError": "An error occurred while deleting the product.",
+    "fillAllFields": "Please fill in all fields!",
+    "cancel": "Cancel",
+    "adding": "Adding...",
+    "image": "Image",
+    "actions": "Actions",
+    "viewLink": "View link"
+  },
+  "Shoutout": {
+    "featuredCreator": "Featured Channel",
+    "featuredSub": "Featured Subscriber",
+    "viewChannel": "View Channel"
   }
 }

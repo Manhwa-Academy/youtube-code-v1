@@ -12,6 +12,8 @@ import { ErrorFallback } from "@/components/error-fallback";
 import { THUMBNAIL_FALLBACK } from "../../constants";
 import { VideoPlayer, VideoPlayerSkeleton } from "../components/video-player";
 import { VideoTopRow, VideoTopRowSkeleton } from "../components/video-top-row";
+import { Button } from "@/components/ui/button";
+import { Scissors } from "lucide-react";
 
 interface VideoSectionProps {
   videoId: string;
@@ -54,6 +56,12 @@ type Playlist = {
 const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp }: VideoSectionProps) => {
   const t = useTranslations("Video");
   const params = useSearchParams();
+
+  const clipId = params.get("clipId");
+  const { data: clip } = trpc.clips.getOne.useQuery(
+    { id: clipId || "" },
+    { enabled: !!clipId }
+  );
 
   const [showPlaylist, setShowPlaylist] = useState(false);
   const playlistId = params.get("list");
@@ -206,8 +214,53 @@ const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp 
           autoNextEnabled={autoNextEnabled}
           loopEnabled={loopEnabledProp ?? loopEnabled}
           isVertical={isVertical}
+          clipStart={clip?.startTime}
+          clipEnd={clip?.endTime}
         />
       </div>
+
+      {/* ✂️ CLIP INFOBAR (If viewing a clip) */}
+      {clip && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-violet-500/10 via-fuchsia-500/5 to-transparent border border-violet-500/20 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="flex items-start gap-3">
+            <div className="size-10 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-500 shrink-0">
+              <Scissors className="size-5" />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase tracking-wider font-extrabold text-violet-500">
+                  {t("playingClip")}
+                </span>
+                <span className="text-[10px] text-muted-foreground">•</span>
+                <span className="text-[10px] text-muted-foreground bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full font-mono font-semibold">
+                  {t("seconds", { count: clip.endTime - clip.startTime })}
+                </span>
+              </div>
+              <h2 className="text-sm font-bold text-neutral-800 dark:text-neutral-100 leading-tight">
+                “{clip.title}”
+              </h2>
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                {t.rich("clippedBy", {
+                  name: clip.creator.name,
+                  bold: (chunks) => <span className="font-semibold text-neutral-700 dark:text-neutral-300">{chunks}</span>
+                })}
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => {
+              const url = new URL(window.location.href);
+              url.searchParams.delete("clipId");
+              window.history.pushState({}, "", url.toString());
+              window.location.reload();
+            }}
+            className="rounded-xl text-xs h-9 bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-neutral-100 dark:hover:bg-neutral-200 dark:text-neutral-900 shadow-md font-semibold transition-all duration-200 shrink-0"
+          >
+            {t("watchFullVideo")}
+          </Button>
+        </div>
+      )}
 
       {/* 🧾 INFO */}
       {!hideInfo && (

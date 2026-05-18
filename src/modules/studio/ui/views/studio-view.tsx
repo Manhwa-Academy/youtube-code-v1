@@ -6,6 +6,7 @@ import { Suspense, useState } from "react";
 import { VideosSection } from "../sections/videos-section";
 import { PlaylistsSection } from "../sections/playlists-section";
 import { PostsSection } from "../sections/posts-section";
+import { MerchSection } from "../sections/merch-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
 import {
@@ -32,6 +33,7 @@ const StudioViewSuspense = () => {
   const [limit, setLimit] = useState(30);
 
   const t = useTranslations("Studio");
+  const tMerch = useTranslations("Merch");
 
   const onTabChange = (value: string) => {
     router.push(`/studio?tab=${value}`, { scroll: false });
@@ -75,6 +77,12 @@ const StudioViewSuspense = () => {
             >
               {t("posts")}
             </TabsTrigger>
+            <TabsTrigger 
+              value="merch"
+              className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary bg-transparent data-[state=active]:bg-transparent font-medium"
+            >
+              {tMerch("title")}
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -89,6 +97,9 @@ const StudioViewSuspense = () => {
         </TabsContent>
         <TabsContent value="posts" className="mt-0 outline-none">
           <PostsSection limit={limit} />
+        </TabsContent>
+        <TabsContent value="merch" className="mt-0 outline-none">
+          <MerchSection />
         </TabsContent>
 
         <div className="px-4 py-4 border-t flex items-center justify-end gap-x-2 text-sm text-muted-foreground">

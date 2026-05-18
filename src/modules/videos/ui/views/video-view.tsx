@@ -9,6 +9,7 @@ import { trpc } from "@/trpc/client";
 import { VideoSection } from "../sections/video-section";
 import { CommentsSection } from "../sections/comments-section";
 import { SuggestionsSection } from "../sections/suggestions-section";
+import { MerchShelf } from "@/modules/merch/ui/components/merch-shelf";
 import { ShortsActions } from "../components/shorts-actions";
 import { ShortsInfo } from "../components/shorts-info";
 import { VideoPlaylist } from "../components/video-playlist";
@@ -232,6 +233,9 @@ const VideoViewSuspense = ({ videoId }: VideoViewProps) => {
       <div className="flex flex-col xl:flex-row gap-6">
         <div className="flex-1 min-w-0">
           <VideoSection videoId={videoId} />
+          
+          {/* 🛍️ Channel Merch Shelf */}
+          <MerchShelf uploaderId={video.userId} />
           
           {/* Mobile mix playlist panel */}
           {playlist && (

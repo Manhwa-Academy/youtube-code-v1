@@ -14,6 +14,9 @@ import { postsRouter } from '@/modules/posts/server/procedures';
 import { notificationsRouter } from '@/modules/notifications/server/procedures';
 import { reportsRouter } from '@/modules/reports/server/procedures';
 import { adminRouter } from '@/modules/admin/server/procedures';
+import { clipsRouter } from '@/modules/clips/server/procedures';
+import { storiesRouter } from '@/modules/stories/server/procedures';
+import { merchRouter } from '@/modules/merch/server/procedures';
 
 import { createTRPCRouter } from '../init';
 
@@ -34,6 +37,9 @@ export const appRouter = createTRPCRouter({
   notifications: notificationsRouter,
   reports: reportsRouter,
   admin: adminRouter,
+  clips: clipsRouter,
+  stories: storiesRouter,
+  merch: merchRouter,
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;

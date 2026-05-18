@@ -44,15 +44,6 @@ live_chat_messages (id, streamId, userId, message, createdAt)
 
 ---
 
-### 9. 👥 Social / Discovery Features
-- **Collaborative Watch**: Xem video cùng bạn bè real-time (synchronized player + chat room)
-- **Clips**: Cắt đoạn video 5–60s, share với timestamp range (như YouTube Clips)
-- **Stories / Reels**: Post ngắn dạng ảnh/video tự biến mất sau 24h
-- **Channel merch shelf**: Hiển thị sản phẩm bên dưới video (link ngoài)
-- **Shoutout Posts**: Creator feature subscriber/kênh khác
-
----
-
 ### 10. 🛡️ Moderation Nâng Cao
 **Hiện trạng:** Có `channelModerations`, reports, basic moderation.
 - **Slow mode**: Giới hạn tần suất comment trong live stream

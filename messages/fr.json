@@ -23,6 +23,7 @@
     "history": "Historique",
     "yourVideos": "Vos vidéos",
     "likedVideos": "Vidéos j'aime",
+    "yourClips": "Vos Clips",
     "allPlaylists": "Toutes les playlists",
     "downloads": "Téléchargements",
     "allSubscriptions": "Tous les abonnements",
@@ -63,7 +64,11 @@
     "aiChaptersTitle": "Chapitres vidéo automatiques",
     "aiChaptersDesc": "Cliquez sur un horodatage pour accéder au contenu correspondant",
     "aiBeta": "IA Bêta",
-    "nextVideo": "Prochaine vidéo dans {countdown}"
+    "nextVideo": "Prochaine vidéo dans {countdown}",
+    "playingClip": "Lecture du Clip",
+    "seconds": "{count} secondes",
+    "clippedBy": "Coupé par <bold>{name}</bold>",
+    "watchFullVideo": "Regarder la vidéo complète"
   },
   "Comments": {
     "disabled": "Les commentaires sont désactivés.",
@@ -940,5 +945,62 @@
     "mixPlaylistDescription": "YouTube a créé cette playlist pour vous",
     "expandPlaylist": "Développer la playlist mix",
     "hidePlaylist": "Masquer la playlist mix"
+  },
+  "Clips": {
+    "title": "Vos Clips",
+    "description": "Courts segments vidéo que vous avez découpés et enregistrés",
+    "noClips": "Pas encore de clips",
+    "noClipsDescription": "Découpez des segments de vidéos pour créer vos propres clips dès maintenant !",
+    "yourClips": "Vos Clips"
+  },
+  "Stories": {
+    "title": "Stories / Reels",
+    "yourStory": "Votre Story",
+    "createStory": "Créer une Story",
+    "addStory": "Ajouter une Story",
+    "expiresIn24h": "La Story disparaît après 24 heures",
+    "noStories": "Pas encore de stories",
+    "uploading": "Téléchargement...",
+    "storyType": "Type de Story",
+    "image": "Image",
+    "video": "Vidéo",
+    "caption": "Légende",
+    "captionPlaceholder": "Comment ça va aujourd'hui...",
+    "cancel": "Annuler",
+    "success": "Story créée avec succès!",
+    "error": "Une erreur est survenue lors de la création de la story.",
+    "uploadMedia": "Télécharger un média",
+    "uploadFile": "Télécharger un fichier",
+    "uploadTip": "Sélectionnez une image ou une vidéo à télécharger directement sur Cloudinary",
+    "uploadSuccess": "Téléchargé sur Cloudinary avec succès !",
+    "uploadError": "Erreur lors du téléchargement sur Cloudinary. Veuillez réessayer !",
+    "uploadLimit": "Image max 10Mo, Vidéo max 50Mo !"
+  },
+  "Merch": {
+    "title": "Produits du canal",
+    "buyNow": "Acheter maintenant",
+    "noProducts": "Aucun produit disponible",
+    "manageMerch": "Gérer les produits",
+    "addProduct": "Ajouter un produit",
+    "productTitle": "Nom du produit",
+    "productPrice": "Prix",
+    "productLink": "Lien externe",
+    "productImage": "Image du produit",
+    "manageMerchDescription": "Gérer les produits externes affichés sous vos vidéos",
+    "addProductSuccess": "Produit ajouté avec succès!",
+    "addProductError": "Une erreur est survenue lors de l'ajout du produit.",
+    "deleteProductSuccess": "Produit supprimé avec succès!",
+    "deleteProductError": "Une erreur est survenue lors de la suppression du produit.",
+    "fillAllFields": "Veuillez remplir tous les champs !",
+    "cancel": "Annuler",
+    "adding": "Ajout en cours...",
+    "image": "Image",
+    "actions": "Actions",
+    "viewLink": "Voir le lien"
+  },
+  "Shoutout": {
+    "featuredCreator": "Chaîne en vedette",
+    "featuredSub": "Abonné en vedette",
+    "viewChannel": "Voir la chaîne"
   }
 }

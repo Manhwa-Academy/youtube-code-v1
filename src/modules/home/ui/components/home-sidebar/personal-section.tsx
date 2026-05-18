@@ -13,6 +13,7 @@ import {
   PlaySquareIcon,
   BellIcon,
   ShieldAlertIcon,
+  Scissors,
 } from "lucide-react";
 
 import { useIsOnline } from "@/hooks/use-is-online";
@@ -63,6 +64,12 @@ export const PersonalSection = () => {
       title: t("likedVideos"),
       url: "/playlists/liked",
       icon: ThumbsUpIcon,
+      auth: true,
+    },
+    {
+      title: t("yourClips"),
+      url: "/playlists/clips",
+      icon: Scissors,
       auth: true,
     },
     {

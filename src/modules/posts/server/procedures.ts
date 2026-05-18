@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { eq, and, desc, lt, or, getTableColumns, sql, inArray, isNull, lte, gt } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 
 import { db } from "@/db";
@@ -41,6 +42,7 @@ export const postsRouter = createTRPCRouter({
           })),
         }).optional(),
         scheduledAt: z.string().datetime().optional(),
+        shoutoutUserId: z.string().uuid().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -53,6 +55,7 @@ export const postsRouter = createTRPCRouter({
           content: input.content,
           type: input.type,
           videoId: input.videoId,
+          shoutoutUserId: input.shoutoutUserId,
           scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : null,
         })
         .returning();
@@ -134,12 +137,14 @@ export const postsRouter = createTRPCRouter({
       }
 
       const now = new Date();
+      const shoutoutUsers = alias(users, "shoutout_users");
 
       const data = await db
         .select({
           ...getTableColumns(posts),
           user: users,
           video: videos,
+          shoutoutUser: shoutoutUsers,
           likeCount: db.$count(
             postReactions,
             and(eq(postReactions.postId, posts.id), eq(postReactions.type, "like"))
@@ -157,6 +162,7 @@ export const postsRouter = createTRPCRouter({
         .from(posts)
         .innerJoin(users, eq(posts.userId, users.id))
         .leftJoin(videos, eq(posts.videoId, videos.id))
+        .leftJoin(shoutoutUsers, eq(posts.shoutoutUserId, shoutoutUsers.id))
         .where(
           and(
             eq(posts.userId, targetUserId),
@@ -289,11 +295,14 @@ export const postsRouter = createTRPCRouter({
         viewerId = user?.id;
       }
 
+      const shoutoutUsers = alias(users, "shoutout_users");
+
       const [post] = await db
         .select({
           ...getTableColumns(posts),
           user: users,
           video: videos,
+          shoutoutUser: shoutoutUsers,
           likeCount: db.$count(
             postReactions,
             and(eq(postReactions.postId, posts.id), eq(postReactions.type, "like"))
@@ -310,6 +319,7 @@ export const postsRouter = createTRPCRouter({
         .from(posts)
         .innerJoin(users, eq(posts.userId, users.id))
         .leftJoin(videos, eq(posts.videoId, videos.id))
+        .leftJoin(shoutoutUsers, eq(posts.shoutoutUserId, shoutoutUsers.id))
         .where(eq(posts.id, id));
 
       if (!post) throw new TRPCError({ code: "NOT_FOUND" });

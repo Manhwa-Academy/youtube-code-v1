@@ -82,6 +82,7 @@ export const posts = pgTable("posts", {
   content: text("content"),
   type: postType("type").default("text").notNull(),
   videoId: uuid("video_id").references(() => videos.id, { onDelete: "set null" }),
+  shoutoutUserId: uuid("shoutout_user_id").references(() => users.id, { onDelete: "set null" }),
   scheduledAt: timestamp("scheduled_at"),
   isEdited: boolean("is_edited").default(false).notNull(),
   canComment: boolean("can_comment").default(true).notNull(),
@@ -165,6 +166,11 @@ export const postRelations = relations(posts, ({ one, many }) => ({
   poll: one(postPolls, { fields: [posts.id], references: [postPolls.postId] }),
   reactions: many(postReactions),
   comments: many(comments),
+  shoutoutUser: one(users, {
+    fields: [posts.shoutoutUserId],
+    references: [users.id],
+    relationName: "posts_shoutout_user_id_fkey",
+  }),
 }));
 
 export const postImageRelations = relations(postImages, ({ one }) => ({
@@ -215,7 +221,7 @@ export const users = pgTable(
   "users",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    clerkId: text("clerk_id").unique().notNull(),
+    clerkId: text("clerk_id").notNull(),
     name: text("name").notNull(),
     bannerUrl: text("banner_url"),
     bannerKey: text("banner_key"),
@@ -254,6 +260,12 @@ export const userRelations = relations(users, ({ many }) => ({
     relationName: "notifications_actor_id_fkey",
   }),
   searchHistory: many(searchHistory),
+  clips: many(clips),
+  shoutoutPosts: many(posts, {
+    relationName: "posts_shoutout_user_id_fkey",
+  }),
+  merchProducts: many(merchProducts),
+  stories: many(stories),
 }));
 
 // ====================== SEARCH HISTORY ======================
@@ -279,7 +291,7 @@ export const categories = pgTable(
   "categories",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    name: text("name").notNull().unique(),
+    name: text("name").notNull(),
     description: text("description"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -354,6 +366,7 @@ export const videoRelations = relations(videos, ({ one, many }) => ({
   reactions: many(videoReactions),
   comments: many(comments),
   playlistVideos: many(playlistVideos),
+  clips: many(clips),
 }));
 
 // ====================== PLAYLISTS ======================
@@ -762,4 +775,70 @@ export const pushSubscriptionRelations = relations(
 
 export const pushSubscriptionSelectSchema = createSelectSchema(pushSubscriptions);
 export const pushSubscriptionInsertSchema = createInsertSchema(pushSubscriptions);
+
+// ====================== CLIPS ======================
+export const clips = pgTable("clips", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  videoId: uuid("video_id")
+    .references(() => videos.id, { onDelete: "cascade" })
+    .notNull(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  startTime: integer("start_time").notNull(), // in seconds
+  endTime: integer("end_time").notNull(), // in seconds
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const clipSelectSchema = createSelectSchema(clips);
+export const clipInsertSchema = createInsertSchema(clips);
+export const clipUpdateSchema = createUpdateSchema(clips);
+
+export const clipRelations = relations(clips, ({ one }) => ({
+  user: one(users, { fields: [clips.userId], references: [users.id] }),
+  video: one(videos, { fields: [clips.videoId], references: [videos.id] }),
+}));
+
+// ====================== MERCH PRODUCTS ======================
+export const merchProducts = pgTable("merch_products", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  title: text("title").notNull(),
+  price: text("price").notNull(),
+  imageUrl: text("image_url").notNull(),
+  externalLink: text("external_link").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const merchProductSelectSchema = createSelectSchema(merchProducts);
+export const merchProductInsertSchema = createInsertSchema(merchProducts);
+
+export const merchProductRelations = relations(merchProducts, ({ one }) => ({
+  user: one(users, { fields: [merchProducts.userId], references: [users.id] }),
+}));
+
+// ====================== STORIES ======================
+export const stories = pgTable("stories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  mediaUrl: text("media_url").notNull(),
+  mediaType: text("media_type").default("image").notNull(), // 'image' or 'video'
+  caption: text("caption"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+export const storySelectSchema = createSelectSchema(stories);
+export const storyInsertSchema = createInsertSchema(stories);
+
+export const storyRelations = relations(stories, ({ one }) => ({
+  user: one(users, { fields: [stories.userId], references: [users.id] }),
+}));
 

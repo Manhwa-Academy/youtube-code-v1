@@ -23,6 +23,7 @@
     "history": "历史记录",
     "yourVideos": "您的视频",
     "likedVideos": "顶过的视频",
+    "yourClips": "您的剪辑",
     "allPlaylists": "所有播放列表",
     "downloads": "离线内容",
     "allSubscriptions": "所有订阅",
@@ -63,7 +64,11 @@
     "aiChaptersTitle": "自动视频分段",
     "aiChaptersDesc": "点击时间戳跳转到相应内容",
     "aiBeta": "AI 测试版",
-    "nextVideo": "下一部视频将在 {countdown} 秒后播放"
+    "nextVideo": "下一部视频将在 {countdown} 秒后播放",
+    "playingClip": "正在播放剪辑",
+    "seconds": "{count} 秒",
+    "clippedBy": "由 <bold>{name}</bold> 剪辑",
+    "watchFullVideo": "观看完整视频"
   },
   "Comments": {
     "disabled": "评论功能已关闭。",
@@ -961,5 +966,62 @@
     "mixPlaylistDescription": "YouTube 为您特别制作的播放列表",
     "expandPlaylist": "展开混合视频列表",
     "hidePlaylist": "隐藏混合视频列表"
+  },
+  "Clips": {
+    "title": "您的剪辑",
+    "description": "您已剪辑并保存的视频短片段",
+    "noClips": "暂无剪辑",
+    "noClipsDescription": "立即从视频中剪辑片段，创建您自己的剪辑！",
+    "yourClips": "您的剪辑"
+  },
+  "Stories": {
+    "title": "Stories / Reels",
+    "yourStory": "您的故事",
+    "createStory": "发布故事",
+    "addStory": "添加故事",
+    "expiresIn24h": "故事将在24小时后自动消失",
+    "noStories": "暂无故事",
+    "uploading": "正在上传...",
+    "storyType": "快闪故事类型",
+    "image": "图片",
+    "video": "视频",
+    "caption": "说明文字",
+    "captionPlaceholder": "今天怎么样...",
+    "cancel": "取消",
+    "success": "成功发布故事！",
+    "error": "发布故事时发生错误。",
+    "uploadMedia": "上传媒体",
+    "uploadFile": "上传文件",
+    "uploadTip": "选择图片或视频直接上传至 Cloudinary",
+    "uploadSuccess": "成功上传至 Cloudinary！",
+    "uploadError": "上传至 Cloudinary 时出错。请重试！",
+    "uploadLimit": "图片最大 10MB，视频最大 50MB！"
+  },
+  "Merch": {
+    "title": "频道商品",
+    "buyNow": "立即购买",
+    "noProducts": "暂无商品",
+    "manageMerch": "管理商品",
+    "addProduct": "添加商品",
+    "productTitle": "商品名称",
+    "productPrice": "价格",
+    "productLink": "外部购买链接",
+    "productImage": "商品图片",
+    "manageMerchDescription": "管理在您的视频下方展示的外部商品",
+    "addProductSuccess": "成功添加商品！",
+    "addProductError": "添加商品时发生错误。",
+    "deleteProductSuccess": "成功删除商品！",
+    "deleteProductError": "删除商品时发生错误。",
+    "fillAllFields": "请填写所有字段！",
+    "cancel": "取消",
+    "adding": "正在添加...",
+    "image": "图片",
+    "actions": "操作",
+    "viewLink": "查看链接"
+  },
+  "Shoutout": {
+    "featuredCreator": "推荐频道",
+    "featuredSub": "推荐订阅者",
+    "viewChannel": "查看频道"
   }
 }

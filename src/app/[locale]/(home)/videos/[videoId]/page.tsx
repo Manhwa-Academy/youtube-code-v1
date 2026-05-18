@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { Metadata, ResolvingMetadata } from "next";
 import { eq } from "drizzle-orm";
 
@@ -17,11 +18,19 @@ interface PageProps {
   }>;
 }
 
+const isUuid = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+
 export async function generateMetadata(
   { params }: PageProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const { videoId, locale } = await params;
+  
+  if (!isUuid(videoId)) {
+    return {
+      title: "Video not found",
+    };
+  }
   
   const [video] = await db
     .select({
@@ -96,6 +105,10 @@ export async function generateMetadata(
 
 const Page = async ({ params }: PageProps) => {
   const { videoId, locale } = await params;
+
+  if (!isUuid(videoId)) {
+    return notFound();
+  }
 
   void trpc.videos.getOne.prefetch({ id: videoId });
   void trpc.comments.getMany.prefetchInfinite({ videoId, limit: DEFAULT_LIMIT });

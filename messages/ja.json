@@ -23,6 +23,7 @@
     "history": "履歴",
     "yourVideos": "自分の動画",
     "likedVideos": "高く評価した動画",
+    "yourClips": "あなたのクリップ",
     "allPlaylists": "すべての再生リスト",
     "downloads": "オフライン",
     "allSubscriptions": "すべての登録チャンネル",
@@ -63,7 +64,11 @@
     "aiChaptersTitle": "自動動画チャプター",
     "aiChaptersDesc": "タイムスタンプをクリックすると、対応するコンテンツにジャンプします",
     "aiBeta": "AI ベータ",
-    "nextVideo": "{countdown}秒後に次の動画"
+    "nextVideo": "{countdown}秒後に次の動画",
+    "playingClip": "クリップ再生中",
+    "seconds": "{count} 秒",
+    "clippedBy": "<bold>{name}</bold> が作成",
+    "watchFullVideo": "フル動画を視聴"
   },
   "Comments": {
     "disabled": "コメント機能はオフになっています。",
@@ -1058,5 +1063,62 @@
     "mixPlaylistDescription": "YouTubeがあなたのために作成したプレイリストです",
     "expandPlaylist": "ミックスプレイリストを展開",
     "hidePlaylist": "ミックスプレイリストを非表示"
+  },
+  "Clips": {
+    "title": "あなたのクリップ",
+    "description": "切り取って保存した短いビデオセグメント",
+    "noClips": "クリップはまだありません",
+    "noClipsDescription": "ビデオからセグメントを切り取って、今すぐ自分のクリップを作成しましょう！",
+    "yourClips": "あなたのクリップ"
+  },
+  "Stories": {
+    "title": "Stories / Reels",
+    "yourStory": "ストーリー",
+    "createStory": "ストーリーを作成",
+    "addStory": "ストーリーを追加",
+    "expiresIn24h": "ストーリーは24時間後に消去されます",
+    "noStories": "ストーリーはまだありません",
+    "uploading": "アップロード中...",
+    "storyType": "ストーリーの種類",
+    "image": "画像",
+    "video": "動画",
+    "caption": "キャプション",
+    "captionPlaceholder": "今日の様子は...",
+    "cancel": "キャンセル",
+    "success": "ストーリーが正常に作成されました！",
+    "error": "ストーリーの作成中にエラーが発生しました。",
+    "uploadMedia": "メディアをアップロード",
+    "uploadFile": "ファイルをアップロード",
+    "uploadTip": "画像または動画を選択して、Cloudinaryに直接アップロードします",
+    "uploadSuccess": "Cloudinaryへのアップロードが成功しました！",
+    "uploadError": "Cloudinaryへのアップロード中にエラーが発生しました。もう一度お試しください！",
+    "uploadLimit": "画像は最大10MB、動画は最大50MBです！"
+  },
+  "Merch": {
+    "title": "チャンネルグッズ",
+    "buyNow": "今すぐ購入",
+    "noProducts": "販売中の商品はありません",
+    "manageMerch": "グッズを管理",
+    "addProduct": "商品を追加",
+    "productTitle": "商品名",
+    "productPrice": "価格",
+    "productLink": "外部リンク",
+    "productImage": "商品画像",
+    "manageMerchDescription": "動画の下に表示される外部製品を管理します",
+    "addProductSuccess": "製品が正常に追加されました！",
+    "addProductError": "製品の追加中にエラーが発生しました。",
+    "deleteProductSuccess": "製品が正常に削除されました！",
+    "deleteProductError": "製品の削除中にエラーが発生しました。",
+    "fillAllFields": "すべてのフィールドを入力してください！",
+    "cancel": "キャンセル",
+    "adding": "追加中...",
+    "image": "画像",
+    "actions": "アクション",
+    "viewLink": "リンクを表示"
+  },
+  "Shoutout": {
+    "featuredCreator": "おすすめのチャンネル",
+    "featuredSub": "おすすめの登録者",
+    "viewChannel": "チャンネルを表示"
   }
 }

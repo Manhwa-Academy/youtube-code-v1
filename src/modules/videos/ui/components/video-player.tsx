@@ -32,6 +32,8 @@ interface VideoPlayerProps {
   loopEnabled?: boolean;
   isVertical?: boolean; 
   component?: "watch" | "studio";
+  clipStart?: number;
+  clipEnd?: number;
 }
 
 export const VideoPlayerSkeleton = () => (
@@ -55,6 +57,8 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       loopEnabled = false,
       trackingEnabled = true,
       component = "watch",
+      clipStart,
+      clipEnd,
     },
     ref,
   ) => {
@@ -170,7 +174,10 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         let resumeAt = 0;
         let source = "none";
 
-        if (globalCurrentTime > 0 && globalCurrentTime < duration - 2) {
+        if (clipStart !== undefined) {
+          resumeAt = 0; // When using Mux server-side clipping, HLS playlist is trimmed and timeline starts at 0!
+          source = "clipStart";
+        } else if (globalCurrentTime > 0 && globalCurrentTime < duration - 2) {
           resumeAt = globalCurrentTime;
           source = "globalStore";
         } else if (localResumeRef.current > 0 && localResumeRef.current < duration - 2) {
@@ -216,10 +223,11 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         player.removeEventListener("canplay", handleCanPlay);
         player.removeEventListener("loadedmetadata", handleCanPlay);
       };
-    }, [videoId, trackingEnabled, savedProgress, autoPlay]);
+    }, [videoId, trackingEnabled, savedProgress, autoPlay, clipStart]);
 
     useEffect(() => {
-      if (!trackingEnabled) return;
+      // Do not save video progress when watching a shared clip!
+      if (!trackingEnabled || clipStart !== undefined) return;
       const player = playerRef.current;
       if (!player) return;
 
@@ -269,7 +277,28 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
 
       player.addEventListener("timeupdate", handleTimeUpdate);
       return () => player.removeEventListener("timeupdate", handleTimeUpdate);
-    }, [videoId, trackingEnabled]);
+    }, [videoId, trackingEnabled, clipStart]);
+
+    // Clip Looping effect
+    useEffect(() => {
+      if (clipStart === undefined || clipEnd === undefined) return;
+      const player = playerRef.current;
+      if (!player) return;
+
+      const handleClipTimeUpdate = () => {
+        if (!player) return;
+        const current = player.currentTime || 0;
+        const duration = clipEnd - clipStart;
+        if (current >= duration || current < -0.5) {
+          player.currentTime = 0;
+        }
+      };
+
+      player.addEventListener("timeupdate", handleClipTimeUpdate);
+      return () => {
+        player.removeEventListener("timeupdate", handleClipTimeUpdate);
+      };
+    }, [clipStart, clipEnd, playerRef]);
 
     useEffect(() => {
       const saveOnExit = () => {
@@ -390,7 +419,13 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
         />
         <MuxPlayer
           ref={playerRef}
-          playbackId={playbackId || ""}
+          playbackId={
+            playbackId
+              ? clipStart !== undefined && clipEnd !== undefined
+                ? `${playbackId}?asset_start_time=${clipStart}&asset_end_time=${clipEnd}`
+                : playbackId
+              : ""
+          }
           streamType="on-demand"
           poster={thumbnailUrl || THUMBNAIL_FALLBACK}
           autoPlay={autoPlay ? "any" : false}
@@ -398,7 +433,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           accentColor="#FF2056"
           preferPlayback="mse"
           playsInline
-          startTime={savedProgress}
+          startTime={clipStart !== undefined ? 0 : savedProgress}
           onCanPlay={() => {
             const player = playerRef.current;
             if (player && isInitialSeekingRef.current) {

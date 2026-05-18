@@ -32,6 +32,7 @@ interface PostCardProps {
 
 export const PostCard = ({ post, isCompact }: PostCardProps) => {
   const t = useTranslations("Posts");
+  const tShoutout = useTranslations("Shoutout");
   const locale = useLocale();
   const router = useRouter();
   const { user } = useUser();
@@ -199,6 +200,45 @@ export const PostCard = ({ post, isCompact }: PostCardProps) => {
                   )}>
                     {post.content}
                   </div>
+
+                  {/* 📣 Shoutout Creator Card */}
+                  {post.shoutoutUser && !isCompact && (
+                    <div className="mt-3 p-4 rounded-2xl bg-gradient-to-br from-violet-500/5 via-fuchsia-500/5 to-transparent border border-violet-500/10 dark:border-violet-500/20 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-violet-500/30 hover:shadow-md transition-all duration-300">
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <UserAvatar 
+                            name={post.shoutoutUser.name} 
+                            imageUrl={post.shoutoutUser.imageUrl} 
+                            size="lg" 
+                          />
+                          <div className="absolute -bottom-1 -right-1 size-5 rounded-full bg-violet-600 text-white flex items-center justify-center shadow-md">
+                            <span className="text-[10px]">✨</span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] uppercase tracking-wider font-extrabold text-violet-600 dark:text-violet-400">
+                            {tShoutout("featuredCreator")}
+                          </span>
+                          <h4 className="text-sm font-bold text-neutral-800 dark:text-neutral-200">
+                            {post.shoutoutUser.name}
+                          </h4>
+                          <span className="text-xs text-muted-foreground">
+                            {post.shoutoutUser.handle ? `@${post.shoutoutUser.handle}` : `@${post.shoutoutUser.name}`}
+                          </span>
+                        </div>
+                      </div>
+                      <Button 
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full border-violet-500/30 text-violet-600 dark:text-violet-400 hover:bg-violet-500/10 text-xs font-bold shrink-0 self-end sm:self-center"
+                      >
+                        <Link href={`/users/${post.shoutoutUser.id}`} className="flex items-center gap-1">
+                          {tShoutout("viewChannel")}
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
 
                   {isCompact && post.poll && (
                     <div className="mt-2">

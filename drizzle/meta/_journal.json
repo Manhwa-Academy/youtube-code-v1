@@ -36,6 +36,20 @@
       "when": 1778998826556,
       "tag": "0004_striped_stick",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779080714705,
+      "tag": "0005_chunky_lizard",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779083295696,
+      "tag": "0006_clean_selene",
+      "breakpoints": true
     }
   ]
 }

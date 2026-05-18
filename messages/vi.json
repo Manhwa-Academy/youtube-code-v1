@@ -23,6 +23,7 @@
     "history": "Video đã xem",
     "yourVideos": "Video của bạn",
     "likedVideos": "Video đã thích",
+    "yourClips": "Clip của bạn",
     "allPlaylists": "Tất cả danh sách phát",
     "downloads": "Video tải xuống",
     "allSubscriptions": "Tất cả kênh đăng ký",
@@ -67,7 +68,11 @@
     "aiSummaryTitle": "Tóm tắt video bằng AI",
     "aiChaptersTitle": "Phân đoạn Video tự động",
     "aiChaptersDesc": "Nhấp vào mốc thời gian để nhảy nhanh đến nội dung tương ứng",
-    "aiBeta": "AI Beta"
+    "aiBeta": "AI Beta",
+    "playingClip": "Đang phát Clip",
+    "seconds": "{count} giây",
+    "clippedBy": "Cắt bởi <bold>{name}</bold>",
+    "watchFullVideo": "Xem video đầy đủ"
   },
   "Comments": {
     "disabled": "Tính năng bình luận đã bị tắt.",
@@ -1091,5 +1096,62 @@
     "mixPlaylistDescription": "YouTube tạo danh sách phát này cho riêng bạn",
     "expandPlaylist": "Mở rộng danh sách kết hợp",
     "hidePlaylist": "Ẩn danh sách kết hợp"
+  },
+  "Clips": {
+    "title": "Clip của bạn",
+    "description": "Các phân đoạn video ngắn bạn đã cắt và lưu",
+    "noClips": "Chưa có clip nào",
+    "noClipsDescription": "Cắt các phân đoạn hay từ video để tạo clip của riêng bạn ngay bây giờ!",
+    "yourClips": "Clip của bạn"
+  },
+  "Stories": {
+    "title": "Stories / Reels",
+    "yourStory": "Tin của bạn",
+    "createStory": "Tạo tin",
+    "addStory": "Thêm tin mới",
+    "expiresIn24h": "Tin sẽ tự biến mất sau 24 giờ",
+    "noStories": "Chưa có tin nào",
+    "uploading": "Đang tải lên...",
+    "storyType": "Loại tin tức",
+    "image": "Ảnh",
+    "video": "Video",
+    "caption": "Mô tả ngắn (Caption)",
+    "captionPlaceholder": "Hôm nay thế nào...",
+    "cancel": "Hủy",
+    "success": "Đã tạo tin thành công!",
+    "error": "Đã xảy ra lỗi khi tạo tin.",
+    "uploadMedia": "Tải lên tệp tin",
+    "uploadFile": "Tải tệp lên",
+    "uploadTip": "Chọn ảnh hoặc video để tải trực tiếp lên Cloudinary",
+    "uploadSuccess": "Tải tệp lên Cloudinary thành công!",
+    "uploadError": "Lỗi khi tải tệp lên Cloudinary. Vui lòng thử lại!",
+    "uploadLimit": "Ảnh tối đa 10MB, Video tối đa 50MB!"
+  },
+  "Merch": {
+    "title": "Sản phẩm của kênh",
+    "buyNow": "Mua ngay",
+    "noProducts": "Chưa có sản phẩm nào",
+    "manageMerch": "Quản lý sản phẩm",
+    "addProduct": "Thêm sản phẩm",
+    "productTitle": "Tên sản phẩm",
+    "productPrice": "Giá sản phẩm",
+    "productLink": "Liên kết mua hàng",
+    "productImage": "Ảnh sản phẩm",
+    "manageMerchDescription": "Quản lý sản phẩm ngoài được trưng bày bên dưới video",
+    "addProductSuccess": "Đã thêm sản phẩm thành công!",
+    "addProductError": "Đã xảy ra lỗi khi thêm sản phẩm.",
+    "deleteProductSuccess": "Đã xóa sản phẩm thành công!",
+    "deleteProductError": "Đã xảy ra lỗi khi xóa sản phẩm.",
+    "fillAllFields": "Vui lòng điền đầy đủ các thông tin!",
+    "cancel": "Hủy",
+    "adding": "Đang thêm...",
+    "image": "Ảnh",
+    "actions": "Hành động",
+    "viewLink": "Xem link"
+  },
+  "Shoutout": {
+    "featuredCreator": "Kênh nổi bật",
+    "featuredSub": "Người đăng ký nổi bật",
+    "viewChannel": "Xem kênh"
   }
 }
