@@ -122,6 +122,18 @@ const VideoSectionSuspense = ({ videoId, hideInfo, loopEnabled: loopEnabledProp 
     { enabled: !!playlistId }
   );
 
+  // Đồng bộ chỉ mục currentIndex với video thực tế đang phát
+  useEffect(() => {
+    if (playlistVideosData?.items) {
+      const foundIndex = playlistVideosData.items.findIndex(
+        (item) => item.id === currentVideoId
+      );
+      if (foundIndex !== -1 && foundIndex !== currentIndex) {
+        setCurrentIndex(foundIndex);
+      }
+    }
+  }, [playlistVideosData, currentVideoId, currentIndex]);
+
   const next = playlistVideosData?.items?.[currentIndex + 1];
 
   // 🔹 suggestion random nếu không có playlist

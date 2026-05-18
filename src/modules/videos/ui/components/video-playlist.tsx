@@ -40,13 +40,16 @@ export const VideoPlaylist = ({
     return localStorage.getItem("playlist_collapsed") === "true";
   });
 
+  const activeIndex = playlist.videos.findIndex(v => v.id === currentVideoId);
+  const resolvedIndex = activeIndex !== -1 ? activeIndex : currentIndex;
+
   const handleToggleCollapse = () => {
     const nextState = !isCollapsed;
     setIsCollapsed(nextState);
     localStorage.setItem("playlist_collapsed", nextState.toString());
   };
 
-  const nextVideo = playlist.videos[(currentIndex + 1) % playlist.videos.length];
+  const nextVideo = playlist.videos[(resolvedIndex + 1) % playlist.videos.length];
 
   return (
     <div 
@@ -112,7 +115,7 @@ export const VideoPlaylist = ({
               {playlist.name}
             </h3>
             <p className="text-xs text-zinc-400">
-              {t("mixPlaylistDescription")} • {currentIndex + 1} / {playlist.videos.length}
+              {t("mixPlaylistDescription")} • {resolvedIndex + 1} / {playlist.videos.length}
             </p>
           </div>
           <button 
@@ -130,7 +133,7 @@ export const VideoPlaylist = ({
         {/* LIST */}
         <div className="overflow-y-auto max-h-[380px] divide-y divide-zinc-950/50 scrollbar-thin scrollbar-thumb-zinc-800 shrink-0">
           {playlist.videos.map((v, i) => {
-            const isCurrent = v.id === currentVideoId || i === currentIndex;
+            const isCurrent = v.id === currentVideoId;
             const duration = v.duration || 0;
             const progress = v.progress || 0; // Đọc trực tiếp tiến trình từ Database (seconds)
             const totalSeconds = duration / 1000;

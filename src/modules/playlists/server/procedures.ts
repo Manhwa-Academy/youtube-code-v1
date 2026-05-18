@@ -152,6 +152,7 @@ export const playlistsRouter = createTRPCRouter({
           user: users,
           addedAt: videosFromPlaylist.addedAt,
           position: videosFromPlaylist.position,
+          progress: sql<number>`COALESCE(user_progress.progress, 0)`.as("progress"),
           viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
           likeCount: db.$count(
             videoReactions,
@@ -173,6 +174,18 @@ export const playlistsRouter = createTRPCRouter({
         .innerJoin(
           videosFromPlaylist,
           eq(videos.id, videosFromPlaylist.videoId),
+        )
+        .leftJoin(
+          db.select({
+            videoId: videoViews.videoId,
+            userId: videoViews.userId,
+            progress: sql<number>`MAX(${videoViews.progress})`.as("progress")
+          })
+          .from(videoViews)
+          .where(userId ? eq(videoViews.userId, userId) : sql`1=0`)
+          .groupBy(videoViews.videoId, videoViews.userId)
+          .as("user_progress"),
+          eq(videos.id, sql`user_progress.video_id`)
         )
         .where(
           and(
@@ -467,7 +480,7 @@ export const playlistsRouter = createTRPCRouter({
           eq(videos.id, sql`user_progress.video_id`)
         )
         .where(eq(playlistVideos.playlistId, playlist.id))
-        .orderBy(playlistVideos.createdAt);
+        .orderBy(playlistVideos.position, playlistVideos.createdAt);
 
       if (playlistVideosData.length === 0) continue;
 
@@ -544,14 +557,14 @@ export const playlistsRouter = createTRPCRouter({
             FROM playlist_videos pv
             JOIN videos v ON v.id = pv.video_id
             WHERE pv.playlist_id = playlists.id
-            ORDER BY pv.created_at ASC
+            ORDER BY pv.position ASC, pv.created_at ASC
             LIMIT 1
           )`,
           firstVideoId: sql<string | null>`(
             SELECT pv.video_id
             FROM playlist_videos pv
             WHERE pv.playlist_id = playlists.id
-            ORDER BY pv.created_at ASC
+            ORDER BY pv.position ASC, pv.created_at ASC
             LIMIT 1
           )`,
           viewCount: sql<number>`(
@@ -789,7 +802,7 @@ export const playlistsRouter = createTRPCRouter({
             FROM playlist_videos pv
             JOIN videos v ON v.id = pv.video_id
             WHERE pv.playlist_id = playlists.id
-            ORDER BY pv.created_at ASC
+            ORDER BY pv.position ASC, pv.created_at ASC
             LIMIT 1
           )`,
 
@@ -797,7 +810,7 @@ export const playlistsRouter = createTRPCRouter({
             SELECT pv.video_id
             FROM playlist_videos pv
             WHERE pv.playlist_id = playlists.id
-            ORDER BY pv.created_at ASC
+            ORDER BY pv.position ASC, pv.created_at ASC
             LIMIT 1
           )`,
           viewCount: sql<number>`(
