@@ -1795,4 +1795,141 @@ export const studioRouter = createTRPCRouter({
 
       return { success: true };
     }),
+
+  getViewerPosts: protectedProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({ id: z.string().uuid(), createdAt: z.date() })
+          .nullish(),
+        limit: z.number().min(1).max(100).default(20),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+      const { cursor, limit } = input;
+
+      const data = await db
+        .select({
+          id: posts.id,
+          content: posts.content,
+          type: posts.type,
+          createdAt: posts.createdAt,
+          user: {
+            id: users.id,
+            name: users.name,
+            imageUrl: users.imageUrl,
+            handle: users.handle,
+          },
+        })
+        .from(posts)
+        .innerJoin(users, eq(posts.userId, users.id))
+        .innerJoin(
+          subscriptions,
+          and(
+            eq(subscriptions.viewerId, posts.userId),
+            eq(subscriptions.creatorId, userId)
+          )
+        )
+        .where(
+          and(
+            eq(posts.shoutoutUserId, userId),
+            cursor
+              ? or(
+                  lt(posts.createdAt, cursor.createdAt),
+                  and(
+                    eq(posts.createdAt, cursor.createdAt),
+                    lt(posts.id, cursor.id),
+                  ),
+                )
+              : undefined,
+          )
+        )
+        .orderBy(desc(posts.createdAt), desc(posts.id))
+        .limit(limit + 1);
+
+      const hasNextPage = data.length > limit;
+      const items = hasNextPage ? data.slice(0, limit) : data;
+
+      const nextCursor = hasNextPage
+        ? {
+            id: items[items.length - 1].id,
+            createdAt: items[items.length - 1].createdAt,
+          }
+        : null;
+
+      return {
+        items,
+        nextCursor,
+      };
+    }),
+
+  getMentions: protectedProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({ id: z.string().uuid(), createdAt: z.date() })
+          .nullish(),
+        limit: z.number().min(1).max(100).default(20),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { id: userId } = ctx.user;
+      const { cursor, limit } = input;
+
+      const data = await db
+        .select({
+          id: posts.id,
+          content: posts.content,
+          type: posts.type,
+          createdAt: posts.createdAt,
+          user: {
+            id: users.id,
+            name: users.name,
+            imageUrl: users.imageUrl,
+            handle: users.handle,
+          },
+        })
+        .from(posts)
+        .innerJoin(users, eq(posts.userId, users.id))
+        .leftJoin(
+          subscriptions,
+          and(
+            eq(subscriptions.viewerId, posts.userId),
+            eq(subscriptions.creatorId, userId)
+          )
+        )
+        .where(
+          and(
+            eq(posts.shoutoutUserId, userId),
+            isNull(subscriptions.viewerId),
+            cursor
+              ? or(
+                  lt(posts.createdAt, cursor.createdAt),
+                  and(
+                    eq(posts.createdAt, cursor.createdAt),
+                    lt(posts.id, cursor.id),
+                  ),
+                )
+              : undefined,
+          )
+        )
+        .orderBy(desc(posts.createdAt), desc(posts.id))
+        .limit(limit + 1);
+
+      const hasNextPage = data.length > limit;
+      const items = hasNextPage ? data.slice(0, limit) : data;
+
+      const nextCursor = hasNextPage
+        ? {
+            id: items[items.length - 1].id,
+            createdAt: items[items.length - 1].createdAt,
+          }
+        : null;
+
+      return {
+        items,
+        nextCursor,
+      };
+    }),
 });

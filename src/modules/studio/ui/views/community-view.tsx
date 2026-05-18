@@ -740,16 +740,26 @@ export const CommunityView = ({ videoId, currentTab = "comments" }: CommunityVie
           </div>
         </TabsContent>
 
-        <TabsContent value="viewer-posts">
-           <div className="p-8 text-center text-muted-foreground">
-              {t("featureUnderDevelopment")}
-           </div>
+        <TabsContent value="viewer-posts" className="outline-none mt-4">
+           <Suspense fallback={
+             <div className="flex flex-col items-center justify-center py-24 gap-y-4">
+                <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                <p className="text-sm text-muted-foreground animate-pulse">{t("loadingViewerPosts", { defaultValue: "Đang tải bài viết..." })}</p>
+             </div>
+           }>
+              <ViewerPostsList />
+           </Suspense>
         </TabsContent>
 
-        <TabsContent value="mentions">
-           <div className="p-8 text-center text-muted-foreground">
-              {t("featureUnderDevelopment")}
-           </div>
+        <TabsContent value="mentions" className="outline-none mt-4">
+           <Suspense fallback={
+             <div className="flex flex-col items-center justify-center py-24 gap-y-4">
+                <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                <p className="text-sm text-muted-foreground animate-pulse">{t("loadingMentions", { defaultValue: "Đang tải lượt đề cập..." })}</p>
+             </div>
+           }>
+              <MentionsList />
+           </Suspense>
         </TabsContent>
         
         <TabsContent value="settings">
@@ -1428,6 +1438,156 @@ const CommunityCommentsList = ({
         isFetchingNextPage={query.isFetchingNextPage}
         fetchNextPage={query.fetchNextPage}
         isManual
+      />
+    </div>
+  );
+};
+
+const ViewerPostsList = () => {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
+  const dateLocale = dateFnsLocales[locale as keyof typeof dateFnsLocales] || vi;
+
+  const [data, query] = trpc.studio.getViewerPosts.useSuspenseInfiniteQuery({
+    limit: 20,
+  }, {
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  });
+
+  const posts = data.pages.flatMap((page) => page.items);
+
+  if (posts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 gap-y-4 text-center">
+        <div className="p-4 bg-neutral-100 dark:bg-white/5 rounded-full shrink-0">
+          <MessageSquareIcon className="size-8 text-muted-foreground stroke-[1.5]" />
+        </div>
+        <div className="space-y-1">
+          <h3 className="font-bold text-base text-black dark:text-white">
+            {t("noViewerPosts", { defaultValue: "Chưa có bài đăng nào của người xem" })}
+          </h3>
+          <p className="text-xs text-muted-foreground max-w-sm">
+            {t("noViewerPostsDesc", { defaultValue: "Khi người đăng ký nhắc đến bạn trong các bài viết cộng đồng, chúng sẽ xuất hiện ở đây." })}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-y-4 pt-2">
+      {posts.map((post) => (
+        <div key={post.id} className="bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-xl p-5 hover:border-neutral-300 dark:hover:border-white/20 transition-all flex flex-col md:flex-row md:items-start gap-4">
+          <Avatar className="size-10 shrink-0">
+            <AvatarImage src={post.user.imageUrl} alt={post.user.name} />
+            <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-x-2 flex-wrap">
+              <span className="font-bold text-sm text-black dark:text-white truncate">{post.user.name}</span>
+              {post.user.handle && (
+                <span className="text-xs text-muted-foreground">@{post.user.handle}</span>
+              )}
+              <span className="text-xs text-muted-foreground">•</span>
+              <span className="text-xs text-muted-foreground">
+                {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: dateLocale })}
+              </span>
+            </div>
+            <p className="mt-2 text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">
+              {post.content}
+            </p>
+            <div className="mt-4 flex items-center gap-x-4">
+              <Link 
+                href={`/posts/${post.id}`}
+                target="_blank"
+                className="inline-flex items-center gap-x-1.5 text-xs text-blue-500 hover:text-blue-600 hover:underline font-bold transition"
+              >
+                {t("viewPost", { defaultValue: "Xem bài đăng" })}
+                <ArrowUpRightIcon className="size-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      ))}
+      <InfiniteScroll
+        hasNextPage={query.hasNextPage}
+        isFetchingNextPage={query.isFetchingNextPage}
+        fetchNextPage={query.fetchNextPage}
+      />
+    </div>
+  );
+};
+
+const MentionsList = () => {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
+  const dateLocale = dateFnsLocales[locale as keyof typeof dateFnsLocales] || vi;
+
+  const [data, query] = trpc.studio.getMentions.useSuspenseInfiniteQuery({
+    limit: 20,
+  }, {
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  });
+
+  const posts = data.pages.flatMap((page) => page.items);
+
+  if (posts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 gap-y-4 text-center">
+        <div className="p-4 bg-neutral-100 dark:bg-white/5 rounded-full shrink-0">
+          <MessageSquareIcon className="size-8 text-muted-foreground stroke-[1.5]" />
+        </div>
+        <div className="space-y-1">
+          <h3 className="font-bold text-base text-black dark:text-white">
+            {t("noMentions", { defaultValue: "Chưa có lượt đề cập nào" })}
+          </h3>
+          <p className="text-xs text-muted-foreground max-w-sm">
+            {t("noMentionsDesc", { defaultValue: "Khi những người sáng tạo khác đề cập đến bạn trong bài đăng của họ, các lượt đề cập đó sẽ hiển thị ở đây." })}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-y-4 pt-2">
+      {posts.map((post) => (
+        <div key={post.id} className="bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-xl p-5 hover:border-neutral-300 dark:hover:border-white/20 transition-all flex flex-col md:flex-row md:items-start gap-4">
+          <Avatar className="size-10 shrink-0">
+            <AvatarImage src={post.user.imageUrl} alt={post.user.name} />
+            <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-x-2 flex-wrap">
+              <span className="font-bold text-sm text-black dark:text-white truncate">{post.user.name}</span>
+              {post.user.handle && (
+                <span className="text-xs text-muted-foreground">@{post.user.handle}</span>
+              )}
+              <span className="text-xs text-muted-foreground">•</span>
+              <span className="text-xs text-muted-foreground">
+                {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: dateLocale })}
+              </span>
+            </div>
+            <p className="mt-2 text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">
+              {post.content}
+            </p>
+            <div className="mt-4 flex items-center gap-x-4">
+              <Link 
+                href={`/posts/${post.id}`}
+                target="_blank"
+                className="inline-flex items-center gap-x-1.5 text-xs text-blue-500 hover:text-blue-600 hover:underline font-bold transition"
+              >
+                {t("viewPost", { defaultValue: "Xem bài đăng" })}
+                <ArrowUpRightIcon className="size-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      ))}
+      <InfiniteScroll
+        hasNextPage={query.hasNextPage}
+        isFetchingNextPage={query.isFetchingNextPage}
+        fetchNextPage={query.fetchNextPage}
       />
     </div>
   );
