@@ -44,17 +44,6 @@ live_chat_messages (id, streamId, userId, message, createdAt)
 
 ---
 
-### 8. 🧠 AI Enhancement
-**Hiện trạng:** AI generate title/description + thumbnail đã có.
-- **Auto-chapters**: Phân tích transcript để tạo timestamps tự động
-- **Content moderation AI**: Tự động flag bình luận/video vi phạm bằng AI
-- **Smart thumbnail A/B test**: Upload 2 thumbnail, hệ thống chọn cái có CTR cao hơn
-- **Video summary**: Tóm tắt nội dung video thành 3-5 câu (từ transcript)
-- **Translation**: Dịch subtitle sang ngôn ngữ khác tự động
-- **Recommendation ML**: Thay vì random suggestion, dùng embedding similarity (pgvector)
-
----
-
 ### 9. 👥 Social / Discovery Features
 - **Collaborative Watch**: Xem video cùng bạn bè real-time (synchronized player + chat room)
 - **Clips**: Cắt đoạn video 5–60s, share với timestamp range (như YouTube Clips)

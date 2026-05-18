@@ -62,7 +62,8 @@
     "aiSummaryTitle": "AI-Video-Zusammenfassung",
     "aiChaptersTitle": "Automatische Video-Kapitel",
     "aiChaptersDesc": "Klicken Sie auf einen Zeitstempel, um zum entsprechenden Inhalt zu springen",
-    "aiBeta": "KI Beta"
+    "aiBeta": "KI Beta",
+    "nextVideo": "Nächstes Video in {countdown}"
   },
   "Comments": {
     "disabled": "Die Kommentarfunktion wurde deaktiviert.",
@@ -1003,7 +1004,7 @@
     "autoPlay": "Autoplay",
     "loop": "Schleife",
     "download": "Herunterladen",
-    "downloading": "Wird heruntergeladen...",
+    "downloading": "Herunterladen...",
     "speed": "Wiedergabegeschwindigkeit",
     "stopAfter": "Anhalten nach",
     "cancelStop": "Geplantes Anhalten abbrechen",

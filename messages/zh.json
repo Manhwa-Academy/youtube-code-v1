@@ -62,7 +62,8 @@
     "aiSummaryTitle": "AI 视频摘要",
     "aiChaptersTitle": "自动视频分段",
     "aiChaptersDesc": "点击时间戳跳转到相应内容",
-    "aiBeta": "AI 测试版"
+    "aiBeta": "AI 测试版",
+    "nextVideo": "下一部视频将在 {countdown} 秒后播放"
   },
   "Comments": {
     "disabled": "评论功能已关闭。",
@@ -940,7 +941,7 @@
     "autoPlay": "自动播放",
     "loop": "循环播放",
     "download": "下载",
-    "downloading": "下载中...",
+    "downloading": "正在下载...",
     "speed": "播放速度",
     "stopAfter": "定时停止",
     "cancelStop": "取消定时停止",

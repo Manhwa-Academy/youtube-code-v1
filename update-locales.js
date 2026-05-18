@@ -2595,6 +2595,18 @@ const translationsToAdd = {
       zh: "播放速度",
     },
   },
+  Video: {
+    nextVideo: {
+      en: "Next video in {countdown}",
+      vi: "Video tiếp theo sau {countdown}",
+      de: "Nächstes Video in {countdown}",
+      es: "Siguiente video en {countdown}",
+      fr: "Prochaine vidéo dans {countdown}",
+      ja: "{countdown}秒後に次の動画",
+      ko: "{countdown}초 후 다음 동영상",
+      zh: "下一部视频将在 {countdown} 秒后播放",
+    },
+  },
 };
 
 locales.forEach((locale) => {

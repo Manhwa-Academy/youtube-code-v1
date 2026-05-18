@@ -62,7 +62,8 @@
     "aiSummaryTitle": "AI動画要約",
     "aiChaptersTitle": "自動動画チャプター",
     "aiChaptersDesc": "タイムスタンプをクリックすると、対応するコンテンツにジャンプします",
-    "aiBeta": "AI ベータ"
+    "aiBeta": "AI ベータ",
+    "nextVideo": "{countdown}秒後に次の動画"
   },
   "Comments": {
     "disabled": "コメント機能はオフになっています。",

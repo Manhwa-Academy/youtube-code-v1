@@ -62,7 +62,8 @@
     "aiSummaryTitle": "Résumé vidéo par IA",
     "aiChaptersTitle": "Chapitres vidéo automatiques",
     "aiChaptersDesc": "Cliquez sur un horodatage pour accéder au contenu correspondant",
-    "aiBeta": "IA Bêta"
+    "aiBeta": "IA Bêta",
+    "nextVideo": "Prochaine vidéo dans {countdown}"
   },
   "Comments": {
     "disabled": "Les commentaires sont désactivés.",

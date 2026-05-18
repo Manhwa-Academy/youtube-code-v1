@@ -62,7 +62,8 @@
     "aiSummaryTitle": "AI 동영상 요약",
     "aiChaptersTitle": "자동 동영상 챕터",
     "aiChaptersDesc": "타임스탬프를 클릭하여 해당 콘텐츠로 바로 이동하세요",
-    "aiBeta": "AI 베타"
+    "aiBeta": "AI 베타",
+    "nextVideo": "{countdown}초 후 다음 동영상"
   },
   "Comments": {
     "disabled": "댓글 기능이 사용 중지되었습니다.",
