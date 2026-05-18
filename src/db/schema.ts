@@ -634,6 +634,11 @@ export const viewEvents = pgTable(
     videoId: uuid("video_id")
       .references(() => videos.id, { onDelete: "cascade" })
       .notNull(),
+    trafficSource: text("traffic_source").default("direct").notNull(),
+    country: text("country"),
+    city: text("city"),
+    deviceType: text("device_type").default("desktop").notNull(),
+    browser: text("browser").default("unknown").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   }
 );

@@ -4,16 +4,6 @@
 
 ## 🔴 Ưu Tiên Cao — Nên làm ngay (Tuần 1–4)
 
-### 3. 📊 Studio Analytics — Giai đoạn 2
-**Hiện trạng:** Analytics khá tốt nhưng còn thiếu:
-- **Traffic sources breakdown**: Direct / Search / Suggested / External / Shorts / Playlist
-- **Geographic data**: Lượt xem theo quốc gia/thành phố (dùng IP geolocation khi record `viewEvents`)
-- **Device/Browser breakdown**: Mobile vs Desktop vs Tablet
-- **Comparison mode**: So sánh 2 khoảng thời gian (e.g., tuần này vs tuần trước)
-- Export CSV/Excel cho analytics data
-
----
-
 ### 4. 🎬 Playlist Nâng Cao
 **Hiện trạng:** Playlist CRUD cơ bản đã có.
 - **Reorder video** trong playlist bằng drag & drop (dnd-kit)
@@ -58,19 +48,3 @@ live_chat_messages (id, streamId, userId, message, createdAt)
 - Push notifications native
 - Offline mode: Download video để xem offline
 - Shorts feed với swipe gesture
-
-## 🟢 Ưu Tiên Thấp — Dài Hạn (3–6 tháng+)
-
-### 14. 🏆 Gamification
-- **Badges / Achievements**: "First 1000 views", "Consistent Creator" (đăng 4 tuần liên tiếp)
-- **Channel milestones**: Hiển thị celebration khi đạt 100/1K/10K subscribers
-- **Watch streak**: User xem liên tiếp nhiều ngày được reward
-- **Leaderboard**: Top channels theo region/category
-
----
-
-### 15. 🤝 Multi-Channel Network (MCN)
-- Creator group nhiều kênh vào 1 tổ chức
-- Dashboard tổng hợp analytics toàn bộ kênh trong network
-- Chia sẻ revenue trong network
-

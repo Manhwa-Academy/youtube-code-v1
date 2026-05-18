@@ -46,7 +46,8 @@ import {
   TypeIcon,
   PlayIcon,
   MinusIcon,
-  TrendingDownIcon
+  TrendingDownIcon,
+  FileSpreadsheetIcon
 } from "lucide-react";
 
 import { trpc } from "@/trpc/client";
@@ -116,7 +117,7 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex justify-between items-center text-xs">
-                   <span>Shorts</span>
+                   <span>{t("shorts")}</span>
                    <span className="font-bold">{data.contentBreakdown.returningViewers.shorts}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
@@ -141,7 +142,7 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="flex justify-between items-center text-xs">
-                  <span>Shorts</span>
+                  <span>{t("shorts")}</span>
                   <span className="font-bold">{data.contentBreakdown.subscribers.shorts}</span>
                </div>
                <div className="flex justify-between items-center text-xs">
@@ -170,7 +171,7 @@ const AllContentSection = ({ data, days, videoId }: { data: any, days: number, v
                <div className="space-y-4">
                   <div className="space-y-1">
                      <div className="flex justify-between text-xs mb-1">
-                        <span>Shorts</span>
+                        <span>{t("shorts")}</span>
                         <span className="font-bold">{viewsBreakdown.shorts} ({getPercentage(viewsBreakdown.shorts)}%)</span>
                      </div>
                      <div className="h-2 w-full bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
@@ -971,8 +972,15 @@ const AnalyticsContent = ({ days, videoId }: { days: number, videoId?: string })
                   </div>
                 )}
              </div>
-             <p className="text-[10px] text-muted-foreground mt-1">
-               {data.totalViews > 0 ? t("goodProgress") : t("quietPeriod")}
+             <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-x-1">
+               {data.comparison.viewsGrowthPercentage > 0 ? (
+                 <span className="text-emerald-500 font-bold">↑ +{data.comparison.viewsGrowthPercentage}%</span>
+               ) : data.comparison.viewsGrowthPercentage < 0 ? (
+                 <span className="text-red-500 font-bold">↓ {data.comparison.viewsGrowthPercentage}%</span>
+               ) : (
+                 <span className="font-bold">- 0%</span>
+               )}
+               <span>{t("comparedToPrevious")}</span>
              </p>
           </div>
 
@@ -1407,6 +1415,56 @@ const AudienceTab = ({ days, videoId }: { days: number, videoId?: string }) => {
                <p className="text-xs text-muted-foreground mt-4 mb-4">{t("noPostsData")}</p>
             </CardContent>
          </Card>
+
+         {/* Geographic Breakdown */}
+         <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
+            <CardHeader className="pb-2">
+               <CardTitle className="text-sm font-bold">{t("geography")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("last28Days")}</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+               {data.contentBreakdown.geographyBreakdown && data.contentBreakdown.geographyBreakdown.length > 0 ? (
+                 <div className="space-y-3 mt-4">
+                    {data.contentBreakdown.geographyBreakdown.map((geo: any, i: number) => (
+                      <div key={i} className="flex justify-between items-center text-[11px] font-bold">
+                         <span className="truncate w-[100px]">{geo.label}</span>
+                         <div className="flex items-center gap-x-3 w-1/2 justify-end">
+                           <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: `${Math.max(geo.percentage, 1)}%` }} />
+                           <span className="w-8 text-right">{geo.percentage}%</span>
+                         </div>
+                      </div>
+                    ))}
+                 </div>
+               ) : (
+                 <p className="text-xs text-muted-foreground mt-4 mb-4">{t("noAudienceData")}</p>
+               )}
+            </CardContent>
+         </Card>
+
+         {/* Device & Browser Breakdown */}
+         <Card className="rounded-xl shadow-sm bg-transparent border-neutral-200 dark:border-neutral-800">
+            <CardHeader className="pb-2">
+               <CardTitle className="text-sm font-bold">{t("devices")}</CardTitle>
+               <p className="text-[10px] text-muted-foreground">{t("last28Days")}</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+               {data.contentBreakdown.deviceBreakdown && data.contentBreakdown.deviceBreakdown.length > 0 ? (
+                 <div className="space-y-3 mt-4">
+                    {data.contentBreakdown.deviceBreakdown.map((dev: any, i: number) => (
+                      <div key={i} className="flex justify-between items-center text-[11px] font-bold">
+                         <span className="capitalize">{dev.label}</span>
+                         <div className="flex items-center gap-x-3 w-1/2 justify-end">
+                           <div className="h-1.5 bg-orange-500 rounded-full" style={{ width: `${Math.max(dev.percentage, 1)}%` }} />
+                           <span className="w-8 text-right">{dev.percentage}%</span>
+                         </div>
+                      </div>
+                    ))}
+                 </div>
+               ) : (
+                 <p className="text-xs text-muted-foreground mt-4 mb-4">{t("noAudienceData")}</p>
+               )}
+            </CardContent>
+         </Card>
       </div>
     </div>
   );
@@ -1774,6 +1832,14 @@ export const AnalyticsView = ({ videoId: videoIdParam }: { videoId?: string }) =
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{videoId ? t("videoAnalytics") : t("channelAnalytics")}</h1>
         <div className="flex items-center gap-x-2">
+           <Button 
+             variant="secondary" 
+             size="sm" 
+             onClick={() => window.open(`/api/analytics/export?days=${days}${videoId ? `&videoId=${videoId}` : ''}&locale=${locale}`, "_blank")}
+           >
+              <FileSpreadsheetIcon className="size-4 mr-2 text-green-600 dark:text-green-500" />
+              {t("exportCSV")}
+           </Button>
            <Button 
              variant="outline" 
              size="sm" 

@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { UTApi } from "uploadthing/server";
+import { headers } from "next/headers";
+import { UAParser } from "ua-parser-js";
 import {
   and,
   desc,
@@ -708,10 +710,26 @@ Rules:
       return { aiSummary };
     }),
   incrementView: baseProcedure
-    .input(z.object({ videoId: z.string().uuid() }))
+    .input(z.object({ 
+      videoId: z.string().uuid(),
+      trafficSource: z.enum(["direct", "search", "suggested", "external", "shorts", "playlist"]).optional().default("direct"),
+    }))
     .mutation(async ({ input, ctx }) => {
       let userId: string | undefined;
       let trackingEnabled = true;
+
+      // --- Analytics Data Extraction ---
+      const headersList = await headers();
+      const userAgent = headersList.get("user-agent") || "";
+      const ip = headersList.get("x-forwarded-for") || "unknown";
+      
+      const isDev = process.env.NODE_ENV === "development";
+      const country = headersList.get("x-vercel-ip-country") || (isDev ? "VN" : "unknown");
+      const city = headersList.get("x-vercel-ip-city") || (isDev ? "Hanoi" : "unknown");
+      
+      const parser = new UAParser(userAgent);
+      const deviceType = parser.getDevice().type || "desktop"; // mobile, tablet, or undefined (desktop)
+      const browser = parser.getBrowser().name || "unknown";
 
       if (ctx.clerkUserId) {
         const [user] = await db
@@ -734,6 +752,11 @@ Rules:
       await db.insert(viewEvents).values({
         userId,
         videoId: input.videoId,
+        trafficSource: input.trafficSource,
+        country,
+        city,
+        deviceType,
+        browser,
       });
 
       if (userId && trackingEnabled) {

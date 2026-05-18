@@ -541,7 +541,7 @@
     "errorLoadingComments": "Fehler beim Laden der Kommentare",
     "name": "Name",
     "channelContentDescription": "Verwalten Sie Ihre Videos, Kurzvideos, Playlists und Beiträge auf Ihrem Kanal",
-    "shorts": "Kurzvideos",
+    "shorts": "Shorts-Feed",
     "rowsPerPage": "Zeilen pro Seite:",
     "postComments": "Beitragskommentare",
     "on": "Ein",
@@ -579,7 +579,15 @@
     "manualSummaryLabel": "Video-Zusammenfassung",
     "manualSummaryPlaceholder": "Geben Sie Ihre Video-Zusammenfassung ein...",
     "manualChaptersLabel": "Video-Kapitel (MM:SS - Titel)",
-    "manualChaptersPlaceholder": "00:00 - Einführung\n00:05 - Hintergrundmusik"
+    "manualChaptersPlaceholder": "00:00 - Einführung\n00:05 - Hintergrundmusik",
+    "geography": "Geografie",
+    "devices": "Geräte",
+    "exportCSV": "Excel exportieren",
+    "comparedToPrevious": "(Im Vergleich zum Vorzeitraum)",
+    "direct": "Direkt / Unbekannt",
+    "search": "YouTube-Suche",
+    "suggested": "Vorgeschlagene Videos",
+    "playlist": "Playlists"
   },
   "VideoCard": {
     "noDescription": "Keine Beschreibung",

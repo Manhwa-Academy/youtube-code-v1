@@ -498,6 +498,11 @@ export const studioRouter = createTRPCRouter({
         [uniqueViewersData],
         viewsFromSubscribersData,
         [totalVideosData],
+        trafficDataRaw,
+        geoDataRaw,
+        deviceDataRaw,
+        browserDataRaw,
+        [comparisonDataRaw],
       ] = await Promise.all([
         db
           .select({
@@ -647,6 +652,52 @@ export const studioRouter = createTRPCRouter({
           .select({ count: sql<number>`CAST(COUNT(*) AS INTEGER)` })
           .from(videos)
           .where(eq(videos.userId, userId)),
+        db
+          .select({ source: viewEvents.trafficSource, count: sql<number>`CAST(COUNT(*) AS INTEGER)` })
+          .from(viewEvents)
+          .innerJoin(videos, eq(viewEvents.videoId, videos.id))
+          .where(and(eq(videos.userId, userId), videoId ? eq(videos.id, videoId) : undefined, days === 3650 ? undefined : gte(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`)))
+          .groupBy(viewEvents.trafficSource),
+        db
+          .select({ country: viewEvents.country, count: sql<number>`CAST(COUNT(*) AS INTEGER)` })
+          .from(viewEvents)
+          .innerJoin(videos, eq(viewEvents.videoId, videos.id))
+          .where(and(eq(videos.userId, userId), videoId ? eq(videos.id, videoId) : undefined, days === 3650 ? undefined : gte(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`)))
+          .groupBy(viewEvents.country)
+          .orderBy(desc(sql`COUNT(*)`))
+          .limit(10),
+        db
+          .select({ device: viewEvents.deviceType, count: sql<number>`CAST(COUNT(*) AS INTEGER)` })
+          .from(viewEvents)
+          .innerJoin(videos, eq(viewEvents.videoId, videos.id))
+          .where(and(eq(videos.userId, userId), videoId ? eq(videos.id, videoId) : undefined, days === 3650 ? undefined : gte(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`)))
+          .groupBy(viewEvents.deviceType),
+        db
+          .select({ browser: viewEvents.browser, count: sql<number>`CAST(COUNT(*) AS INTEGER)` })
+          .from(viewEvents)
+          .innerJoin(videos, eq(viewEvents.videoId, videos.id))
+          .where(and(eq(videos.userId, userId), videoId ? eq(videos.id, videoId) : undefined, days === 3650 ? undefined : gte(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`)))
+          .groupBy(viewEvents.browser)
+          .orderBy(desc(sql`COUNT(*)`))
+          .limit(5),
+        db
+          .select({
+            totalViews: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+          })
+          .from(viewEvents)
+          .innerJoin(videos, eq(viewEvents.videoId, videos.id))
+          .where(
+            and(
+              eq(videos.userId, userId),
+              videoId ? eq(videos.id, videoId) : undefined,
+              days === 3650
+                ? undefined
+                : and(
+                    gte(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * (${days} * 2)`),
+                    lt(viewEvents.createdAt, sql`NOW() - INTERVAL '1 day' * ${days}`)
+                  ),
+            )
+          ),
       ]);
 
       // 2. Tính toán Watch time
@@ -972,7 +1023,30 @@ export const studioRouter = createTRPCRouter({
         ),
       );
 
+      const totalViewsRaw = trafficDataRaw.reduce((acc, curr) => acc + curr.count, 0) || 1;
+      
+      const mapToPercentages = (dataRaw: any[], keyName: string) => {
+        return dataRaw.map((item: any) => ({
+          label: item[keyName] || "Unknown",
+          count: item.count,
+          percentage: Number(((item.count / totalViewsRaw) * 100).toFixed(1))
+        }));
+      };
+
+      const trafficSourcesBreakdown = mapToPercentages(trafficDataRaw, "source");
+      const geographyBreakdown = mapToPercentages(geoDataRaw, "country");
+      const deviceBreakdown = mapToPercentages(deviceDataRaw, "device");
+      const browserBreakdown = mapToPercentages(browserDataRaw, "browser");
+
+      const previousTotalViews = comparisonDataRaw?.totalViews || 0;
+      const currentTotalViews = statsInRange?.totalViews || 0;
+      const viewsGrowthPercentage = previousTotalViews === 0 && currentTotalViews > 0 ? 100 : previousTotalViews === 0 ? 0 : Number((((currentTotalViews) - previousTotalViews) / previousTotalViews * 100).toFixed(1));
+
       return {
+        comparison: {
+          previousTotalViews,
+          viewsGrowthPercentage,
+        },
         audience: {
           uniqueViewers: uniqueViewersData?.count || 0,
           subscribersGained,
@@ -1082,7 +1156,7 @@ export const studioRouter = createTRPCRouter({
             avgViewDuration: `${Math.floor(avgSec / 60)}:${(avgSec % 60).toString().padStart(2, "0")}`,
             watchTimeFromImpressions: watchTimeFromImp.toFixed(2),
           },
-          trafficSources: [
+          trafficSources: trafficSourcesBreakdown.length > 0 ? trafficSourcesBreakdown : [
             {
               label: "trafficSourceYoutubeSearch",
               percentage: searchPct,
@@ -1100,6 +1174,9 @@ export const studioRouter = createTRPCRouter({
               percentage: directPct,
             },
           ],
+          geographyBreakdown,
+          deviceBreakdown,
+          browserBreakdown,
           publishedCount: {
             videos: await db.$count(
               videos,

@@ -524,7 +524,7 @@
     "errorLoadingComments": "加载评论时出错",
     "name": "名称",
     "channelContentDescription": "管理频道上的视频、短视频、播放列表和帖子",
-    "shorts": "短视频",
+    "shorts": "Shorts 动态",
     "rowsPerPage": "每页行数：",
     "postComments": "帖子评论",
     "on": "开启",
@@ -562,7 +562,15 @@
     "manualSummaryLabel": "视频摘要",
     "manualSummaryPlaceholder": "输入您的视频摘要...",
     "manualChaptersLabel": "视频分段 (MM:SS - 标题)",
-    "manualChaptersPlaceholder": "00:00 - 引入\n00:05 - 背景音乐"
+    "manualChaptersPlaceholder": "00:00 - 引入\n00:05 - 背景音乐",
+    "geography": "地理位置",
+    "devices": "设备",
+    "exportCSV": "导出 Excel",
+    "comparedToPrevious": "(与上期相比)",
+    "direct": "直接 / 未知",
+    "search": "YouTube 搜索",
+    "suggested": "推荐的视频",
+    "playlist": "播放列表"
   },
   "VideoCard": {
     "noDescription": "无描述",

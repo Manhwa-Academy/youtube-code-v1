@@ -575,7 +575,7 @@
     "errorLoadingComments": "コメントの読み込み中にエラーが発生しました",
     "name": "名前",
     "channelContentDescription": "チャンネルの動画、ショート動画、再生リスト、投稿を管理します",
-    "shorts": "ショート動画",
+    "shorts": "Shorts フィード",
     "rowsPerPage": "1 ページあたりの行数:",
     "postComments": "投稿のコメント",
     "on": "オン",
@@ -613,7 +613,15 @@
     "manualSummaryLabel": "動画の要約",
     "manualSummaryPlaceholder": "動画の要約を入力してください...",
     "manualChaptersLabel": "動画のチャプター (MM:SS - タイトル)",
-    "manualChaptersPlaceholder": "00:00 - 導入部\n00:05 - BGM"
+    "manualChaptersPlaceholder": "00:00 - 導入部\n00:05 - BGM",
+    "geography": "地域",
+    "devices": "デバイス",
+    "exportCSV": "Excel出力",
+    "comparedToPrevious": "(前の期間との比較)",
+    "direct": "直接 / 不明",
+    "search": "YouTube 検索",
+    "suggested": "関連動画",
+    "playlist": "再生リスト"
   },
   "VideoCard": {
     "noDescription": "説明なし",

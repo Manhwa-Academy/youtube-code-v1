@@ -504,7 +504,7 @@
     "errorLoadingComments": "Erreur lors du chargement des commentaires",
     "name": "Nom",
     "channelContentDescription": "Gérez vos vidéos, vidéos courtes, playlists et posts sur votre chaîne",
-    "shorts": "Vidéos courtes",
+    "shorts": "Flux Shorts",
     "rowsPerPage": "Lignes par page :",
     "postComments": "Commentaires du post",
     "minSubscribers": "Nombre d'abonnés",
@@ -541,7 +541,16 @@
     "manualSummaryLabel": "Résumé de la Vidéo",
     "manualSummaryPlaceholder": "Saisissez le résumé de votre vidéo...",
     "manualChaptersLabel": "Chapitres de la Vidéo (MM:SS - Titre)",
-    "manualChaptersPlaceholder": "00:00 - Introduction\n00:05 - Musique de fond"
+    "manualChaptersPlaceholder": "00:00 - Introduction\n00:05 - Musique de fond",
+    "subscribed": "Abonné",
+    "geography": "Géographie",
+    "devices": "Appareils",
+    "exportCSV": "Exporter Excel",
+    "comparedToPrevious": "(Par rapport à la période précédente)",
+    "direct": "Direct / Inconnu",
+    "search": "Recherche YouTube",
+    "suggested": "Vidéos suggérées",
+    "playlist": "Playlists"
   },
   "VideoCard": {
     "noDescription": "Aucune description",
