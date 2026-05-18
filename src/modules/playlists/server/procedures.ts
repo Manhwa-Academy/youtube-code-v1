@@ -1193,10 +1193,9 @@ export const playlistsRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Playlist not found or permission denied" });
       }
 
-      await db.transaction(async (tx) => {
-        for (let index = 0; index < videoIds.length; index++) {
-          const videoId = videoIds[index];
-          await tx
+      await Promise.all(
+        videoIds.map((videoId, index) =>
+          db
             .update(playlistVideos)
             .set({ position: index })
             .where(
@@ -1204,9 +1203,9 @@ export const playlistsRouter = createTRPCRouter({
                 eq(playlistVideos.playlistId, playlistId),
                 eq(playlistVideos.videoId, videoId)
               )
-            );
-        }
-      });
+            )
+        )
+      );
 
       return { success: true };
     }),
