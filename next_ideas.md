@@ -2,19 +2,6 @@
 
 ---
 
-## 🔴 Ưu Tiên Cao — Nên làm ngay (Tuần 1–4)
-
-### 4. 🎬 Playlist Nâng Cao
-**Hiện trạng:** Playlist CRUD cơ bản đã có.
-- **Reorder video** trong playlist bằng drag & drop (dnd-kit)
-- Thêm field `position` vào `playlist_videos` để lưu thứ tự
-- **Playlist player mode**: Tự động phát video tiếp theo trong playlist (như queue YouTube)
-- **Collaborative playlists**: Nhiều người cùng thêm video
-- **Share playlist** với link + embed code
-- **Save to Playlist** button trong video player (popup chọn playlist)
-
----
-
 ## 🟡 Ưu Tiên Trung Bình — 1–3 tháng
 
 ### 6. 📡 Live Streaming (Mux Live)

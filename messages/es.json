@@ -68,7 +68,13 @@
     "playingClip": "Reproduciendo Clip",
     "seconds": "{count} segundos",
     "clippedBy": "Cortado por <bold>{name}</bold>",
-    "watchFullVideo": "Ver video completo"
+    "watchFullVideo": "Ver video completo",
+    "popupTitle": "Ventana emergente",
+    "clipTitle": "Crear clip",
+    "toastVideoNotFound": "Video no encontrado",
+    "toastPlayerNotFound": "Reproductor no encontrado",
+    "toastPopupBlocked": "Este navegador ha bloqueado las ventanas emergentes.",
+    "toastMiniPlayerFallback": "Cambiado al minireproductor debido al bloqueo de ventanas emergentes"
   },
   "Comments": {
     "disabled": "Los comentarios están desactivados.",
@@ -705,7 +711,8 @@
     "embedCode": "Código de inserción",
     "copyLink": "Copiar enlace",
     "linkCopied": "¡Enlace copiado al portapapeles!",
-    "embedCopied": "¡Código de inserción copiado!"
+    "embedCopied": "¡Código de inserción copiado!",
+    "noCollaborators": "Aún no hay colaboradores"
   },
   "Posts": {
     "viewAll": "Ver todo",

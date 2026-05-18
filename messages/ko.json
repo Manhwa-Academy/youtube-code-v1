@@ -68,7 +68,13 @@
     "playingClip": "클립 재생 중",
     "seconds": "{count}초",
     "clippedBy": "<bold>{name}</bold>님이 자름",
-    "watchFullVideo": "전체 동영상 보기"
+    "watchFullVideo": "전체 동영상 보기",
+    "popupTitle": "팝업 창",
+    "clipTitle": "클립 만들기",
+    "toastVideoNotFound": "동영상을 찾을 수 없습니다",
+    "toastPlayerNotFound": "플레이어를 찾을 수 없습니다",
+    "toastPopupBlocked": "이 브라우저는 팝업을 차단했습니다.",
+    "toastMiniPlayerFallback": "팝업 차단으로 인해 미니 플레이어로 전환되었습니다"
   },
   "Comments": {
     "disabled": "댓글 기능이 사용 중지되었습니다.",
@@ -616,7 +622,8 @@
     "embedCode": "소스 코드",
     "copyLink": "링크 복사",
     "linkCopied": "링크가 클립보드에 복사되었습니다!",
-    "embedCopied": "소스 코드가 복사되었습니다!"
+    "embedCopied": "소스 코드가 복사되었습니다!",
+    "noCollaborators": "아직 공동 작업자가 없습니다"
   },
   "Notifications": {
     "title": "알림",

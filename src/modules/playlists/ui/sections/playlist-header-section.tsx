@@ -150,7 +150,7 @@ const CollaborateModalContent = ({ playlistId, isOwner }: { playlistId: string; 
             <div className="max-h-[200px] overflow-y-auto divide-y divide-neutral-100 dark:divide-neutral-800 pr-1">
               {collaborators?.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-4">
-                  Chưa có cộng tác viên nào
+                  {t("noCollaborators")}
                 </p>
               ) : (
                 collaborators?.map((c) => (

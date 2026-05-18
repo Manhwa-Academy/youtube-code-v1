@@ -72,7 +72,13 @@
     "playingClip": "Đang phát Clip",
     "seconds": "{count} giây",
     "clippedBy": "Cắt bởi <bold>{name}</bold>",
-    "watchFullVideo": "Xem video đầy đủ"
+    "watchFullVideo": "Xem video đầy đủ",
+    "popupTitle": "Bật cửa sổ nổi / Popup",
+    "clipTitle": "Cắt Clip",
+    "toastVideoNotFound": "Không tìm thấy video",
+    "toastPlayerNotFound": "Không tìm thấy trình phát",
+    "toastPopupBlocked": "Trình duyệt này đã chặn cửa sổ nổi (Popup).",
+    "toastMiniPlayerFallback": "Đã tự động chuyển sang Trình phát nhỏ do trình duyệt chặn cửa sổ nổi"
   },
   "Comments": {
     "disabled": "Tính năng bình luận đã bị tắt.",
@@ -872,7 +878,8 @@
     "embedCode": "Mã nhúng (Embed Code)",
     "copyLink": "Sao chép liên kết",
     "linkCopied": "Đã sao chép liên kết vào khay nhớ tạm!",
-    "embedCopied": "Đã sao chép mã nhúng!"
+    "embedCopied": "Đã sao chép mã nhúng!",
+    "noCollaborators": "Chưa có cộng tác viên nào"
   },
   "Liked": {
     "title": "Video đã thích",

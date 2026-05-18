@@ -68,7 +68,13 @@
     "playingClip": "正在播放剪辑",
     "seconds": "{count} 秒",
     "clippedBy": "由 <bold>{name}</bold> 剪辑",
-    "watchFullVideo": "观看完整视频"
+    "watchFullVideo": "观看完整视频",
+    "popupTitle": "画中画窗口",
+    "clipTitle": "创建剪辑",
+    "toastVideoNotFound": "找不到视频",
+    "toastPlayerNotFound": "找不到播放器",
+    "toastPopupBlocked": "此浏览器已阻止弹窗。",
+    "toastMiniPlayerFallback": "由于弹窗被阻止，已切换至迷你播放器"
   },
   "Comments": {
     "disabled": "评论功能已关闭。",
@@ -616,7 +622,8 @@
     "embedCode": "嵌入代码",
     "copyLink": "复制链接",
     "linkCopied": "链接已复制到剪贴板！",
-    "embedCopied": "嵌入代码已复制！"
+    "embedCopied": "嵌入代码已复制！",
+    "noCollaborators": "暂无合作者"
   },
   "Notifications": {
     "title": "通知",

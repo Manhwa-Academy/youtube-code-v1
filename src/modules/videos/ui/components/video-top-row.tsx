@@ -98,12 +98,12 @@ export const VideoTopRow = ({
     if (!player) return;
 
     const video: any = player.media || player.video || player.shadowRoot?.querySelector("video") || document.querySelector("video");
-    if (!video) return toast.error(t("error") || "Video not found");
+    if (!video) return toast.error(t("toastVideoNotFound"));
 
     try {
       const videoEl: any = player.nativeEl || player.media || player.video || player.shadowRoot?.querySelector("video") || document.querySelector("video");
       
-      if (!videoEl) return toast.error(t("error") || "Player not found");
+      if (!videoEl) return toast.error(t("toastPlayerNotFound"));
 
       // Ép mở khóa mạnh mẽ hơn cho các dòng máy kén chọn
       videoEl.disablePictureInPicture = false;
@@ -126,7 +126,7 @@ export const VideoTopRow = ({
       if (videoEl.webkitSetPresentationMode) {
         videoEl.webkitSetPresentationMode("picture-in-picture");
       } else {
-        toast.error("This browser has blocked Popups.");
+        toast.error(t("toastPopupBlocked"));
       }
     } catch (err: any) {
       console.error("PiP Error:", err);
@@ -138,7 +138,7 @@ export const VideoTopRow = ({
         thumbnailUrl: video.thumbnailUrl || undefined,
       });
       minimize();
-      toast.info("Switched to Mini-player due to browser Popup blocking");
+      toast.info(t("toastMiniPlayerFallback"));
     }
   };
 
@@ -162,10 +162,10 @@ export const VideoTopRow = ({
             variant="secondary" 
             className="rounded-full px-4 font-bold text-xs flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 border-none h-9"
             onClick={handlePiP}
-            title="Popup"
+            title={t("popupTitle")}
           >
             <ExternalLinkIcon className="size-4" />
-            <span className="hidden md:inline">Popup</span>
+            <span className="hidden md:inline">{t("popupTitle")}</span>
           </Button>
 
           {/* 🔹 VideoPlaybackMenu tự động lấy track từ playerRef */}
@@ -186,10 +186,10 @@ export const VideoTopRow = ({
             variant="secondary"
             className="rounded-full px-4 font-bold text-xs flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 border-none h-9 hover:bg-violet-500/10 hover:text-violet-500 transition-colors"
             onClick={() => setClipDialogOpen(true)}
-            title="Cắt Clip"
+            title={t("clipTitle")}
           >
             <Scissors className="size-4" />
-            <span>Clip</span>
+            <span>{t("clipTitle")}</span>
           </Button>
 
           <Button

@@ -72,7 +72,13 @@
     "playingClip": "Playing Clip",
     "seconds": "{count} seconds",
     "clippedBy": "Clipped by <bold>{name}</bold>",
-    "watchFullVideo": "Watch full video"
+    "watchFullVideo": "Watch full video",
+    "popupTitle": "Popup Window",
+    "clipTitle": "Create Clip",
+    "toastVideoNotFound": "Video not found",
+    "toastPlayerNotFound": "Player not found",
+    "toastPopupBlocked": "This browser has blocked Popups.",
+    "toastMiniPlayerFallback": "Switched to Mini-player due to browser Popup blocking"
   },
   "Comments": {
     "disabled": "Comments are turned off.",
@@ -871,7 +877,8 @@
     "embedCode": "Embed Code",
     "copyLink": "Copy Link",
     "linkCopied": "Link copied to clipboard!",
-    "embedCopied": "Embed code copied!"
+    "embedCopied": "Embed code copied!",
+    "noCollaborators": "No collaborators yet"
   },
   "Liked": {
     "title": "Liked videos",

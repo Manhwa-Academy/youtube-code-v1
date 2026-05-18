@@ -68,7 +68,13 @@
     "playingClip": "クリップ再生中",
     "seconds": "{count} 秒",
     "clippedBy": "<bold>{name}</bold> が作成",
-    "watchFullVideo": "フル動画を視聴"
+    "watchFullVideo": "フル動画を視聴",
+    "popupTitle": "ポップアップ表示",
+    "clipTitle": "クリップの作成",
+    "toastVideoNotFound": "動画が見つかりません",
+    "toastPlayerNotFound": "プレイヤーが見つかりません",
+    "toastPopupBlocked": "このブラウザはポップアップをブロックしました。",
+    "toastMiniPlayerFallback": "ポップアップのブロックにより、ミニプレイヤーに切り替えました"
   },
   "Comments": {
     "disabled": "コメント機能はオフになっています。",
@@ -764,7 +770,8 @@
     "embedCode": "埋め込みコード",
     "copyLink": "リンクをコピー",
     "linkCopied": "リンクをクリップボードにコピーしました！",
-    "embedCopied": "埋め込みコードをコピーしました！"
+    "embedCopied": "埋め込みコードをコピーしました！",
+    "noCollaborators": "コラボレーターはまだいません"
   },
   "Posts": {
     "viewAll": "すべて表示",

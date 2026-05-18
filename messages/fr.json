@@ -68,7 +68,13 @@
     "playingClip": "Lecture du Clip",
     "seconds": "{count} secondes",
     "clippedBy": "Coupé par <bold>{name}</bold>",
-    "watchFullVideo": "Regarder la vidéo complète"
+    "watchFullVideo": "Regarder la vidéo complète",
+    "popupTitle": "Fenêtre contextuelle",
+    "clipTitle": "Créer un clip",
+    "toastVideoNotFound": "Vidéo non trouvée",
+    "toastPlayerNotFound": "Lecteur non trouvé",
+    "toastPopupBlocked": "Ce navigateur a bloqué les fenêtres contextuelles.",
+    "toastMiniPlayerFallback": "Bascule vers le mini-lecteur en raison du blocage des pop-ups"
   },
   "Comments": {
     "disabled": "Les commentaires sont désactivés.",
@@ -596,7 +602,8 @@
     "embedCode": "Code d'intégration",
     "copyLink": "Copier le lien",
     "linkCopied": "Lien copié dans le presse-papiers !",
-    "embedCopied": "Code d'intégration copié !"
+    "embedCopied": "Code d'intégration copié !",
+    "noCollaborators": "Pas encore de collaborateurs"
   },
   "Notifications": {
     "title": "Notifications",

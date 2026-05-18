@@ -8,7 +8,7 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  font-family: Arial, Helvetica, sans-serif;
+  /* Để Inter font từ layout.tsx hoạt động đúng */
 }
 
 @layer base {
@@ -105,9 +105,14 @@ body {
     -webkit-tap-highlight-color: transparent;
   }
 
-  body {
+  /* Ngăn chặn bôi đen/chọn nhầm hình ảnh, icon, video và nút bấm khi click đúp */
+  img, svg, video, button {
     user-select: none;
     -webkit-user-select: none;
+  }
+
+  img {
+    -webkit-user-drag: none;
   }
 }
 

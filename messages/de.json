@@ -68,7 +68,13 @@
     "playingClip": "Clip wird abgespielt",
     "seconds": "{count} Sekunden",
     "clippedBy": "Ausgeschnitten von <bold>{name}</bold>",
-    "watchFullVideo": "Vollständiges Video ansehen"
+    "watchFullVideo": "Vollständiges Video ansehen",
+    "popupTitle": "Popup-Fenster",
+    "clipTitle": "Clip erstellen",
+    "toastVideoNotFound": "Video nicht gefunden",
+    "toastPlayerNotFound": "Player nicht gefunden",
+    "toastPopupBlocked": "Dieser Browser hat Popups blockiert.",
+    "toastMiniPlayerFallback": "Aufgrund einer Popup-Blockierung zum Mini-Player gewechselt"
   },
   "Comments": {
     "disabled": "Die Kommentarfunktion wurde deaktiviert.",
@@ -730,7 +736,8 @@
     "embedCode": "Einbettungscode",
     "copyLink": "Link kopieren",
     "linkCopied": "Link in die Zwischenablage kopiert!",
-    "embedCopied": "Einbettungscode kopiert!"
+    "embedCopied": "Einbettungscode kopiert!",
+    "noCollaborators": "Noch keine Mitarbeiter"
   },
   "Posts": {
     "viewAll": "Alle ansehen",
